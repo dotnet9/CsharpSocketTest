@@ -7,6 +7,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectBinarySerializationTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializationTest", "ObjectBinarySerializationTest\SerializationTest\SerializationTest.csproj", "{849FB784-B220-4F6F-ADAE-15448873BFB1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SocketTesting", "SocketTesting", "{CB845ECA-47B9-452D-A404-4DE8E835C2D9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketNetObject", "SocketTesting\SocketNetObject\SocketNetObject.csproj", "{C78C9212-0061-43D0-8A75-F70D53AA9912}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketDto", "SocketTesting\SocketDto\SocketDto.csproj", "{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketCore", "SocketTesting\SocketCore\SocketCore.csproj", "{163BD3B1-AD6E-450A-9DB0-EB53118EB87A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketClient", "SocketTesting\SocketClient\SocketClient.csproj", "{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketServer", "SocketTesting\SocketServer\SocketServer.csproj", "{30F8C481-AC93-47F8-B248-4C90602E6FF6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,12 +29,37 @@ Global
 		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C78C9212-0061-43D0-8A75-F70D53AA9912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C78C9212-0061-43D0-8A75-F70D53AA9912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C78C9212-0061-43D0-8A75-F70D53AA9912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C78C9212-0061-43D0-8A75-F70D53AA9912}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{163BD3B1-AD6E-450A-9DB0-EB53118EB87A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{163BD3B1-AD6E-450A-9DB0-EB53118EB87A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{163BD3B1-AD6E-450A-9DB0-EB53118EB87A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{163BD3B1-AD6E-450A-9DB0-EB53118EB87A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{849FB784-B220-4F6F-ADAE-15448873BFB1} = {49C052ED-5F1C-4834-8310-F0D425A354F7}
+		{C78C9212-0061-43D0-8A75-F70D53AA9912} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
+		{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
+		{163BD3B1-AD6E-450A-9DB0-EB53118EB87A} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
+		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
+		{30F8C481-AC93-47F8-B248-4C90602E6FF6} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9799BEAD-32FD-45CD-9B68-124237176477}
