@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectBinarySerializationTest", "ObjectBinarySerializationTest", "{49C052ED-5F1C-4834-8310-F0D425A354F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializationTest", "ObjectBinarySerializationTest\SerializationTest\SerializationTest.csproj", "{849FB784-B220-4F6F-ADAE-15448873BFB1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{849FB784-B220-4F6F-ADAE-15448873BFB1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{849FB784-B220-4F6F-ADAE-15448873BFB1} = {49C052ED-5F1C-4834-8310-F0D425A354F7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9799BEAD-32FD-45CD-9B68-124237176477}
+	EndGlobalSection
+EndGlobal

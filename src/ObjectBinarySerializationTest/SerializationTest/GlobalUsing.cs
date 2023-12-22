@@ -1,0 +1,14 @@
+﻿global using System.Text;
+global using System.Reflection;
+global using System.Text.Json;
+global using MessagePack;
+global using ProtoBuf;
+global using BenchmarkDotNet.Running;
+global using SerializationTest.Test;
+global using BenchmarkDotNet.Attributes;
+global using LoremNET;
+global using SerializationTest.Helpers;
+global using SerializationTest.Models;
+global using SerializationTest.SerializeUtils;
+global using SerializationTest.SerializeUtils.Helpers;
+global using System.Diagnostics;
