@@ -64,26 +64,30 @@ public static class MockUtil
         await Task.CompletedTask;
     }
 
+    private static readonly string MockStr = Lorem.Words(1, 3);
+    private static readonly double MockDouble = Random.Shared.NextDouble();
+    private static readonly long Timestamp = TimestampHelper.GetTimestamp();
+
     private static Process MockProcess(int id)
     {
         return new Process
         {
             PID = id + 1,
-            Name = Lorem.Words(1, 3),
-            Type = (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessType)).Length),
-            Status = (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessStatus)).Length),
-            Publisher = Lorem.Words(1, 3),
-            CommandLine = Lorem.Words(1, 3),
-            CPUUsage = Random.Shared.NextDouble(),
-            MemoryUsage = Random.Shared.NextDouble(),
-            DiskUsage = Random.Shared.NextDouble(),
-            NetworkUsage = Random.Shared.NextDouble(),
-            GPU = Random.Shared.NextDouble(),
-            GPUEngine = Lorem.Words(1, 3),
-            PowerUsage = (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length),
-            PowerUsageTrend = (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length),
-            LastUpdateTime = TimestampHelper.GetTimestamp(),
-            UpdateTime = TimestampHelper.GetTimestamp()
+            Name = MockStr,
+            Type = 0,
+            Status = 0,
+            Publisher = MockStr,
+            CommandLine = MockStr,
+            CPUUsage = MockDouble,
+            MemoryUsage = MockDouble,
+            DiskUsage = MockDouble,
+            NetworkUsage = MockDouble,
+            GPU = MockDouble,
+            GPUEngine = MockStr,
+            PowerUsage = 0,
+            PowerUsageTrend = 0,
+            LastUpdateTime = Timestamp,
+            UpdateTime = Timestamp
         };
     }
 
