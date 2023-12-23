@@ -10,10 +10,13 @@ public class ProcessItem : BindableBase
     private string? _commandLine;
 
     private string? _cpuUsage;
+    private double _cpuUsageValue;
 
     private string? _diskUsage;
+    private double _diskUsageValue;
 
     private string? _gpu;
+    private double _gpuValue;
 
     private string? _gpuEngine;
 
@@ -23,14 +26,18 @@ public class ProcessItem : BindableBase
     private DateTime _lastViewUpdateTime;
 
     private string? _memoryUsage;
+    private double _memoryUsageValue;
 
     private string? _name;
 
     private string? _networkUsage;
+    private double _networkUsageValue;
 
     private string? _powerUsage;
+    private ProcessPowerUsage _powerUsageValue;
 
     private string? _powerUsageTrend;
+    private ProcessPowerUsage _powerUsageTrendValue;
 
     private string? _publisher;
 
@@ -111,12 +118,30 @@ public class ProcessItem : BindableBase
     }
 
     /// <summary>
+    ///     CPU使用率
+    /// </summary>
+    public double CPUUsageValue
+    {
+        get => _cpuUsageValue;
+        set => SetProperty(ref _cpuUsageValue, value);
+    }
+
+    /// <summary>
     ///     内存使用大小
     /// </summary>
     public string? MemoryUsage
     {
         get => _memoryUsage;
         set => SetProperty(ref _memoryUsage, value);
+    }
+
+    /// <summary>
+    ///     内存使用大小
+    /// </summary>
+    public double MemoryUsageValue
+    {
+        get => _memoryUsageValue;
+        set => SetProperty(ref _memoryUsageValue, value);
     }
 
     /// <summary>
@@ -129,6 +154,15 @@ public class ProcessItem : BindableBase
     }
 
     /// <summary>
+    ///     磁盘使用大小
+    /// </summary>
+    public double DiskUsageValue
+    {
+        get => _diskUsageValue;
+        set => SetProperty(ref _diskUsageValue, value);
+    }
+
+    /// <summary>
     ///     网络使用值
     /// </summary>
     public string? NetworkUsage
@@ -138,12 +172,30 @@ public class ProcessItem : BindableBase
     }
 
     /// <summary>
+    ///     网络使用值
+    /// </summary>
+    public double NetworkUsageValue
+    {
+        get => _networkUsageValue;
+        set => SetProperty(ref _networkUsageValue, value);
+    }
+
+    /// <summary>
     ///     GPU
     /// </summary>
     public string? GPU
     {
         get => _gpu;
         set => SetProperty(ref _gpu, value);
+    }
+
+    /// <summary>
+    ///     GPU
+    /// </summary>
+    public double GPUValue
+    {
+        get => _gpuValue;
+        set => SetProperty(ref _gpuValue, value);
     }
 
     /// <summary>
@@ -165,12 +217,30 @@ public class ProcessItem : BindableBase
     }
 
     /// <summary>
+    ///     电源使用情况
+    /// </summary>
+    public ProcessPowerUsage PowerUsageValue
+    {
+        get => _powerUsageValue;
+        set => SetProperty(ref _powerUsageValue, value);
+    }
+
+    /// <summary>
     ///     电源使用情况趋势
     /// </summary>
     public string? PowerUsageTrend
     {
         get => _powerUsageTrend;
         set => SetProperty(ref _powerUsageTrend, value);
+    }
+
+    /// <summary>
+    ///     电源使用情况
+    /// </summary>
+    public ProcessPowerUsage PowerUsageTrendValue
+    {
+        get => _powerUsageTrendValue;
+        set => SetProperty(ref _powerUsageTrendValue, value);
     }
 
     /// <summary>
@@ -225,36 +295,50 @@ public class ProcessItem : BindableBase
         Publisher = process.Publisher;
         CommandLine = process.CommandLine;
 
-        CPUUsage = process.CPUUsage.ToString("P1");
-        MemoryUsage = process.MemoryUsage.ToString("P1");
-        DiskUsage = $"{process.DiskUsage:P1} MB/秒";
-        NetworkUsage = $"{process.DiskUsage:P1} Mbps";
-        GPU = process.GPU.ToString("P1");
+        CPUUsageValue = process.CPUUsage;
+        CPUUsage = CPUUsageValue.ToString("P1");
+        MemoryUsageValue = process.MemoryUsage;
+        MemoryUsage = MemoryUsageValue.ToString("P1");
+        DiskUsageValue = process.DiskUsage;
+        DiskUsage = $"{DiskUsageValue:P1} MB/秒";
+        NetworkUsageValue = process.NetworkUsage;
+        NetworkUsage = $"{NetworkUsageValue:P1} Mbps";
+        GPUValue = process.GPU;
+        GPU = GPUValue.ToString("P1");
         GPUEngine = process.GPUEngine;
-        PowerUsage = ((ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsage.ToString()))
-            .Description();
-        PowerUsageTrend = ((ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsageTrend.ToString()))
-            .Description();
+        PowerUsageValue = (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsage.ToString());
+        PowerUsage = PowerUsageValue.Description();
+        PowerUsageTrendValue =
+            (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsageTrend.ToString());
+        PowerUsageTrend = PowerUsageTrendValue.Description();
         LastUpdateTime = process.LastUpdateTime.ToDateTime();
         UpdateTime = process.UpdateTime.ToDateTime();
+
+        LastViewUpdateTime = ViewUpdateTime;
+        ViewUpdateTime = DateTime.Now;
     }
 
     public void Update(ActiveProcess process)
     {
         PID = process.PID;
 
-        CPUUsage = process.CPUUsage.ToString("P1");
-        MemoryUsage = process.MemoryUsage.ToString("P1");
-        DiskUsage = $"{process.DiskUsage:P1} MB/秒";
-        NetworkUsage = $"{process.DiskUsage:P1} Mbps";
-        GPU = process.GPU.ToString("P1");
-        PowerUsage = ((ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsage.ToString()))
-            .Description();
-        PowerUsageTrend = ((ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsageTrend.ToString()))
-            .Description();
+        CPUUsageValue = process.CPUUsage;
+        CPUUsage = CPUUsageValue.ToString("P1");
+        MemoryUsageValue = process.MemoryUsage;
+        MemoryUsage = MemoryUsageValue.ToString("P1");
+        DiskUsageValue = process.DiskUsage;
+        DiskUsage = $"{DiskUsageValue:P1} MB/秒";
+        NetworkUsageValue = process.NetworkUsage;
+        NetworkUsage = $"{NetworkUsageValue:P1} Mbps";
+        GPUValue = process.GPU;
+        GPU = GPUValue.ToString("P1");
+        PowerUsageValue = (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsage.ToString());
+        PowerUsage = PowerUsageValue.Description();
+        PowerUsageTrendValue =
+            (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), process.PowerUsageTrend.ToString());
+        PowerUsageTrend = PowerUsageTrendValue.Description();
         LastUpdateTime = UpdateTime;
         UpdateTime = process.UpdateTime.ToDateTime();
-
 
         LastViewUpdateTime = ViewUpdateTime;
         ViewUpdateTime = DateTime.Now;

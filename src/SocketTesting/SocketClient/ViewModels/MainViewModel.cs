@@ -1,4 +1,6 @@
-﻿namespace SocketClient.ViewModels;
+﻿using System.Timers;
+
+namespace SocketClient.ViewModels;
 
 public class MainViewModel : BindableBase
 {
@@ -112,18 +114,24 @@ public class MainViewModel : BindableBase
         Invoke(DisplayProcesses.Clear);
     }
 
+    private System.Timers.Timer? _sendDataTimer;
+
     private void SendHeartbeat()
     {
-        Task.Run(() =>
-        {
-            while (!TcpHelper.IsRunning) Thread.Sleep(TimeSpan.FromMilliseconds(30));
+        _sendDataTimer = new System.Timers.Timer();
+        _sendDataTimer.Interval = 5000;
+        _sendDataTimer.Elapsed += MockSendData;
+        _sendDataTimer.Start();
+    }
 
-            while (TcpHelper.IsRunning)
-            {
-                TcpHelper.SendCommand(new Heartbeat());
-                Thread.Sleep(TimeSpan.FromSeconds(5));
-            }
-        });
+    private void MockSendData(object? sender, ElapsedEventArgs e)
+    {
+        if (!TcpHelper.IsRunning)
+        {
+            return;
+        }
+
+        TcpHelper.SendCommand(new Heartbeat());
     }
 
     private void Try(string actionName, Action action, Action<Exception>? exceptionAction = null)
@@ -143,7 +151,7 @@ public class MainViewModel : BindableBase
 
     private void Invoke(Action action)
     {
-        Owner?.Dispatcher.Invoke(action);
+        Owner?.Dispatcher.BeginInvoke(action.Invoke);
     }
 
 
@@ -154,7 +162,7 @@ public class MainViewModel : BindableBase
         // 开启线程接收数据
         Task.Run(() =>
         {
-            while (!TcpHelper.IsRunning) Thread.Sleep(TimeSpan.FromMilliseconds(50));
+            while (!TcpHelper.IsRunning) Thread.Sleep(TimeSpan.FromMilliseconds(10));
 
             HandleRefreshCommand();
 
@@ -216,7 +224,7 @@ public class MainViewModel : BindableBase
 
         _receivedProcesses.AddRange(processes);
         var filterData = FilterData(processes);
-        Invoke(() => DisplayProcesses.AddRange(filterData));
+        Invoke(() => DisplayProcesses.Add(filterData));
         if (_receivedProcesses.Count == response.TotalSize)
             _processIdAndItems = _receivedProcesses.ToDictionary(process => process.PID);
 
@@ -260,7 +268,6 @@ public class MainViewModel : BindableBase
                        response is UpdateActiveProcess updateActiveProcess)
                 {
                     allUpdateProcesses.Add(updateActiveProcess);
-                    if (allUpdateProcesses.Count > 50) break;
                 }
 
                 if (allUpdateProcesses.Count > 0)
@@ -274,7 +281,7 @@ public class MainViewModel : BindableBase
                             Logger.Error($"更新点实时数据异常：{ex.Message}");
                         }
 
-                Thread.Sleep(TimeSpan.FromMilliseconds(10));
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
             }
         });
     }

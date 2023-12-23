@@ -31,9 +31,9 @@ public partial class LogView : UserControl
         {
             while (true)
             {
-                try
+                if (Logger.Logs.Reader.TryRead(out var log))
                 {
-                    if (Logger.Logs.TryTake(out var log, TimeSpan.FromMilliseconds(10)))
+                    try
                     {
                         LogRichTextBox.Dispatcher.BeginInvoke(() =>
                         {
@@ -50,13 +50,15 @@ public partial class LogView : UserControl
                             LogRichTextBox.EndChange();
                         });
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"日志读取失败，糟了：{ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"日志读取失败，糟了：{ex.Message}");
+                    Thread.Sleep(TimeSpan.FromMilliseconds(30));
                 }
-
-                Thread.Sleep(TimeSpan.FromMilliseconds(30));
             }
         });
     }

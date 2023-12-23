@@ -6,7 +6,6 @@ namespace SocketServer.SocketHelper;
 public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
 {
     private UdpClient? _client;
-    private Timer _sendDataTimer;
     private IPEndPoint? _udpIpEndPoint;
 
     #region 公开属性
@@ -174,21 +173,21 @@ public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
 
     #region 模拟数据更新
 
+    private System.Timers.Timer _updateDataTimer;
+    private System.Timers.Timer _sendDataTimer;
+    public static int SendTimes { get; private set; }
+
     private void MockSendData()
     {
-        Task.Run(() =>
-        {
-            while (IsRunning)
-            {
-                var sw = Stopwatch.StartNew();
+        _updateDataTimer = new System.Timers.Timer();
+        _updateDataTimer.Interval = 500;
+        _updateDataTimer.Elapsed += MockUpdateData;
+        _updateDataTimer.Start();
 
-                MockUtil.MockUpdateProcess(tcpHelper.MockCount);
-                sw.Stop();
-
-                Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
-                Thread.Sleep(TimeSpan.FromMilliseconds(MockUtil.UdpUpdateMilliseconds));
-            }
-        });
+        _sendDataTimer = new System.Timers.Timer();
+        _sendDataTimer.Interval = 500;
+        _sendDataTimer.Elapsed += MockSendData;
+        _sendDataTimer.Start();
 
         _sendDataTimer = new Timer();
         _sendDataTimer.Interval = MockUtil.UdpSendMilliseconds;
@@ -196,7 +195,19 @@ public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
         _sendDataTimer.Start();
     }
 
-    private void MockSendData(object sender, ElapsedEventArgs e)
+    private void MockUpdateData(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        if (!IsRunning) return;
+
+        var sw = Stopwatch.StartNew();
+
+        MockUtil.MockUpdateProcess(tcpHelper.MockCount);
+        sw.Stop();
+
+        Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
+    }
+
+    private void MockSendData(object sender, System.Timers.ElapsedEventArgs e)
     {
         if (!IsRunning) return;
 
@@ -217,8 +228,6 @@ public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
 
             var buffer = response.SerializeByNative(tcpHelper.SystemId);
             size += _client!.Send(buffer, buffer.Length, _udpIpEndPoint);
-
-            Thread.Sleep(TimeSpan.FromMilliseconds(0.5));
         }
 
         Logger.Info($"推送实时数据{tcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，成功发送{size}字节，{sw.ElapsedMilliseconds}ms");

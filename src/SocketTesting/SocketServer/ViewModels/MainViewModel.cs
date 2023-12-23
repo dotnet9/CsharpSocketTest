@@ -86,7 +86,7 @@ public class MainViewModel : BindableBase
             return Task.CompletedTask;
         }
 
-        TcpHelper.UpdateAllData(true);
+        TcpHelper.UpdateAllData(isUpdateAll: true);
         return Task.CompletedTask;
     }
 
@@ -98,7 +98,7 @@ public class MainViewModel : BindableBase
             return Task.CompletedTask;
         }
 
-        TcpHelper.UpdateAllData(false);
+        TcpHelper.UpdateAllData(isUpdateAll: false);
         return Task.CompletedTask;
     }
 

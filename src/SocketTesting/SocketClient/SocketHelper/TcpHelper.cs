@@ -2,9 +2,9 @@
 
 public class TcpHelper : BindableBase, ISocketBase
 {
-    private readonly BlockingCollection<INetObject> _responses = new(); //接收命令列表
     private Socket? _client;
     public long SystemId { get; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
+    private readonly BlockingCollection<INetObject> _responses = new(); //接收命令列表
 
     #region 公开属性
 

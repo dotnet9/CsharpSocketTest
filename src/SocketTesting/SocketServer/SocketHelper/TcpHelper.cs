@@ -1,4 +1,6 @@
-﻿namespace SocketServer.SocketHelper;
+﻿using System.Timers;
+
+namespace SocketServer.SocketHelper;
 
 public class TcpHelper : BindableBase, ISocketBase
 {
@@ -195,7 +197,6 @@ public class TcpHelper : BindableBase, ISocketBase
         foreach (var client in _clients)
         {
             client.Value.Send(buffer);
-            Thread.Sleep(TimeSpan.FromMilliseconds(1));
         }
 
         Logger.Info($"发送命令{command.GetType()}");
@@ -382,9 +383,7 @@ public class TcpHelper : BindableBase, ISocketBase
 
             var msg = response.TaskId == default ? "推送" : "响应请求";
             Logger.Info(
-                $"{msg}【{response.PageIndex + 1}/{response.PageCount}】进程{response.Processes.Count}条({sendCount}/{response.TotalSize})");
-
-            Thread.Sleep(TimeSpan.FromMilliseconds(1));
+                $"{msg}【{response.PageIndex + 1}/{response.PageCount}】{response.Processes.Count}条({sendCount}/{response.TotalSize})");
         }
     }
 
@@ -398,24 +397,26 @@ public class TcpHelper : BindableBase, ISocketBase
 
     #region 更新数据
 
-    private void MockUpdate()
-    {
-        Task.Run(() =>
-        {
-            var isUpdateAll = false;
-            while (IsRunning)
-            {
-                UpdateAllData(isUpdateAll);
-                isUpdateAll = !isUpdateAll;
-
-                Thread.Sleep(TimeSpan.FromMinutes(4));
-            }
-        });
-    }
+    private System.Timers.Timer _sendDataTimer;
+    private bool _isUpdateAll;
 
     public void UpdateAllData(bool isUpdateAll)
     {
-        if (isUpdateAll)
+        _isUpdateAll = isUpdateAll;
+        MockSendData(null, null);
+    }
+
+    private void MockUpdate()
+    {
+        _sendDataTimer = new System.Timers.Timer();
+        _sendDataTimer.Interval = 4 * 60 * 1000;
+        _sendDataTimer.Elapsed += MockSendData;
+        _sendDataTimer.Start();
+    }
+
+    private void MockSendData(object? sender, ElapsedEventArgs? e)
+    {
+        if (_isUpdateAll)
         {
             SendCommand(new ChangeProcess());
             Logger.Info("====TCP推送结构变化通知====");
@@ -427,6 +428,8 @@ public class TcpHelper : BindableBase, ISocketBase
             Processes = MockUtil.MockProcesses(MockCount, MockPageSize)
         });
         Logger.Info("====TCP推送更新通知====");
+
+        _isUpdateAll = !_isUpdateAll;
     }
 
     #endregion

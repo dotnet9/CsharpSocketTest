@@ -2,11 +2,11 @@
 
 public class UdpHelper : BindableBase, ISocketBase
 {
+    private UdpClient? _client;
+    private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
     private readonly BlockingCollection<byte[]> _receivedBuffers = new(new ConcurrentQueue<byte[]>());
 
     private readonly BlockingCollection<UpdateActiveProcess> _receivedResponse = new();
-    private UdpClient? _client;
-    private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
 
     #region 公开属性
 
@@ -159,7 +159,7 @@ public class UdpHelper : BindableBase, ISocketBase
 
     public bool TryGetResponse(out INetObject? response)
     {
-        var result = _receivedResponse.TryTake(out var updateActiveProcess, TimeSpan.FromMilliseconds(100));
+        var result = _receivedResponse.TryTake(out var updateActiveProcess);
         response = updateActiveProcess;
         return result;
     }
@@ -177,14 +177,14 @@ public class UdpHelper : BindableBase, ISocketBase
                 {
                     if (_client?.Client == null || _client.Available < 0)
                     {
-                        Thread.Sleep(TimeSpan.FromMilliseconds(30));
+                        Thread.Sleep(TimeSpan.FromMilliseconds(10));
                         continue;
                     }
 
                     var data = _client.Receive(ref _remoteEp);
-                    ReceiveTime = DateTime.Now;
-
                     _receivedBuffers.Add(data);
+
+                    ReceiveTime = DateTime.Now;
                 }
                 catch (SocketException ex)
                 {

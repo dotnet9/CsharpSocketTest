@@ -6,7 +6,10 @@ public class RangObservableCollection<T> : ObservableCollection<T>
 
     protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
     {
-        if (!SuppressNotification) base.OnCollectionChanged(e);
+        if (!SuppressNotification)
+        {
+            base.OnCollectionChanged(e);
+        }
     }
 
     public new void Clear()
@@ -15,13 +18,19 @@ public class RangObservableCollection<T> : ObservableCollection<T>
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
 
-    public void AddRange(IEnumerable<T> collection)
+    public void Add(IEnumerable<T> collection)
     {
-        if (collection == null) throw new ArgumentNullException(nameof(collection));
+        if (collection == null)
+        {
+            throw new ArgumentNullException(nameof(collection));
+        }
 
         SuppressNotification = true;
 
-        foreach (var item in collection) Items.Add(item);
+        foreach (var item in collection)
+        {
+            Items.Add(item);
+        }
 
         SuppressNotification = false;
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
