@@ -65,7 +65,8 @@ public class MainViewModel : BindableBase
 
     private Task HandleMockDataCommandAsync()
     {
-        return MockUtil.MockAllProcess(TcpHelper.MockCount);
+        MockUtil.MockAllProcess(TcpHelper.MockCount);
+        return Task.CompletedTask;
     }
 
     private Task HandleRunUdpMulticastCommandAsync()

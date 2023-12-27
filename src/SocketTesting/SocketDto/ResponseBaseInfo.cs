@@ -17,24 +17,24 @@ public class ResponseBaseInfo : INetObject
     public string? OperatingSystemType { get; set; }
 
     /// <summary>
-    /// 系统内存大小（单位MB）
+    /// 系统内存大小（单位GB）
     /// </summary>
-    public int MemorySize { get; set; }
+    public byte MemorySize { get; set; }
 
     /// <summary>
     /// 处理器个数
     /// </summary>
-    public int ProcessorCount { get; set; }
+    public byte ProcessorCount { get; set; }
 
     /// <summary>
     /// 硬盘总容量（单位GB）
     /// </summary>
-    public int TotalDiskSpace { get; set; }
+    public short TotalDiskSpace { get; set; }
 
     /// <summary>
     /// 网络带宽（单位Mbps）
     /// </summary>
-    public int NetworkBandwidth { get; set; }
+    public short NetworkBandwidth { get; set; }
 
     /// <summary>
     /// 服务器IP地址
@@ -59,5 +59,5 @@ public class ResponseBaseInfo : INetObject
     /// <summary>
     /// 最后更新时间
     /// </summary>
-    public long LastUpdateTime { get; set; }
+    public uint LastUpdateTime { get; set; }
 }

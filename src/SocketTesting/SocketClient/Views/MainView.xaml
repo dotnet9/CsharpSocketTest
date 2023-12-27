@@ -2,17 +2,17 @@
     x:Class="SocketClient.Views.MainView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:SocketClient.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dto="clr-namespace:SocketDto;assembly=SocketDto"
     xmlns:logs="clr-namespace:SocketCore.LogHelper;assembly=SocketCore"
     xmlns:markup="clr-namespace:WpfExtensions.Xaml.Markup;assembly=WpfExtensions.Xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:converters="clr-namespace:SocketClient.Converters"
     xmlns:viewmodel="clr-namespace:SocketClient.ViewModels"
     Title="Socket Client"
-    Width="1200"
-    Height="600"
+    Width="2250"
+    Height="1000"
     d:DataContext="{d:DesignInstance viewmodel:MainViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
     Icon="/Assets/Images/favicon.ico"
@@ -44,7 +44,7 @@
             <RowDefinition Height="3" />
             <RowDefinition Height="200" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <GroupBox Header="Tcp服务配置">
@@ -128,53 +128,48 @@
                         Width="160"
                         DisplayMemberBinding="{Binding CommandLine, Mode=OneWay}"
                         Header="命令行" />
-                    <GridViewColumn
-                        Width="80"
-                        Header="CPU使用率">
+                    <GridViewColumn Width="80" Header="CPU使用率">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding CPUUsage}"
-                                           Foreground="{Binding CPUUsageValue, Converter={StaticResource UsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding CPUUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding CPUUsage}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn
-                        Width="80"
-                        Header="内存使用率">
+                    <GridViewColumn Width="80" Header="内存使用率">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding MemoryUsage}"
-                                           Foreground="{Binding MemoryUsageValue, Converter={StaticResource UsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding MemoryUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding MemoryUsage}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn
-                        Width="100"
-                        Header="磁盘">
+                    <GridViewColumn Width="100" Header="磁盘">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding DiskUsage}"
-                                           Foreground="{Binding DiskUsageValue, Converter={StaticResource UsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding DiskUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding DiskUsage}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn
-                        Width="100"
-                        Header="网络">
+                    <GridViewColumn Width="100" Header="网络">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding NetworkUsage}"
-                                           Foreground="{Binding NetworkUsageValue, Converter={StaticResource UsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding NetworkUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding NetworkUsage}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn
-                        Width="60"
-                        Header="GPU">
+                    <GridViewColumn Width="60" Header="GPU">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding GPU}"
-                                           Foreground="{Binding GPUValue, Converter={StaticResource UsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding GPUValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Gpu}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -182,22 +177,21 @@
                         Width="160"
                         DisplayMemberBinding="{Binding GPUEngine, Mode=OneWay}"
                         Header="GPU引擎" />
-                    <GridViewColumn
-                        Header="电源使用情况">
+                    <GridViewColumn Header="电源使用情况">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PowerUsage}"
-                                           Foreground="{Binding PowerUsageValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding PowerUsageValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding PowerUsage}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn
-                        Width="120"
-                        Header="电源使用情况趋势">
+                    <GridViewColumn Width="120" Header="电源使用情况趋势">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding PowerUsageTrend}"
-                                           Foreground="{Binding PowerUsageTrendValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}" />
+                                <TextBlock
+                                    Foreground="{Binding PowerUsageTrendValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding PowerUsageTrend}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -232,8 +226,11 @@
             Orientation="Horizontal">
             <TextBlock Text="{Binding BaseInfo}" />
         </StackPanel>
-        <StackPanel Grid.Row="5" VerticalAlignment="Center">
-            <TextBlock>
+        <StackPanel
+            Grid.Row="5"
+            Margin="0,8"
+            VerticalAlignment="Center">
+            <TextBlock Margin="0,5,0,5">
                 <Run Text="TCP：" />
                 <Run
                     Foreground="{markup:If {Binding TcpHelper.IsRunning}, {x:Static Brushes.Green}, {x:Static Brushes.Red}}"
@@ -248,11 +245,14 @@
                 <Run Foreground="Green" Text="{Binding TcpHelper.SendTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
                 <Run Text=" 接收 " />
                 <Run Foreground="Green" Text="{Binding TcpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
-                <Run Text="  UDP：" />
+
+            </TextBlock>
+            <TextBlock>
+                <Run Text="UDP组播：" />
                 <Run
                     Foreground="{markup:If {Binding UdpHelper.IsRunning}, {x:Static Brushes.Green}, {x:Static Brushes.Red}}"
                     Text="{markup:If {Binding UdpHelper.IsRunning}, 已订阅, 未订阅}" />
-                <Run Text=" 组播时间 " />
+                <Run Text=" 时间 " />
                 <Run Foreground="Green" Text="{Binding UdpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
             </TextBlock>
         </StackPanel>

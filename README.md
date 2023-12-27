@@ -1,14 +1,14 @@
 # C#百万对象序列化与网络传输实践
 
-| 日期       | 更新内容               | 版本  | 作者         |
-| ---------- | ---------------------- | ----- | ------------ |
-| 2023-12-16 | 初建，添加网络对象定义 | 0.0.1 | 沙漠尽头的狼 |
-|            |                        |       |              |
-|            |                        |       |              |
+| 日期       | 更新内容                                       | 版本  | 作者         |
+| ---------- | ---------------------------------------------- | ----- | ------------ |
+| 2023-12-16 | 初建，添加网络对象定义                         | 0.0.1 | 沙漠尽头的狼 |
+| 2023-12-24 | 修改数据类型，节约网络传输大小和减少数据包个数 | 0.0.2 |              |
+|            |                                                |       |              |
 
 [TOC]
 
-## 1. 背景
+## 1. 背景【0.0.1】
 
 完善文章《[C#百万对象序列化深度剖析：如何在网络传输中实现速度与体积的完美平衡 (dotnet9.com)](https://dotnet9.com/2023/12/deep-analysis-of-csharp-million-object-serialization-how-to-achieve-a-perfect-balance-between-speed-and-volume-in-network-transm)》，以客户端实时获取服务端进程信息为测试案例：
 
@@ -20,7 +20,7 @@
 
 ### 2.1. 网络对象
 
-#### 2.1.1. 数据包格式
+#### 2.1.1. 数据包格式【0.0.1】
 
 **数据包=头部+数据**
 
@@ -49,37 +49,37 @@
 |                     |        |          |                              |
 | Heartbeat           | 255    | 1        | TCP心跳包                    |
 
-#### 2.1.2. 网络对象定义
+#### 2.1.2. 网络对象定义【0.0.1】
 
-##### RequestBaseInfo
-
-| 字段名 | 数据类型 | 说明   |
-| ------ | -------- | ------ |
-| TaskId | int      | 任务Id |
-
-##### ResponseBaseInfo
-
-| 字段名              | 数据类型 | 说明                           |
-| ------------------- | -------- | ------------------------------ |
-| TaskId              | int      | 任务Id                         |
-| OperatingSystemType | string?  | 服务器操作系统类型             |
-| MemorySize          | int      | 系统内存大小（单位MB）         |
-| ProcessorCount      | int      | 处理器个数                     |
-| TotalDiskSpace      | int      | 硬盘总容量（单位GB）           |
-| NetworkBandwidth    | int      | 网络带宽（单位Mbps）           |
-| IpAddress           | string?  | 服务器IP地址                   |
-| ServerName          | string?  | 服务器名称                     |
-| DataCenterLocation  | string?  | 数据中心位置                   |
-| IsRunning           | byte     | 运行状态，0：未运行，1：已运行 |
-| LastUpdateTime      | long     | 最后更新时间                   |
-
-##### RequestProcess
+##### RequestBaseInfo【0.0.1】
 
 | 字段名 | 数据类型 | 说明   |
 | ------ | -------- | ------ |
 | TaskId | int      | 任务Id |
 
-##### ResponseProcess
+##### ResponseBaseInfo【0.0.2】
+
+| 字段名              | 数据类型 | 说明                                                         |
+| ------------------- | -------- | ------------------------------------------------------------ |
+| TaskId              | int      | 任务Id                                                       |
+| OperatingSystemType | string?  | 服务器操作系统类型                                           |
+| MemorySize          | byte     | 系统内存大小（单位GB）                                       |
+| ProcessorCount      | byte     | 处理器个数                                                   |
+| TotalDiskSpace      | short    | 硬盘总容量（单位GB）                                         |
+| NetworkBandwidth    | short    | 网络带宽（单位Mbps）                                         |
+| IpAddress           | string?  | 服务器IP地址                                                 |
+| ServerName          | string?  | 服务器名称                                                   |
+| DataCenterLocation  | string?  | 数据中心位置                                                 |
+| IsRunning           | byte     | 运行状态，0：未运行，1：已运行                               |
+| LastUpdateTime      | uint     | 最后更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms） |
+
+##### RequestProcess【0.0.1】
+
+| 字段名 | 数据类型 | 说明   |
+| ------ | -------- | ------ |
+| TaskId | int      | 任务Id |
+
+##### ResponseProcess【0.0.1】
 
 | 字段名    | 数据类型         | 说明       |
 | --------- | ---------------- | ---------- |
@@ -90,60 +90,73 @@
 | PageIndex | int              | 页索引     |
 | Processes | `List<Process>?` | 进程列表   |
 
-##### Process
+##### Process【0.0.2】
 
-| 字段名          | 数据类型 | 说明             |
-| --------------- | -------- | ---------------- |
-| PID             | int      | 进程ID           |
-| Name            | string?  | 进程名称         |
-| Type            | byte     | 进程类型         |
-| Status          | byte     | 进程状态         |
-| Publisher       | string?  | 发布者           |
-| CommandLine     | string?  | 命令行           |
-| CPUUsage        | double   | CPU使用率        |
-| MemoryUsage     | double   | 内存使用率       |
-| DiskUsage       | double   | 磁盘使用大小     |
-| NetworkUsage    | double   | 网络使用值       |
-| GPU             | double   | GPU              |
-| GPUEngine       | string?  | GPU引擎          |
-| PowerUsage      | byte     | 电源使用情况     |
-| PowerUsageTrend | byte     | 电源使用情况趋势 |
-| LastUpdateTime  | long     | 上次更新时间     |
-| UpdateTime      | long     | 更新时间         |
+| 字段名         | 数据类型 | 说明                                                         |
+| -------------- | -------- | ------------------------------------------------------------ |
+| PID            | int      | 进程ID                                                       |
+| Name           | string?  | 进程名称                                                     |
+| Publisher      | string?  | 发布者                                                       |
+| CommandLine    | string?  | 命令行                                                       |
+| Data           | byte[8]  | 下面详细说明                                                 |
+| LastUpdateTime | uint     | 上次更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms） |
+| UpdateTime     | uint     | 更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms）    |
 
-##### UpdateProcess
+Data值：
+
+| bit索引 | bit个数 | 字段            | 说明                                                         |      |
+| ------- | ------- | --------------- | ------------------------------------------------------------ | ---- |
+| 0       | 10      | Cpu             | CPU（所有内核的总处理利用率），最后一位表示小数位，比如253表示25.3% |      |
+| 10      | 10      | Memory          | 内存（进程占用的物理内存），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算 |      |
+| 20      | 10      | Disk            | 磁盘（所有物理驱动器的总利用率），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算 |      |
+| 30      | 10      | Network         | 网络（当前主要网络上的网络利用率），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算 |      |
+| 40      | 10      | Gpu             | GPU(所有GPU引擎的最高利用率)，最后一位表示小数位，比如253表示25.3 |      |
+| 50      | 1       | GpuEngine       | GPU引擎，0：无，1：GPU 0 - 3D                                |      |
+| 51      | 3       | PowerUsage      | 电源使用情况（CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高 |      |
+| 54      | 3       | PowerUsageTrend | 电源使用情况趋势（一段时间内CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高 |      |
+| 57      | 1       | Type            | 进程类型，0：应用，1：后台进程                               |      |
+| 58      | 2       | Status          | 进程状态，0：正常运行，1：效率模式，2：挂起                  |      |
+
+##### UpdateProcess【0.0.1】
 
 | 字段名    | 数据类型         | 说明     |
 | --------- | ---------------- | -------- |
 | Processes | `List<Process>?` | 进程列表 |
 
-##### UpdateActiveProcess
+##### UpdateActiveProcess【0.0.1】
 
 | 字段名    | 数据类型               | 说明     |
 | --------- | ---------------------- | -------- |
 | Processes | `List<ActiveProcess>?` | 进程列表 |
 
-##### ActiveProcess
+##### ActiveProcess【0.0.2】
 
-| 字段名          | 数据类型 | 说明             |
-| --------------- | -------- | ---------------- |
-| PID             | int      | 进程ID           |
-| CPUUsage        | double   | CPU使用率        |
-| MemoryUsage     | double   | 内存使用率       |
-| DiskUsage       | double   | 磁盘             |
-| NetworkUsage    | double   | 网络使用值       |
-| GPU             | double   | GPU              |
-| PowerUsage      | byte     | 电源使用情况     |
-| PowerUsageTrend | byte     | 电源使用情况趋势 |
-| UpdateTime      | long     | 更新时间         |
+| 字段名     | 数据类型 | 说明                                                      |
+| ---------- | -------- | --------------------------------------------------------- |
+| PID        | int      | 进程ID                                                    |
+| Data       | byte[8]  | 下面详细说明                                              |
+| UpdateTime | uint     | 更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms） |
 
-##### ChangeProcess
+Data值：
+
+| bit索引 | bit个数 | 字段            | 说明                                                         |      |
+| ------- | ------- | --------------- | ------------------------------------------------------------ | ---- |
+| 0       | 10      | Cpu             | CPU（所有内核的总处理利用率），最后一位表示小数位，比如253表示25.3% |      |
+| 10      | 10      | Memory          | 内存（进程占用的物理内存），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算 |      |
+| 20      | 10      | Disk            | 磁盘（所有物理驱动器的总利用率），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算 |      |
+| 30      | 10      | Network         | 网络（当前主要网络上的网络利用率），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算 |      |
+| 40      | 10      | Gpu             | GPU(所有GPU引擎的最高利用率)，最后一位表示小数位，比如253表示25.3 |      |
+| 50      | 1       | GpuEngine       | GPU引擎，0：无，1：GPU 0 - 3D                                |      |
+| 51      | 3       | PowerUsage      | 电源使用情况（CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高 |      |
+| 54      | 3       | PowerUsageTrend | 电源使用情况趋势（一段时间内CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高 |      |
+
+##### ChangeProcess【0.0.1】
 
 | 字段名 | 数据类型 | 说明 |
 | ------ | -------- | ---- |
 |        |          |      |
 
-##### Heartbeat
+##### Heartbeat【0.0.1】
 
 | 字段名 | 数据类型 | 说明 |
 | ------ | -------- | ---- |

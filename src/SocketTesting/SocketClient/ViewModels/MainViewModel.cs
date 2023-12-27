@@ -205,7 +205,7 @@ public class MainViewModel : BindableBase
     {
         var oldBaseInfo = BaseInfo;
         BaseInfo =
-            $"更新时间【{response.LastUpdateTime.ToDateTime():yyyy:MM:dd HH:mm:ss fff}】：数据中心【{response.DataCenterLocation}】-操作系统【{response.OperatingSystemType}】-内存【{ByteSizeConverter.FormatMB(response.MemorySize)}】-处理器个数【{response.ProcessorCount}】-硬盘【{ByteSizeConverter.FormatGB(response.TotalDiskSpace)}】-带宽【{response.NetworkBandwidth}Mbps】";
+            $"更新时间【{response.LastUpdateTime.TodayToDateTime():yyyy:MM:dd HH:mm:ss fff}】：数据中心【{response.DataCenterLocation}】-操作系统【{response.OperatingSystemType}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.TotalDiskSpace}GB】-带宽【{response.NetworkBandwidth}Mbps】";
 
         Logger.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
         Logger.Info($"【旧】{oldBaseInfo}");

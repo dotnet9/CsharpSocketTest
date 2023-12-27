@@ -16,7 +16,7 @@ public static class MockUtil
         {
             TaskId = taskId,
             OperatingSystemType = "Windows 11",
-            MemorySize = 48 * 1024,
+            MemorySize = 48,
             ProcessorCount = 8,
             TotalDiskSpace = 1024 + 256,
             NetworkBandwidth = 1024,
@@ -25,7 +25,7 @@ public static class MockUtil
             DataCenterLocation = "成都",
             IsRunning = (byte)(ProcessRunningStatus)Enum.Parse(typeof(ProcessRunningStatus),
                 Random.Shared.Next(0, Enum.GetNames(typeof(ProcessRunningStatus)).Length).ToString()),
-            LastUpdateTime = TimestampHelper.GetTimestamp()
+            LastUpdateTime = TimestampHelper.GetCurrentTodayTimestamp()
         };
     }
 
@@ -43,7 +43,7 @@ public static class MockUtil
         return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 
-    public static async Task MockAllProcess(int totalCount)
+    public static void MockAllProcess(int totalCount)
     {
         if (_mockCount == totalCount && _mockProcesses?.Count == totalCount &&
             _mockUpdateProcesses?.Count == totalCount)
@@ -57,16 +57,15 @@ public static class MockUtil
 
         _mockProcesses = Enumerable.Range(0, _mockCount).Select(MockProcess).ToList();
         sw.Stop();
-        Logger.Info($"模拟{_mockCount}条进程{sw.ElapsedMilliseconds}ms");
+        Logger.Info($"模拟{_mockCount}条{sw.ElapsedMilliseconds}ms");
         _mockUpdateProcesses = Enumerable.Range(0, _mockCount).Select(index => new ActiveProcess { PID = index + 1 })
             .ToList();
         MockUpdateProcess(_mockCount);
-        await Task.CompletedTask;
     }
 
     private static readonly string MockStr = Lorem.Words(1, 3);
-    private static readonly double MockDouble = Random.Shared.NextDouble();
-    private static readonly long Timestamp = TimestampHelper.GetTimestamp();
+    private static readonly short MockShort = (short)Random.Shared.Next(0, 1000);
+    private static readonly uint Timestamp = TimestampHelper.GetCurrentTodayTimestamp();
 
     private static Process MockProcess(int id)
     {
@@ -78,11 +77,11 @@ public static class MockUtil
             Status = 0,
             Publisher = MockStr,
             CommandLine = MockStr,
-            CPUUsage = MockDouble,
-            MemoryUsage = MockDouble,
-            DiskUsage = MockDouble,
-            NetworkUsage = MockDouble,
-            GPU = MockDouble,
+            CPU = MockShort,
+            Memory = MockShort,
+            Disk = MockShort,
+            Network = MockShort,
+            GPU = MockShort,
             GPUEngine = MockStr,
             PowerUsage = 0,
             PowerUsageTrend = 0,
@@ -102,23 +101,23 @@ public static class MockUtil
     {
         MockAllProcess(totalCount);
 
-        var cpuUsage = Random.Shared.NextDouble();
-        var memoryUsage = Random.Shared.NextDouble();
-        var diskUsage = Random.Shared.NextDouble();
-        var networkUsage = Random.Shared.NextDouble();
-        var gpu = Random.Shared.NextDouble();
+        var cpu = (short)Random.Shared.Next(0, 1000);
+        var memory = (short)Random.Shared.Next(0, 1000);
+        var disk = (short)Random.Shared.Next(0, 1000);
+        var network = (short)Random.Shared.Next(0, 1000);
+        var gpu = (short)Random.Shared.Next(0, 1000);
         var powerUsage =
             (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length);
         var powerUsageTrend =
             (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length);
-        var updateTime = TimestampHelper.GetTimestamp();
+        var updateTime = TimestampHelper.GetCurrentTodayTimestamp();
 
         _mockUpdateProcesses!.ForEach(process =>
         {
-            process.CPUUsage = cpuUsage;
-            process.MemoryUsage = memoryUsage;
-            process.DiskUsage = diskUsage;
-            process.NetworkUsage = networkUsage;
+            process.CPU = cpu;
+            process.Memory = memory;
+            process.Disk = disk;
+            process.Network = network;
             process.GPU = gpu;
             process.PowerUsage =
                 powerUsage;
