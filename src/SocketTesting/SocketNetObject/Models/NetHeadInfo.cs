@@ -3,7 +3,7 @@
 /// <summary>
 /// 网络通信对象头部信息
 /// </summary>
-public class NetObjectHeadInfo
+public class NetHeadInfo
 {
     /// <summary>
     /// 数据包大小

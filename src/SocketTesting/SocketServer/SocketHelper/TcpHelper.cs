@@ -286,14 +286,14 @@ public class TcpHelper : BindableBase, ISocketBase
         });
     }
 
-    private void ReadCommand(Socket tcpClient, byte[] buffer, NetObjectHeadInfo netObjectHeadInfo)
+    private void ReadCommand(Socket tcpClient, byte[] buffer, NetHeadInfo netObjectHeadInfo)
     {
         INetObject command;
 
         if (netObjectHeadInfo.IsNetObject<RequestBaseInfo>())
             command = buffer.Deserialize<RequestBaseInfo>();
-        else if (netObjectHeadInfo.IsNetObject<RequestProcess>())
-            command = buffer.Deserialize<RequestProcess>();
+        else if (netObjectHeadInfo.IsNetObject<RequestProcessList>())
+            command = buffer.Deserialize<RequestProcessList>();
         else if (netObjectHeadInfo.IsNetObject<Heartbeat>())
             command = buffer.Deserialize<Heartbeat>();
         else
@@ -347,7 +347,7 @@ public class TcpHelper : BindableBase, ISocketBase
             case RequestBaseInfo requestBaseInfo:
                 ProcessingRequest(tcpClient, requestBaseInfo);
                 break;
-            case RequestProcess requestProcess:
+            case RequestProcessList requestProcess:
                 ProcessingRequest(tcpClient, requestProcess);
                 break;
             case Heartbeat _:
@@ -363,13 +363,13 @@ public class TcpHelper : BindableBase, ISocketBase
         SendCommand(client, MockUtil.MockBase(request.TaskId));
     }
 
-    private void ProcessingRequest(Socket client, RequestProcess request)
+    private void ProcessingRequest(Socket client, RequestProcessList request)
     {
         var pageCount = MockUtil.GetPageCount(MockCount, MockPageSize);
         var sendCount = 0;
         for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
         {
-            var response = new ResponseProcess
+            var response = new ResponseProcessList
             {
                 TaskId = request.TaskId,
                 TotalSize = MockCount,
@@ -418,12 +418,12 @@ public class TcpHelper : BindableBase, ISocketBase
     {
         if (_isUpdateAll)
         {
-            SendCommand(new ChangeProcess());
+            SendCommand(new ChangeProcessList());
             Logger.Info("====TCP推送结构变化通知====");
             return;
         }
 
-        SendCommand(new UpdateProcess
+        SendCommand(new UpdateProcessList
         {
             Processes = MockUtil.MockProcesses(MockCount, MockPageSize)
         });

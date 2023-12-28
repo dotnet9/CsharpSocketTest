@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectBinarySerializationTest", "ObjectBinarySerializationTest", "{49C052ED-5F1C-4834-8310-F0D425A354F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializationTest", "ObjectBinarySerializationTest\SerializationTest\SerializationTest.csproj", "{849FB784-B220-4F6F-ADAE-15448873BFB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerializationTest", "ObjectBinarySerializationTest\SerializationTest\SerializationTest.csproj", "{849FB784-B220-4F6F-ADAE-15448873BFB1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SocketTesting", "SocketTesting", "{CB845ECA-47B9-452D-A404-4DE8E835C2D9}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketClient", "SocketTesting\SocketClient\SocketClient.csproj", "{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketServer", "SocketTesting\SocketServer\SocketServer.csproj", "{30F8C481-AC93-47F8-B248-4C90602E6FF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketDto.Test", "SocketTesting\SocketDto.Test\SocketDto.Test.csproj", "{9CCC071C-CADC-4C50-814D-5779726CFC5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30F8C481-AC93-47F8-B248-4C90602E6FF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{163BD3B1-AD6E-450A-9DB0-EB53118EB87A} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 		{30F8C481-AC93-47F8-B248-4C90602E6FF6} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
+		{9CCC071C-CADC-4C50-814D-5779726CFC5F} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9799BEAD-32FD-45CD-9B68-124237176477}

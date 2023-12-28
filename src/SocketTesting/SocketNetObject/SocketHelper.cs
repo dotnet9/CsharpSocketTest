@@ -1,8 +1,8 @@
 ﻿namespace SocketNetObject;
 
-public static class SocketHelper
+public static partial class SerializeHelper
 {
-    public static bool ReadPacket(this Socket socket, out byte[] buffer, out NetObjectHeadInfo netObject)
+    public static bool ReadPacket(this Socket socket, out byte[] buffer, out NetHeadInfo netObject)
     {
         // 1、接收数据包
         var lenBuffer = ReceiveBuffer(socket, 4);
@@ -17,7 +17,7 @@ public static class SocketHelper
 
         // 2、解析数据包
         var readIndex = 0;
-        return SerializeHelper.ReadHead(buffer, ref readIndex, out netObject);
+        return ReadHead(buffer, ref readIndex, out netObject);
     }
 
     private static byte[] ReceiveBuffer(Socket client, int count)

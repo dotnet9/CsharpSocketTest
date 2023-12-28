@@ -3,8 +3,8 @@
 /// <summary>
 /// 请求进程信息
 /// </summary>
-[NetObjectHead(3, 1)]
-public class RequestProcess : INetObject
+[NetHead(3, 1)]
+public class RequestProcessList : INetObject
 {
     /// <summary>
     /// 任务Id

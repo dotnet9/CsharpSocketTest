@@ -184,13 +184,13 @@ public class MainViewModel : BindableBase
             case ResponseBaseInfo responseBase:
                 ReadTcpData(responseBase);
                 break;
-            case ResponseProcess responseProcess:
+            case ResponseProcessList responseProcess:
                 ReadTcpData(responseProcess);
                 break;
-            case UpdateProcess updateProcess:
+            case UpdateProcessList updateProcess:
                 ReadTcpData(updateProcess);
                 break;
-            case ChangeProcess _:
+            case ChangeProcessList _:
                 HandleRefreshCommand();
                 break;
             case Heartbeat responseHeartbeat:
@@ -205,19 +205,19 @@ public class MainViewModel : BindableBase
     {
         var oldBaseInfo = BaseInfo;
         BaseInfo =
-            $"更新时间【{response.LastUpdateTime.TodayToDateTime():yyyy:MM:dd HH:mm:ss fff}】：数据中心【{response.DataCenterLocation}】-操作系统【{response.OperatingSystemType}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.TotalDiskSpace}GB】-带宽【{response.NetworkBandwidth}Mbps】";
+            $"更新时间【{response.LastUpdateTime.TodayToDateTime():yyyy:MM:dd HH:mm:ss fff}】：数据中心【{response.DataCenterLocation}】-操作系统【{response.OS}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.DiskSize}GB】-带宽【{response.NetworkBandwidth}Mbps】";
 
         Logger.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
         Logger.Info($"【旧】{oldBaseInfo}");
         Logger.Info($"【新】{BaseInfo}");
 
-        TcpHelper.SendCommand(new RequestProcess { TaskId = TcpHelper.GetNewTaskId() });
+        TcpHelper.SendCommand(new RequestProcessList { TaskId = TcpHelper.GetNewTaskId() });
         Logger.Info("发送请求进程信息命令");
 
         ClearData();
     }
 
-    private void ReadTcpData(ResponseProcess response)
+    private void ReadTcpData(ResponseProcessList response)
     {
         var processes = response.Processes?.ConvertAll(process => new ProcessItem(process));
         if (!(processes?.Count > 0)) return;
@@ -233,7 +233,7 @@ public class MainViewModel : BindableBase
             $"{msg}【{response.PageIndex + 1}/{response.PageCount}】进程{processes.Count}条({_receivedProcesses.Count}/{response.TotalSize})");
     }
 
-    private void ReadTcpData(UpdateProcess response)
+    private void ReadTcpData(UpdateProcessList response)
     {
         if (_processIdAndItems == null) return;
 
@@ -263,9 +263,9 @@ public class MainViewModel : BindableBase
 
             while (UdpHelper.IsRunning)
             {
-                var allUpdateProcesses = new List<UpdateActiveProcess>();
+                var allUpdateProcesses = new List<UpdateActiveProcessList>();
                 while (UdpHelper.TryGetResponse(out var response) &&
-                       response is UpdateActiveProcess updateActiveProcess)
+                       response is UpdateActiveProcessList updateActiveProcess)
                 {
                     allUpdateProcesses.Add(updateActiveProcess);
                 }
@@ -286,7 +286,7 @@ public class MainViewModel : BindableBase
         });
     }
 
-    private void ReceiveUdpData(UpdateActiveProcess response)
+    private void ReceiveUdpData(UpdateActiveProcessList response)
     {
         response.Processes?.ForEach(updateProcess =>
         {

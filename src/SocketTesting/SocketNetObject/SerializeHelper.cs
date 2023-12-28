@@ -1,6 +1,6 @@
 ﻿namespace SocketNetObject;
 
-public static partial class SerializeHelper
+public partial class SerializeHelper
 {
     private static readonly ConcurrentDictionary<string, List<PropertyInfo>> ObjectPropertyInfos = new();
 
@@ -285,14 +285,14 @@ public static partial class SerializeHelper
         return propertyInfos;
     }
 
-    public static NetObjectHeadAttribute GetNetObjectHead(this Type netObjectType)
+    public static NetHeadAttribute GetNetObjectHead(this Type netObjectType)
     {
-        var attribute = netObjectType.GetCustomAttribute<NetObjectHeadAttribute>();
+        var attribute = netObjectType.GetCustomAttribute<NetHeadAttribute>();
         return attribute ?? throw new Exception(
-            $"{netObjectType.Name} has not been marked with the attribute {nameof(NetObjectHeadAttribute)}");
+            $"{netObjectType.Name} has not been marked with the attribute {nameof(NetHeadAttribute)}");
     }
 
-    public static bool ReadHead(byte[] buffer, ref int readIndex, out NetObjectHeadInfo? netObjectHeadInfo)
+    public static bool ReadHead(byte[] buffer, ref int readIndex, out NetHeadInfo? netObjectHeadInfo)
     {
         netObjectHeadInfo = null;
         if (buffer.Length < (readIndex + PacketHeadLen))
@@ -300,7 +300,7 @@ public static partial class SerializeHelper
             return false;
         }
 
-        netObjectHeadInfo = new NetObjectHeadInfo();
+        netObjectHeadInfo = new NetHeadInfo();
 
         netObjectHeadInfo.BufferLen = BitConverter.ToInt32(buffer, readIndex);
         readIndex += sizeof(int);
@@ -317,7 +317,7 @@ public static partial class SerializeHelper
         return true;
     }
 
-    public static bool IsNetObject<T>(this NetObjectHeadInfo netObjectHeadInfo)
+    public static bool IsNetObject<T>(this NetHeadInfo netObjectHeadInfo)
     {
         var netObjectAttribute = GetNetObjectHead(typeof(T));
         return netObjectAttribute.Id == netObjectHeadInfo.ObjectId &&

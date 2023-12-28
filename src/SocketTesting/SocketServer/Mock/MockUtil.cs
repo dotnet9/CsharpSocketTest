@@ -1,4 +1,4 @@
-﻿using Process = SocketDto.Process;
+﻿using ProcessItem = SocketDto.ProcessItem;
 
 namespace SocketServer.Mock;
 
@@ -7,20 +7,20 @@ public static class MockUtil
     public const int UdpUpdateMilliseconds = 200;
     public const int UdpSendMilliseconds = 200;
     private static int _mockCount;
-    private static List<Process>? _mockProcesses;
-    private static List<ActiveProcess>? _mockUpdateProcesses;
+    private static List<ProcessItem>? _mockProcesses;
+    private static List<ActiveProcessItem>? _mockUpdateProcesses;
 
     public static ResponseBaseInfo MockBase(int taskId = default)
     {
         return new ResponseBaseInfo
         {
             TaskId = taskId,
-            OperatingSystemType = "Windows 11",
+            OS = "Windows 11",
             MemorySize = 48,
             ProcessorCount = 8,
-            TotalDiskSpace = 1024 + 256,
+            DiskSize = 1024 + 256,
             NetworkBandwidth = 1024,
-            IpAddress = "192.32.35.23",
+            Ips = "192.32.35.23",
             ServerName = "Windows server 2021",
             DataCenterLocation = "成都",
             IsRunning = (byte)(ProcessRunningStatus)Enum.Parse(typeof(ProcessRunningStatus),
@@ -29,13 +29,13 @@ public static class MockUtil
         };
     }
 
-    public static List<Process> MockProcesses(int totalCount, int pageSize, int pageIndex)
+    public static List<ProcessItem> MockProcesses(int totalCount, int pageSize, int pageIndex)
     {
         MockAllProcess(totalCount);
         return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 
-    public static List<Process> MockProcesses(int totalCount, int pageSize)
+    public static List<ProcessItem> MockProcesses(int totalCount, int pageSize)
     {
         MockAllProcess(totalCount);
         var pageCount = GetPageCount(totalCount, pageSize);
@@ -58,7 +58,7 @@ public static class MockUtil
         _mockProcesses = Enumerable.Range(0, _mockCount).Select(MockProcess).ToList();
         sw.Stop();
         Logger.Info($"模拟{_mockCount}条{sw.ElapsedMilliseconds}ms");
-        _mockUpdateProcesses = Enumerable.Range(0, _mockCount).Select(index => new ActiveProcess { PID = index + 1 })
+        _mockUpdateProcesses = Enumerable.Range(0, _mockCount).Select(index => new ActiveProcessItem { PID = index + 1 })
             .ToList();
         MockUpdateProcess(_mockCount);
     }
@@ -67,7 +67,7 @@ public static class MockUtil
     private static readonly short MockShort = (short)Random.Shared.Next(0, 1000);
     private static readonly uint Timestamp = TimestampHelper.GetCurrentTodayTimestamp();
 
-    private static Process MockProcess(int id)
+    private static ProcessItem MockProcess(int id)
     {
         return new Process
         {
@@ -91,7 +91,7 @@ public static class MockUtil
     }
 
 
-    public static List<ActiveProcess> MockUpdateProcess(int totalCount, int pageSize, int pageIndex)
+    public static List<ActiveProcessItem> MockUpdateProcess(int totalCount, int pageSize, int pageIndex)
     {
         MockAllProcess(totalCount);
         return _mockUpdateProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
@@ -137,7 +137,7 @@ public static class MockUtil
     {
         // sizeof(int)为Processes长度点位4个字节
         pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int)) /
-                   ActiveProcess.ObjectSize;
+                   ActiveProcessItem.ObjectSize;
         pageCount = GetPageCount(totalCount, pageSize);
     }
 

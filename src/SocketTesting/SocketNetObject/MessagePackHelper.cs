@@ -1,6 +1,6 @@
 ﻿namespace SocketNetObject;
 
-public static partial class SerializeHelper
+public partial class SerializeHelper
 {
     private static readonly MessagePackSerializerOptions Options =
         MessagePack.Resolvers.ContractlessStandardResolver

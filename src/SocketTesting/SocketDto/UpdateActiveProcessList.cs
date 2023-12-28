@@ -1,16 +1,11 @@
 ﻿namespace SocketDto;
 
 /// <summary>
-/// 响应请求进程信息
+/// 更新进程变化信息，序列化和反序列不能加压缩，部分双精度因为有效位数太长，可能导致UDP包过大而发送失败，所以UDP包不要加压缩
 /// </summary>
-[NetObjectHead(4, 1)]
-public class ResponseProcess : INetObject
+[NetHead(6, 1)]
+public class UpdateActiveProcessList : INetObject
 {
-    /// <summary>
-    /// 任务Id
-    /// </summary>
-    public int TaskId { get; set; }
-
     /// <summary>
     /// 总数据大小
     /// </summary>
@@ -34,5 +29,5 @@ public class ResponseProcess : INetObject
     /// <summary>
     /// 进程列表
     /// </summary>
-    public List<Process>? Processes { get; set; }
+    public List<ActiveProcessItem>? Processes { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿using Process = SocketDto.Process;
+﻿using ProcessItem = SocketDto.ProcessItem;
 
 namespace SocketClient.Models;
 
@@ -53,7 +53,7 @@ public class ProcessItem : BindableBase
     {
     }
 
-    public ProcessItem(Process process)
+    public ProcessItem(ProcessItem process)
     {
         Update(process);
     }
@@ -285,7 +285,7 @@ public class ProcessItem : BindableBase
         }
     }
 
-    public void Update(Process process)
+    public void Update(ProcessItem process)
     {
         PID = process.PID;
 
@@ -318,7 +318,7 @@ public class ProcessItem : BindableBase
         ViewUpdateTime = DateTime.Now;
     }
 
-    public void Update(ActiveProcess process)
+    public void Update(ActiveProcessItem process)
     {
         PID = process.PID;
 

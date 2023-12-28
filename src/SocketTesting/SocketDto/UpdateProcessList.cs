@@ -3,11 +3,11 @@
 /// <summary>
 /// 更新进程信息
 /// </summary>
-[NetObjectHead(5, 1)]
-public class UpdateProcess : INetObject
+[NetHead(5, 1)]
+public class UpdateProcessList : INetObject
 {
     /// <summary>
     /// 进程列表
     /// </summary>
-    public List<Process>? Processes { get; set; }
+    public List<ProcessItem>? Processes { get; set; }
 }

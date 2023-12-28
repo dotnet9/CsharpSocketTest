@@ -221,7 +221,7 @@ public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
         {
             if (!IsRunning) break;
 
-            var response = new UpdateActiveProcess
+            var response = new UpdateActiveProcessList
             {
                 Processes = MockUtil.MockUpdateProcess(tcpHelper.MockCount, pageSize, pageIndex)
             };

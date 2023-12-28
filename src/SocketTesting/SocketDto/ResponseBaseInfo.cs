@@ -3,7 +3,7 @@
 /// <summary>
 /// 响应基本信息
 /// </summary>
-[NetObjectHead(2, 1)]
+[NetHead(2, 1)]
 public class ResponseBaseInfo : INetObject
 {
     /// <summary>
@@ -12,9 +12,9 @@ public class ResponseBaseInfo : INetObject
     public int TaskId { get; set; }
 
     /// <summary>
-    /// 服务器操作系统类型
+    /// 操作系统名称
     /// </summary>
-    public string? OperatingSystemType { get; set; }
+    public string? OS { get; set; }
 
     /// <summary>
     /// 系统内存大小（单位GB）
@@ -29,7 +29,7 @@ public class ResponseBaseInfo : INetObject
     /// <summary>
     /// 硬盘总容量（单位GB）
     /// </summary>
-    public short TotalDiskSpace { get; set; }
+    public short DiskSize { get; set; }
 
     /// <summary>
     /// 网络带宽（单位Mbps）
@@ -37,24 +37,14 @@ public class ResponseBaseInfo : INetObject
     public short NetworkBandwidth { get; set; }
 
     /// <summary>
-    /// 服务器IP地址
+    /// 服务器IP地址，多个地址以“，”分隔
     /// </summary>
-    public string? IpAddress { get; set; }
+    public string? Ips { get; set; }
 
     /// <summary>
-    /// 服务器名称
+    /// 通信对象时间戳起始年份，比如：23，表示2023年1月1号开始计算时间戳，后面的时间戳都以这个字段计算为准，精确到0.1s，即100ms，主要用于节约网络对象传输大小
     /// </summary>
-    public string? ServerName { get; set; }
-
-    /// <summary>
-    /// 数据中心位置
-    /// </summary>
-    public string? DataCenterLocation { get; set; }
-
-    /// <summary>
-    /// 运行状态
-    /// </summary>
-    public byte IsRunning { get; set; }
+    public byte TimestampStartYear { get; set; }
 
     /// <summary>
     /// 最后更新时间

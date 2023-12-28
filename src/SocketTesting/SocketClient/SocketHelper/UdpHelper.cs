@@ -6,7 +6,7 @@ public class UdpHelper : BindableBase, ISocketBase
     private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
     private readonly BlockingCollection<byte[]> _receivedBuffers = new(new ConcurrentQueue<byte[]>());
 
-    private readonly BlockingCollection<UpdateActiveProcess> _receivedResponse = new();
+    private readonly BlockingCollection<UpdateActiveProcessList> _receivedResponse = new();
 
     #region 公开属性
 
@@ -219,7 +219,7 @@ public class UdpHelper : BindableBase, ISocketBase
                         || buffer.Length != netObjectInfo!.BufferLen)
                         continue;
 
-                    var updateActiveProcess = buffer.DeserializeByNative<UpdateActiveProcess>();
+                    var updateActiveProcess = buffer.DeserializeByNative<UpdateActiveProcessList>();
 
                     _receivedResponse.Add(updateActiveProcess);
                 }

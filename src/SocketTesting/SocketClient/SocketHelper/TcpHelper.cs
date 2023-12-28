@@ -226,7 +226,7 @@ public class TcpHelper : BindableBase, ISocketBase
         });
     }
 
-    private void ReceiveResponse(byte[] buffer, NetObjectHeadInfo netObjectHeadInfo)
+    private void ReceiveResponse(byte[] buffer, NetHeadInfo netObjectHeadInfo)
     {
         INetObject command;
 
@@ -234,21 +234,21 @@ public class TcpHelper : BindableBase, ISocketBase
         {
             command = buffer.Deserialize<ResponseBaseInfo>();
         }
-        else if (netObjectHeadInfo.IsNetObject<ResponseProcess>())
+        else if (netObjectHeadInfo.IsNetObject<ResponseProcessList>())
         {
-            command = buffer.Deserialize<ResponseProcess>();
+            command = buffer.Deserialize<ResponseProcessList>();
         }
-        else if (netObjectHeadInfo.IsNetObject<UpdateProcess>())
+        else if (netObjectHeadInfo.IsNetObject<UpdateProcessList>())
         {
-            command = buffer.Deserialize<UpdateProcess>();
+            command = buffer.Deserialize<UpdateProcessList>();
         }
-        else if (netObjectHeadInfo.IsNetObject<ChangeProcess>())
+        else if (netObjectHeadInfo.IsNetObject<ChangeProcessList>())
         {
-            command = buffer.Deserialize<ChangeProcess>();
+            command = buffer.Deserialize<ChangeProcessList>();
         }
-        else if (netObjectHeadInfo.IsNetObject<UpdateActiveProcess>())
+        else if (netObjectHeadInfo.IsNetObject<UpdateActiveProcessList>())
         {
-            command = buffer.Deserialize<UpdateActiveProcess>();
+            command = buffer.Deserialize<UpdateActiveProcessList>();
         }
         else if (netObjectHeadInfo.IsNetObject<Heartbeat>())
         {

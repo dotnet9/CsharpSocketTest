@@ -4,7 +4,7 @@
 /// 数据包定义
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class NetObjectHeadAttribute(byte id, byte version) : Attribute
+public class NetHeadAttribute(byte id, byte version) : Attribute
 {
     /// <summary>
     /// 对象Id
