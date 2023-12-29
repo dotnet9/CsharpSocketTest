@@ -49,6 +49,11 @@ public partial class SerializeHelper
         var properties = GetProperties(data!.GetType());
         foreach (var property in properties)
         {
+            if (property.GetCustomAttribute(typeof(NetIgnoreMemberAttribute)) is NetIgnoreMemberAttribute _)
+            {
+                continue;
+            }
+
             SerializeProperty(writer, data, property);
         }
     }
@@ -98,9 +103,17 @@ public partial class SerializeHelper
         {
             writer.Write(value == null ? default : short.Parse(value.ToString()));
         }
+        else if (valueType == typeof(ushort))
+        {
+            writer.Write(value == null ? default : ushort.Parse(value.ToString()));
+        }
         else if (valueType == typeof(int))
         {
             writer.Write(value == null ? default : int.Parse(value.ToString()));
+        }
+        else if (valueType == typeof(uint))
+        {
+            writer.Write(value == null ? default : uint.Parse(value.ToString()));
         }
         else if (valueType == typeof(long))
         {
@@ -117,6 +130,10 @@ public partial class SerializeHelper
         else if (valueType == typeof(string))
         {
             writer.Write(value == null ? string.Empty : value.ToString());
+        }
+        else
+        {
+            throw new Exception($"Unsupported data type: {valueType.Name}");
         }
     }
 
@@ -170,6 +187,11 @@ public partial class SerializeHelper
         var properties = GetProperties(data!.GetType());
         foreach (var property in properties)
         {
+            if (property.GetCustomAttribute(typeof(NetIgnoreMemberAttribute)) is NetIgnoreMemberAttribute _)
+            {
+                continue;
+            }
+
             object value = DeserializeValue(reader, property.PropertyType);
             property.SetValue(data, value);
         }
@@ -211,9 +233,19 @@ public partial class SerializeHelper
             return reader.ReadInt16();
         }
 
+        if (propertyType == typeof(ushort))
+        {
+            return reader.ReadUInt16();
+        }
+
         if (propertyType == typeof(int))
         {
             return reader.ReadInt32();
+        }
+
+        if (propertyType == typeof(uint))
+        {
+            return reader.ReadUInt32();
         }
 
         if (propertyType == typeof(long))

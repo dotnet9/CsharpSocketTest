@@ -3,8 +3,7 @@
 public partial class SerializeHelper
 {
     private static readonly MessagePackSerializerOptions Options =
-        MessagePack.Resolvers.ContractlessStandardResolver
-            .Options.WithCompression(MessagePackCompression.Lz4BlockArray);
+        MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
 
     public static byte[] Serialize<T>(this T data, long systemId) where T : INetObject
     {
