@@ -54,10 +54,12 @@ public partial class LogView : UserControl
                     {
                         Console.WriteLine($"日志读取失败，糟了：{ex.Message}");
                     }
+
+                    Thread.Sleep(TimeSpan.FromMilliseconds(10));
                 }
                 else
                 {
-                    Thread.Sleep(TimeSpan.FromMilliseconds(30));
+                    Thread.Sleep(TimeSpan.FromMilliseconds(100));
                 }
             }
         });

@@ -38,6 +38,11 @@ public class UpdateActiveProcessList : INetObject
 public class ActiveProcessItem
 {
     /// <summary>
+    /// 对象大小，Data为8字节，序列化时需要4字节表示byte[]长度，所有总大小为4+8+4=16
+    /// </summary>
+    public const int ObjectSize = 16;
+
+    /// <summary>
     /// 见ActiveProcessData定义
     /// </summary>
     private byte[]? _data;
@@ -83,7 +88,7 @@ public record ActiveProcessItemData
     /// 占10bit, CPU（所有内核的总处理利用率），最后一位表示小数位，比如253表示25.3%
     /// </summary>
     [NetFieldOffset(0, 10)]
-    public short Cpu { get; set; }
+    public short CPU { get; set; }
 
     /// <summary>
     /// 占10bit, 内存（进程占用的物理内存），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算
@@ -107,13 +112,13 @@ public record ActiveProcessItemData
     /// 占10bit, GPU(所有GPU引擎的最高利用率)，最后一位表示小数位，比如253表示25.3
     /// </summary>
     [NetFieldOffset(40, 10)]
-    public short Gpu { get; set; }
+    public short GPU { get; set; }
 
     /// <summary>
     /// 占1bit，GPU引擎，0：无，1：GPU 0 - 3D
     /// </summary>
     [NetFieldOffset(50, 1)]
-    public byte GpuEngine { get; set; }
+    public byte GPUEngine { get; set; }
 
     /// <summary>
     /// 占3bit，电源使用情况（CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高

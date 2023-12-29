@@ -4,6 +4,7 @@ namespace SocketServer.Mock;
 
 public static class MockUtil
 {
+    public const byte TimestampStartYear = 23;
     public const int UdpUpdateMilliseconds = 200;
     public const int UdpSendMilliseconds = 200;
     private static int _mockCount;
@@ -15,17 +16,14 @@ public static class MockUtil
         return new ResponseBaseInfo
         {
             TaskId = taskId,
-            OS = "Windows 11",
-            MemorySize = 48,
-            ProcessorCount = 8,
-            DiskSize = 1024 + 256,
+            OS = "Windows 11 专业版",
+            MemorySize = 64,
+            ProcessorCount = 12,
+            DiskSize = 2048,
             NetworkBandwidth = 1024,
             Ips = "192.32.35.23",
-            ServerName = "Windows server 2021",
-            DataCenterLocation = "成都",
-            IsRunning = (byte)(ProcessRunningStatus)Enum.Parse(typeof(ProcessRunningStatus),
-                Random.Shared.Next(0, Enum.GetNames(typeof(ProcessRunningStatus)).Length).ToString()),
-            LastUpdateTime = TimestampHelper.GetCurrentTodayTimestamp()
+            TimestampStartYear = 23,
+            LastUpdateTime = TimestampHelper.GetCurrentTimestamp(23)
         };
     }
 
@@ -58,33 +56,51 @@ public static class MockUtil
         _mockProcesses = Enumerable.Range(0, _mockCount).Select(MockProcess).ToList();
         sw.Stop();
         Logger.Info($"模拟{_mockCount}条{sw.ElapsedMilliseconds}ms");
-        _mockUpdateProcesses = Enumerable.Range(0, _mockCount).Select(index => new ActiveProcessItem { PID = index + 1 })
+        _mockUpdateProcesses = Enumerable.Range(0, _mockCount)
+            .Select(index => new ActiveProcessItem
+            {
+                ProcessData = new ActiveProcessItemData()
+                {
+                    CPU = MockShort,
+                    Memory = MockShort,
+                    Disk = MockShort,
+                    Network = MockShort,
+                    GPU = MockShort,
+                    GPUEngine = (byte)GpuEngine.Gpu03D,
+                    PowerUsage = (byte)ProcessPowerUsage.Low,
+                    PowerUsageTrend = (byte)ProcessPowerUsage.Low
+                },
+                UpdateTime = Timestamp
+            })
             .ToList();
         MockUpdateProcess(_mockCount);
     }
 
     private static readonly string MockStr = Lorem.Words(1, 3);
     private static readonly short MockShort = (short)Random.Shared.Next(0, 1000);
-    private static readonly uint Timestamp = TimestampHelper.GetCurrentTodayTimestamp();
+    private static readonly uint Timestamp = TimestampStartYear.GetCurrentTimestamp();
 
     private static ProcessItem MockProcess(int id)
     {
-        return new Process
+        return new ProcessItem
         {
             PID = id + 1,
             Name = MockStr,
-            Type = 0,
-            Status = 0,
             Publisher = MockStr,
             CommandLine = MockStr,
-            CPU = MockShort,
-            Memory = MockShort,
-            Disk = MockShort,
-            Network = MockShort,
-            GPU = MockShort,
-            GPUEngine = MockStr,
-            PowerUsage = 0,
-            PowerUsageTrend = 0,
+            ProcessData = new ProcessItemData()
+            {
+                CPU = MockShort,
+                Memory = MockShort,
+                Disk = MockShort,
+                Network = MockShort,
+                GPU = MockShort,
+                GPUEngine = (byte)GpuEngine.Gpu03D,
+                PowerUsage = (byte)ProcessPowerUsage.Low,
+                PowerUsageTrend = (byte)ProcessPowerUsage.Low,
+                Type = (byte)ProcessType.Application,
+                Status = (byte)ProcessStatus.Pending
+            },
             LastUpdateTime = Timestamp,
             UpdateTime = Timestamp
         };
@@ -110,19 +126,22 @@ public static class MockUtil
             (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length);
         var powerUsageTrend =
             (byte)Random.Shared.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length);
-        var updateTime = TimestampHelper.GetCurrentTodayTimestamp();
+        var updateTime = TimestampStartYear.GetCurrentTimestamp();
 
         _mockUpdateProcesses!.ForEach(process =>
         {
-            process.CPU = cpu;
-            process.Memory = memory;
-            process.Disk = disk;
-            process.Network = network;
-            process.GPU = gpu;
-            process.PowerUsage =
-                powerUsage;
-            process.PowerUsageTrend =
-                powerUsageTrend;
+            process.ProcessData = new ActiveProcessItemData()
+            {
+                CPU = cpu,
+                Memory = memory,
+                Disk = disk,
+                Network = network,
+                GPU = gpu,
+                PowerUsage =
+                    powerUsage,
+                PowerUsageTrend =
+                    powerUsageTrend
+            };
             process.UpdateTime = updateTime;
         });
     }
@@ -135,8 +154,8 @@ public static class MockUtil
     public static void MockUpdateActiveProcessPageCount(int totalCount, int packetSize, out int pageSize,
         out int pageCount)
     {
-        // sizeof(int)为Processes长度点位4个字节
-        pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int)) /
+        // sizeof(int)*5为4个数据包基本信息int字段+Processes长度int4个字节
+        pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 5) /
                    ActiveProcessItem.ObjectSize;
         pageCount = GetPageCount(totalCount, pageSize);
     }

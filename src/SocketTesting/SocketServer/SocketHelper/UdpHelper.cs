@@ -173,21 +173,15 @@ public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
 
     #region 模拟数据更新
 
-    private System.Timers.Timer _updateDataTimer;
-    private System.Timers.Timer _sendDataTimer;
-    public static int SendTimes { get; private set; }
+    private Timer _updateDataTimer;
+    private Timer _sendDataTimer;
 
     private void MockSendData()
     {
-        _updateDataTimer = new System.Timers.Timer();
+        _updateDataTimer = new Timer();
         _updateDataTimer.Interval = 500;
         _updateDataTimer.Elapsed += MockUpdateData;
         _updateDataTimer.Start();
-
-        _sendDataTimer = new System.Timers.Timer();
-        _sendDataTimer.Interval = 500;
-        _sendDataTimer.Elapsed += MockSendData;
-        _sendDataTimer.Start();
 
         _sendDataTimer = new Timer();
         _sendDataTimer.Interval = MockUtil.UdpSendMilliseconds;
@@ -223,10 +217,15 @@ public class UdpHelper(TcpHelper tcpHelper) : BindableBase, ISocketBase
 
             var response = new UpdateActiveProcessList
             {
+                TotalSize = tcpHelper.MockCount,
+                PageSize = pageSize,
+                PageCount = pageCount,
+                PageIndex = pageIndex,
                 Processes = MockUtil.MockUpdateProcess(tcpHelper.MockCount, pageSize, pageIndex)
             };
 
             var buffer = response.SerializeByNative(tcpHelper.SystemId);
+            tcpHelper.UDPPacketsSentCount++;
             size += _client!.Send(buffer, buffer.Length, _udpIpEndPoint);
         }
 

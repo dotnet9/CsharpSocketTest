@@ -7,6 +7,7 @@ public class UdpHelper : BindableBase, ISocketBase
     private readonly BlockingCollection<byte[]> _receivedBuffers = new(new ConcurrentQueue<byte[]>());
 
     private readonly BlockingCollection<UpdateActiveProcessList> _receivedResponse = new();
+    private int _receivedPacketsCount;
 
     #region 公开属性
 
@@ -82,6 +83,25 @@ public class UdpHelper : BindableBase, ISocketBase
         set
         {
             if (value != _receiveTime) SetProperty(ref _receiveTime, value);
+        }
+    }
+
+    /// <summary>
+    /// 已发送UDP包个数
+    /// </summary>
+    public static int UDPPacketsSentCount { get; set; }
+
+    private string? _receiveCount;
+
+    /// <summary>
+    ///     UDP接收情况统计
+    /// </summary>
+    public string? ReceiveCount
+    {
+        get => _receiveCount;
+        set
+        {
+            if (value != _receiveCount) SetProperty(ref _receiveCount, value);
         }
     }
 
@@ -182,6 +202,7 @@ public class UdpHelper : BindableBase, ISocketBase
                     }
 
                     var data = _client.Receive(ref _remoteEp);
+                    CountReceivedPackets();
                     _receivedBuffers.Add(data);
 
                     ReceiveTime = DateTime.Now;
@@ -197,6 +218,14 @@ public class UdpHelper : BindableBase, ISocketBase
                     Logger.Error($"接收Udp数据异常：{ex.Message}");
                 }
         });
+    }
+
+    private void CountReceivedPackets()
+    {
+        _receivedPacketsCount++;
+        var lostPackets = UDPPacketsSentCount - _receivedPacketsCount;
+        var lostPercents = lostPackets * 1.0 / UDPPacketsSentCount;
+        ReceiveCount = $"{_receivedPacketsCount}/{UDPPacketsSentCount}（丢包率{lostPercents:P}）";
     }
 
     private void AnalyzeData()

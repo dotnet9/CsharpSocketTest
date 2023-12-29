@@ -132,8 +132,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding CPUUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding CPUUsage}" />
+                                    Foreground="{Binding CPUValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding CPU}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -141,8 +141,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding MemoryUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding MemoryUsage}" />
+                                    Foreground="{Binding MemoryValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Memory}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -150,8 +150,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding DiskUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding DiskUsage}" />
+                                    Foreground="{Binding DiskValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Disk}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -159,8 +159,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding NetworkUsageValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding NetworkUsage}" />
+                                    Foreground="{Binding NetworkValue, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Network}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -169,7 +169,7 @@
                             <DataTemplate>
                                 <TextBlock
                                     Foreground="{Binding GPUValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding Gpu}" />
+                                    Text="{Binding GPU}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -181,8 +181,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding PowerUsageValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                    Text="{Binding PowerUsage}" />
+                                    Foreground="{Binding PowerValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding Power}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -203,14 +203,6 @@
                         Width="170"
                         DisplayMemberBinding="{Binding UpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
                         Header="更新时间" />
-                    <GridViewColumn
-                        Width="170"
-                        DisplayMemberBinding="{Binding LastViewUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
-                        Header="上次视图更新时间" />
-                    <GridViewColumn
-                        Width="170"
-                        DisplayMemberBinding="{Binding ViewUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
-                        Header="视图更新时间" />
                 </GridView>
             </ListView.View>
         </ListView>
@@ -252,6 +244,7 @@
                 <Run
                     Foreground="{markup:If {Binding UdpHelper.IsRunning}, {x:Static Brushes.Green}, {x:Static Brushes.Red}}"
                     Text="{markup:If {Binding UdpHelper.IsRunning}, 已订阅, 未订阅}" />
+                <Run Text="{Binding UdpHelper.ReceiveCount,Mode=OneWay}" />
                 <Run Text=" 时间 " />
                 <Run Foreground="Green" Text="{Binding UdpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
             </TextBlock>

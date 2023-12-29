@@ -254,6 +254,7 @@ public class TcpHelper : BindableBase, ISocketBase
         {
             command = buffer.Deserialize<Heartbeat>();
             ResponseHeartbeatTime = ReceiveTime;
+            UdpHelper.UDPPacketsSentCount = (command as Heartbeat)!.UDPPacketsSentCount;
         }
         else
         {

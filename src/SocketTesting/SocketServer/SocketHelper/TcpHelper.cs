@@ -92,11 +92,19 @@ public class TcpHelper : BindableBase, ISocketBase
 
     private DateTime _heartbeatTime;
 
+    /// <summary>
+    /// 心跳时间
+    /// </summary>
     public DateTime HeartbeatTime
     {
         get => _heartbeatTime;
         set => SetProperty(ref _heartbeatTime, value);
     }
+
+    /// <summary>
+    /// 已发送UDP包个数
+    /// </summary>
+    public int UDPPacketsSentCount { get; set; } = 0;
 
     private int _mockCount = 1000000;
 
@@ -209,7 +217,7 @@ public class TcpHelper : BindableBase, ISocketBase
         client.Send(buffer);
 
         if (command is not Heartbeat)
-            Logger.Info($"发送命令{command.GetType()}，{buffer.Length},{sw.ElapsedMilliseconds}ms");
+            Logger.Info($"发送命令{command.GetType()}，{buffer.Length}字节,{sw.ElapsedMilliseconds}ms");
     }
 
     public bool TryGetResponse(out INetObject? response)
@@ -389,7 +397,7 @@ public class TcpHelper : BindableBase, ISocketBase
 
     private void ProcessingRequest(Socket client)
     {
-        SendCommand(client, new Heartbeat());
+        SendCommand(client, new Heartbeat { UDPPacketsSentCount = UDPPacketsSentCount });
         HeartbeatTime = DateTime.Now;
     }
 
@@ -397,7 +405,7 @@ public class TcpHelper : BindableBase, ISocketBase
 
     #region 更新数据
 
-    private System.Timers.Timer _sendDataTimer;
+    private System.Timers.Timer? _sendDataTimer;
     private bool _isUpdateAll;
 
     public void UpdateAllData(bool isUpdateAll)

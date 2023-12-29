@@ -7,12 +7,12 @@ public class UpdateActiveProcessListUnitTest
     {
         var data = new ActiveProcessItemData
         {
-            Cpu = 112,
+            CPU = 112,
             Memory = 325,
             Disk = 23,
             Network = 593,
-            Gpu = 253,
-            GpuEngine = (byte)GpuEngine.None,
+            GPU = 253,
+            GPUEngine = (byte)GpuEngine.None,
             PowerUsage = (byte)ProcessPowerUsage.Low,
             PowerUsageTrend = (byte)ProcessPowerUsage.Low
         };
@@ -22,7 +22,7 @@ public class UpdateActiveProcessListUnitTest
 
         // ActiveProcessItemData总共57位，序列化后应该占8个字节
         Assert.Equal(8, buffer.Length);
-        Assert.Equal(data.Cpu, desData.Cpu);
+        Assert.Equal(data.CPU, desData.CPU);
     }
 
 
@@ -35,24 +35,22 @@ public class UpdateActiveProcessListUnitTest
             PageSize = 3,
             PageCount = 67,
             PageIndex = 1,
-            Processes = new List<ActiveProcessItem>()
-        };
-        var processItem = new ActiveProcessItem
-        {
-            ProcessData = new ActiveProcessItemData()
+            Processes = Enumerable.Range(0, 4).Select(index => new ActiveProcessItem
             {
-                Cpu = 112,
-                Memory = 325,
-                Disk = 23,
-                Network = 593,
-                Gpu = 253,
-                GpuEngine = (byte)GpuEngine.None,
-                PowerUsage = (byte)ProcessPowerUsage.Low,
-                PowerUsageTrend = (byte)ProcessPowerUsage.Low,
-            },
-            UpdateTime = 53
+                ProcessData = new ActiveProcessItemData()
+                {
+                    CPU = 112,
+                    Memory = 325,
+                    Disk = 23,
+                    Network = 593,
+                    GPU = 253,
+                    GPUEngine = (byte)GpuEngine.None,
+                    PowerUsage = (byte)ProcessPowerUsage.Low,
+                    PowerUsageTrend = (byte)ProcessPowerUsage.Low,
+                },
+                UpdateTime = 53
+            }).ToList()
         };
-        netObject.Processes.Add(processItem);
 
         var buffer = netObject.SerializeByNative(32);
         var desObject = buffer.DeserializeByNative<UpdateActiveProcessList>();
@@ -62,6 +60,6 @@ public class UpdateActiveProcessListUnitTest
         Assert.NotNull(desObject.Processes[0].ProcessData);
         // ProcessItemData总共60位，序列化后应该占8个字节
         Assert.Equal(8, desObject.Processes[0].Data?.Length);
-        Assert.Equal(processItem.ProcessData.Cpu, desObject.Processes[0].ProcessData?.Cpu);
+        Assert.Equal(netObject.Processes[0].ProcessData!.CPU, desObject.Processes[0].ProcessData?.CPU);
     }
 }

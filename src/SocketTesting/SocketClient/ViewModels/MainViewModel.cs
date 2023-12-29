@@ -4,19 +4,20 @@ namespace SocketClient.ViewModels;
 
 public class MainViewModel : BindableBase
 {
-    private readonly List<ProcessItem> _receivedProcesses = new();
+    private readonly List<ProcessItemModel> _receivedProcesses = new();
 
     private string? _baseInfo;
+    private byte _timestampStartYear;
 
     private IAsyncCommand? _connectTcpCommand;
-    private Dictionary<int, ProcessItem>? _processIdAndItems;
+    private Dictionary<int, ProcessItemModel>? _processIdAndItems;
 
     private IAsyncCommand? _refreshCommand;
     private string? _searchKey;
 
     private IAsyncCommand? _subscribeUdpMulticastCommand;
     public Window? Owner { get; set; }
-    public RangObservableCollection<ProcessItem> DisplayProcesses { get; } = new();
+    public RangObservableCollection<ProcessItemModel> DisplayProcesses { get; } = new();
     public TcpHelper TcpHelper { get; set; } = new();
     public UdpHelper UdpHelper { get; set; } = new();
 
@@ -101,7 +102,7 @@ public class MainViewModel : BindableBase
         return Task.CompletedTask;
     }
 
-    private IEnumerable<ProcessItem> FilterData(IEnumerable<ProcessItem> processes)
+    private IEnumerable<ProcessItemModel> FilterData(IEnumerable<ProcessItemModel> processes)
     {
         return string.IsNullOrWhiteSpace(SearchKey)
             ? processes
@@ -119,7 +120,7 @@ public class MainViewModel : BindableBase
     private void SendHeartbeat()
     {
         _sendDataTimer = new System.Timers.Timer();
-        _sendDataTimer.Interval = 5000;
+        _sendDataTimer.Interval = 200;
         _sendDataTimer.Elapsed += MockSendData;
         _sendDataTimer.Start();
     }
@@ -203,9 +204,10 @@ public class MainViewModel : BindableBase
 
     private void ReadTcpData(ResponseBaseInfo response)
     {
+        _timestampStartYear = response.TimestampStartYear;
         var oldBaseInfo = BaseInfo;
         BaseInfo =
-            $"更新时间【{response.LastUpdateTime.TodayToDateTime():yyyy:MM:dd HH:mm:ss fff}】：数据中心【{response.DataCenterLocation}】-操作系统【{response.OS}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.DiskSize}GB】-带宽【{response.NetworkBandwidth}Mbps】";
+            $"更新时间【{response.LastUpdateTime.ToDateTime(response.TimestampStartYear):yyyy:MM:dd HH:mm:ss fff}】：操作系统【{response.OS}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.DiskSize}GB】-带宽【{response.NetworkBandwidth}Mbps】";
 
         Logger.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
         Logger.Info($"【旧】{oldBaseInfo}");
@@ -219,7 +221,7 @@ public class MainViewModel : BindableBase
 
     private void ReadTcpData(ResponseProcessList response)
     {
-        var processes = response.Processes?.ConvertAll(process => new ProcessItem(process));
+        var processes = response.Processes?.ConvertAll(process => new ProcessItemModel(process, _timestampStartYear));
         if (!(processes?.Count > 0)) return;
 
         _receivedProcesses.AddRange(processes);
@@ -240,7 +242,7 @@ public class MainViewModel : BindableBase
         response.Processes?.ForEach(updateProcess =>
         {
             if (_processIdAndItems.TryGetValue(updateProcess.PID, out var point))
-                point.Update(updateProcess);
+                point.Update(updateProcess, _timestampStartYear);
             else
                 throw new Exception($"收到更新数据包，遇到本地缓存不存在的进程：{updateProcess.Name}");
         });
@@ -288,13 +290,21 @@ public class MainViewModel : BindableBase
 
     private void ReceiveUdpData(UpdateActiveProcessList response)
     {
-        response.Processes?.ForEach(updateProcess =>
+        var startIndex = response.PageIndex * response.PageSize;
+        for (var i = 0; i < response.Processes!.Count; i++)
         {
-            if (_processIdAndItems != null && _processIdAndItems.TryGetValue(updateProcess.PID, out var point))
-                point.Update(updateProcess);
+            if (_receivedProcesses.Count > startIndex)
+            {
+                _receivedProcesses[startIndex].Update(response.Processes[i], _timestampStartYear);
+            }
             else
-                Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程：{updateProcess.PID}");
-        });
+            {
+                Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
+            }
+
+            startIndex++;
+        }
+
         Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
     }
 
