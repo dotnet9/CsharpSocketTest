@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace SocketClient.Converters
 {
-	public class UsageToBackgroundConverter : IValueConverter
+	public class UsageToFormatConverter : IValueConverter
 	{
 		public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
@@ -13,14 +13,8 @@ namespace SocketClient.Converters
 				return Brushes.Green;
 			}
 
-			var dValue = bValue * 1.0 / 10;
-			return dValue switch
-			{
-				< 5 => Brushes.LightGreen,
-				< 10 => Brushes.Green,
-				< 20 => Brushes.DarkOrange,
-				_ => Brushes.Red
-			};
+			var dValue = bValue * 1.0 / 1000;
+			return dValue.ToString("P1");
 		}
 
 		public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

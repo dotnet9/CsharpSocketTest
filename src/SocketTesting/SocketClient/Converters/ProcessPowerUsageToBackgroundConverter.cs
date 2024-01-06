@@ -14,7 +14,7 @@ namespace SocketClient.Converters
             }
 
             var powerUsageType =
-                (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value!.ToString()!);
+                (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString()!);
             return powerUsageType switch
             {
                 ProcessPowerUsage.VeryLow or ProcessPowerUsage.Low => Brushes.LightGreen,

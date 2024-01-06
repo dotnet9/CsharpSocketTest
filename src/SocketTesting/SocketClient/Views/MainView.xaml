@@ -11,7 +11,7 @@
     xmlns:prism="http://prismlibrary.com/"
     xmlns:viewmodel="clr-namespace:SocketClient.ViewModels"
     Title="Socket Client"
-    Width="2250"
+    Width="1800"
     Height="1000"
     d:DataContext="{d:DesignInstance viewmodel:MainViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
@@ -19,7 +19,9 @@
     mc:Ignorable="d">
     <Window.Resources>
         <converters:ProcessPowerUsageToBackgroundConverter x:Key="ProcessPowerUsageToBackgroundConverter" />
+        <converters:ProcessPowerUsageToFormatConverter x:Key="ProcessPowerUsageToFormatConverter" />
         <converters:UsageToBackgroundConverter x:Key="UsageToBackgroundConverter" />
+        <converters:UsageToFormatConverter x:Key="UsageToFormatConverter" />
         <Style TargetType="{x:Type TextBlock}">
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -105,11 +107,11 @@
             <ListView.View>
                 <GridView>
                     <GridViewColumn
-                        Width="80"
+                        Width="50"
                         DisplayMemberBinding="{Binding PID, Mode=OneWay}"
                         Header="PId" />
                     <GridViewColumn
-                        Width="160"
+                        Width="120"
                         DisplayMemberBinding="{Binding Name, Mode=OneWay}"
                         Header="进程名称" />
                     <GridViewColumn
@@ -121,19 +123,19 @@
                         DisplayMemberBinding="{Binding Status, Mode=OneWay}"
                         Header="进程状态" />
                     <GridViewColumn
-                        Width="160"
+                        Width="120"
                         DisplayMemberBinding="{Binding Publisher, Mode=OneWay}"
                         Header="发布者" />
                     <GridViewColumn
-                        Width="160"
+                        Width="120"
                         DisplayMemberBinding="{Binding CommandLine, Mode=OneWay}"
                         Header="命令行" />
                     <GridViewColumn Width="80" Header="CPU使用率">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding CPUValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding CPU}" />
+                                    Foreground="{Binding CPU, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding CPU, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -141,8 +143,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding MemoryValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding Memory}" />
+                                    Foreground="{Binding Memory, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Memory, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -150,8 +152,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding DiskValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding Disk}" />
+                                    Foreground="{Binding Disk, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Disk, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -159,8 +161,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding NetworkValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding Network}" />
+                                    Foreground="{Binding Network, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Network, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -168,21 +170,21 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding GPUValue, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding GPU}" />
+                                    Foreground="{Binding GPU, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding GPU, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn
-                        Width="160"
+                        Width="120"
                         DisplayMemberBinding="{Binding GPUEngine, Mode=OneWay}"
                         Header="GPU引擎" />
                     <GridViewColumn Header="电源使用情况">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding PowerValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                    Text="{Binding Power}" />
+                                    Foreground="{Binding Power, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding Power, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -190,8 +192,8 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding PowerUsageTrendValue, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                    Text="{Binding PowerUsageTrend}" />
+                                    Foreground="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

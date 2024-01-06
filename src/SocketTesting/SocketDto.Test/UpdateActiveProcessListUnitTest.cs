@@ -7,11 +7,11 @@ public class UpdateActiveProcessListUnitTest
     {
         var data = new ActiveProcessItemData
         {
-            CPU = 112,
-            Memory = 325,
-            Disk = 23,
-            Network = 593,
-            GPU = 253,
+            CPU = 689,
+            Memory = 489,
+            Disk = 256,
+            Network = 782,
+            GPU = 493,
             GPUEngine = (byte)GpuEngine.None,
             PowerUsage = (byte)ProcessPowerUsage.Low,
             PowerUsageTrend = (byte)ProcessPowerUsage.Low
@@ -38,13 +38,13 @@ public class UpdateActiveProcessListUnitTest
             Processes = Enumerable.Range(0, 4).Select(index => new ActiveProcessItem
             {
                 ProcessData = new ActiveProcessItemData()
-                {
-                    CPU = 112,
-                    Memory = 325,
-                    Disk = 23,
-                    Network = 593,
-                    GPU = 253,
-                    GPUEngine = (byte)GpuEngine.None,
+				{
+					CPU = 689,
+					Memory = 489,
+					Disk = 256,
+					Network = 782,
+					GPU = 493,
+					GPUEngine = (byte)GpuEngine.None,
                     PowerUsage = (byte)ProcessPowerUsage.Low,
                     PowerUsageTrend = (byte)ProcessPowerUsage.Low,
                 },
