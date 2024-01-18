@@ -1,3 +1,5 @@
+using System.Data;
+
 namespace SocketDto.Test;
 
 public class ResponseProcessListUnitTest
@@ -74,5 +76,22 @@ public class ResponseProcessListUnitTest
         Assert.Equal(8, desObject.Processes[0].Data?.Length);
         Assert.Equal(processItem.ProcessData.CPU, desObject.Processes[0].ProcessData?.CPU);
         Assert.Equal(processItem.LastUpdateTime, desObject.Processes[0].LastUpdateTime);
+    }
+
+
+    [Fact]
+    public void Test_FormatDouble_Success()
+    {
+        const double data = 3.2359;
+        const string format1 = "00000.00";
+        const string format2 = "00.000";
+        const string expectedData1 = "00003.24";
+        const string expectedData2 = "03.236";
+
+        var formatData1 = data.ToString(format1);
+        var formatData2 = data.ToString(format2);
+
+        Assert.Equal(expectedData1, formatData1);
+        Assert.Equal(expectedData2, formatData2);
     }
 }
