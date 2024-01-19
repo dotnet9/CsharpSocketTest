@@ -50,11 +50,4 @@ public interface ISocketBase
     /// </summary>
     /// <param name="command"></param>
     void SendCommand(INetObject command);
-
-    /// <summary>
-    /// 获取响应数据
-    /// </summary>
-    /// <param name="response"></param>
-    /// <returns></returns>
-    bool TryGetResponse(out INetObject? response);
 }

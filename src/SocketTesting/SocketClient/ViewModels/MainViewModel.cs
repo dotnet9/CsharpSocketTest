@@ -1,5 +1,7 @@
 ﻿using SocketCore;
 using System.Timers;
+using SocketDto.Message;
+using ThreadOption = Messager.ThreadOption;
 
 namespace SocketClient.ViewModels;
 
@@ -69,12 +71,14 @@ public class MainViewModel : BindableBase
         if (!TcpHelper.IsStarted)
         {
             TcpHelper.Start();
+            Messager.Messenger.Default.Subscribe<TcpMessage>(this, ReadTcpData, ThreadOption.PublisherThread);
 
             ReceiveTcpData();
             SendHeartbeat();
         }
         else
         {
+            Messager.Messenger.Default.Unsubscribe<TcpMessage>(this, ReadTcpData);
             TcpHelper.Stop();
         }
 
@@ -188,20 +192,12 @@ public class MainViewModel : BindableBase
             while (!TcpHelper.IsRunning) await Task.Delay(TimeSpan.FromMilliseconds(10));
 
             await HandleRefreshCommand();
-
-            while (TcpHelper.IsRunning)
-            {
-                Try("读取TCP数据", ReadTcpData, ex => Logger.Error($"循环处理数据异常：{ex.Message}"));
-
-                await Task.Delay(TimeSpan.FromMilliseconds(10));
-            }
         });
     }
 
-    private void ReadTcpData()
+    private void ReadTcpData(TcpMessage message)
     {
-        if (!TcpHelper.TryGetResponse(out var command)) return;
-
+        var command = message.NetObject;
         switch (command)
         {
             case ResponseBaseInfo responseBase:

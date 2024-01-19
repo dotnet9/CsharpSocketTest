@@ -1,10 +1,11 @@
-﻿namespace SocketClient.SocketHelper;
+﻿using SocketDto.Message;
+
+namespace SocketClient.SocketHelper;
 
 public class TcpHelper : BindableBase, ISocketBase
 {
 	private Socket? _client;
 	public long SystemId { get; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
-	private readonly BlockingCollection<INetObject> _responses = new(); //接收命令列表
 
 	#region 公开属性
 
@@ -185,11 +186,6 @@ public class TcpHelper : BindableBase, ISocketBase
 			Logger.Info($"发送命令{command.GetType()}");
 	}
 
-	public bool TryGetResponse(out INetObject? response)
-	{
-		return _responses.TryTake(out response, TimeSpan.FromMilliseconds(10));
-	}
-
 	private static int _taskId;
 
 	public static int GetNewTaskId()
@@ -265,8 +261,7 @@ public class TcpHelper : BindableBase, ISocketBase
 			throw new Exception(
 				$"非法数据包：{netObjectHeadInfo}");
 		}
-
-		_responses.Add(command);
+		Messager.Messenger.Default.Publish(this, new TcpMessage(this, command));
 	}
 
 	#endregion

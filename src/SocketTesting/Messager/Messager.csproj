@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Messager\Messager.csproj" />
-    <ProjectReference Include="..\SocketNetObject\SocketNetObject.csproj" />
-  </ItemGroup>
-
 </Project>

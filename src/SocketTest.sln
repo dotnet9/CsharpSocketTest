@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketClient", "SocketTesti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketServer", "SocketTesting\SocketServer\SocketServer.csproj", "{30F8C481-AC93-47F8-B248-4C90602E6FF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketDto.Test", "SocketTesting\SocketDto.Test\SocketDto.Test.csproj", "{9CCC071C-CADC-4C50-814D-5779726CFC5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketDto.Test", "SocketTesting\SocketDto.Test\SocketDto.Test.csproj", "{9CCC071C-CADC-4C50-814D-5779726CFC5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messager", "SocketTesting\Messager\Messager.csproj", "{D7F7CC5F-C4D3-474C-80E9-4151E196E1C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,10 @@ Global
 		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CCC071C-CADC-4C50-814D-5779726CFC5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7F7CC5F-C4D3-474C-80E9-4151E196E1C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7F7CC5F-C4D3-474C-80E9-4151E196E1C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7F7CC5F-C4D3-474C-80E9-4151E196E1C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7F7CC5F-C4D3-474C-80E9-4151E196E1C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{3E3D343E-2FAF-45FD-8859-54BDDDED5BF1} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 		{30F8C481-AC93-47F8-B248-4C90602E6FF6} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 		{9CCC071C-CADC-4C50-814D-5779726CFC5F} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
+		{D7F7CC5F-C4D3-474C-80E9-4151E196E1C7} = {CB845ECA-47B9-452D-A404-4DE8E835C2D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9799BEAD-32FD-45CD-9B68-124237176477}
