@@ -88,6 +88,7 @@
                 </StackPanel>
             </GroupBox>
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
+            <Button Command="{Binding RefreshAllCommand}" Content="刷新所有客户端" />
         </StackPanel>
         <ListView
             x:Name="ProcessListView"
