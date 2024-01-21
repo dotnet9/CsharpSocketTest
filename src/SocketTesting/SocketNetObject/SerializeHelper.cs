@@ -119,6 +119,10 @@ public partial class SerializeHelper
         {
             writer.Write(value == null ? default : long.Parse(value.ToString()));
         }
+        else if (valueType == typeof(float))
+        {
+            writer.Write(value == null ? default : float.Parse(value.ToString()));
+        }
         else if (valueType == typeof(double))
         {
             writer.Write(value == null ? default : double.Parse(value.ToString()));
@@ -251,6 +255,11 @@ public partial class SerializeHelper
         if (propertyType == typeof(long))
         {
             return reader.ReadInt64();
+        }
+
+        if (propertyType == typeof(float))
+        {
+            return reader.ReadSingle();
         }
 
         if (propertyType == typeof(double))
