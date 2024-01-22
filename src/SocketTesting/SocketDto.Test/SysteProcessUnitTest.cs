@@ -1,3 +1,4 @@
+using MessagePack;
 using SocketNetObject.Models;
 using System.Text;
 using System.Text.Json;
@@ -54,10 +55,10 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes_Success()
     {
-        var buffer = SerializeHelper.SerializeByNative(_codeWFObject, 1);
+        var buffer = _codeWFObject.SerializeByNative(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
 
-        var deserializeObj = SerializeHelper.DeserializeByNative<SystemProcess>(buffer);
+        var deserializeObj = buffer.DeserializeByNative<SystemProcess>();
         Assert.Equal("码界工坊", deserializeObj.Name);
     }
 
@@ -88,10 +89,10 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes2_Success()
     {
-        var buffer = SerializeHelper.SerializeByNative(_codeWFObject2, 1);
+        var buffer = _codeWFObject2.SerializeByNative(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
 
-        var deserializeObj = SerializeHelper.DeserializeByNative<SystemProcess2>(buffer);
+        var deserializeObj = buffer.DeserializeByNative<SystemProcess2>();
         Assert.Equal("码界工坊", deserializeObj.Name);
         Assert.Equal(2.2f, deserializeObj.GPU);
     }
@@ -126,10 +127,25 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes3_Success()
     {
-        var buffer = SerializeHelper.SerializeByNative(_codeWFObject3, 1);
+        var buffer = _codeWFObject3.SerializeByNative(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
 
-        var deserializeObj = SerializeHelper.DeserializeByNative<SystemProcess3>(buffer);
+        var deserializeObj = buffer.DeserializeByNative<SystemProcess3>();
+        Assert.Equal("码界工坊", deserializeObj.Name);
+        Assert.Equal(23, deserializeObj.ProcessData.CPU);
+        Assert.Equal(1, deserializeObj.ProcessData.PowerUsage);
+    }
+
+    /// <summary>
+    /// 二进制极限序列化测试（MessagePack压缩）
+    /// </summary>
+    [Fact]
+    public void Test_SerializeToBytes4_Success()
+    {
+        var buffer = _codeWFObject3.Serialize(1);
+        _testOutputHelper.WriteLine($"加入MessagePack压缩序列化后二进制长度：{buffer.Length}");
+
+        var deserializeObj = buffer.Deserialize<SystemProcess3>();
         Assert.Equal("码界工坊", deserializeObj.Name);
         Assert.Equal(23, deserializeObj.ProcessData.CPU);
         Assert.Equal(1, deserializeObj.ProcessData.PowerUsage);
@@ -174,17 +190,20 @@ public class SystemProcess2 : INetObject
     public byte Status { get; set; }
 }
 
+[MessagePackObject]
 [NetHead(1, 3)]
 public class SystemProcess3 : INetObject
 {
-    public int PID { get; set; }
-    public string? Name { get; set; }
-    public string? Publisher { get; set; }
-    public string? CommandLine { get; set; }
+    [Key(0)] public int PID { get; set; }
+    [Key(1)] public string? Name { get; set; }
+    [Key(2)] public string? Publisher { get; set; }
+    [Key(3)] public string? CommandLine { get; set; }
     private byte[]? _data;
+
     /// <summary>
     /// 序列化，这是实际需要序列化的数据
     /// </summary>
+    [Key(4)]
     public byte[]? Data
     {
         get => _data;
@@ -202,6 +221,7 @@ public class SystemProcess3 : INetObject
     /// <summary>
     /// 进程数据，添加NetIgnoreMember在序列化会忽略
     /// </summary>
+    [IgnoreMember]
     [NetIgnoreMember]
     public SystemProcessData? ProcessData
     {
