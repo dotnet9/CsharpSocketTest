@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:SocketClient.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:extension="clr-namespace:SocketClient.Extension"
     xmlns:dto="clr-namespace:SocketDto;assembly=SocketDto"
     xmlns:logs="clr-namespace:SocketCore.LogHelper;assembly=SocketCore"
     xmlns:markup="clr-namespace:WpfExtensions.Xaml.Markup;assembly=WpfExtensions.Xaml"
@@ -93,7 +94,7 @@
         <ListView
             x:Name="ProcessListView"
             Grid.Row="1"
-            GridViewColumnHeader.Click="PointListView_OnClick"
+            extension:ListViewBehavior.HeaderSort="True"
             ItemsSource="{Binding DisplayProcesses, IsAsync=True, Mode=OneWay}"
             ScrollViewer.CanContentScroll="True"
             SelectionMode="Extended"
@@ -110,28 +111,35 @@
                     <GridViewColumn
                         Width="50"
                         DisplayMemberBinding="{Binding PID, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="PId"
                         Header="PId" />
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding Name, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Name"
                         Header="进程名称" />
                     <GridViewColumn
                         Width="80"
                         DisplayMemberBinding="{Binding Type, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Type"
                         Header="进程类型" />
                     <GridViewColumn
                         Width="80"
                         DisplayMemberBinding="{Binding Status, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Status"
                         Header="进程状态" />
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding Publisher, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Publisher"
                         Header="发布者" />
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding CommandLine, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="CommandLine"
                         Header="命令行" />
-                    <GridViewColumn Width="80" Header="CPU使用率">
+                    <GridViewColumn Width="80" Header="CPU使用率"
+                                    extension:ListViewBehavior.SortField="CPU">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -140,7 +148,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="80" Header="内存使用率">
+                    <GridViewColumn Width="80" Header="内存使用率"
+                                    extension:ListViewBehavior.SortField="Memory">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -149,7 +158,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="100" Header="磁盘">
+                    <GridViewColumn Width="100" Header="磁盘"
+                                    extension:ListViewBehavior.SortField="Disk">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -158,7 +168,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="100" Header="网络">
+                    <GridViewColumn Width="100" Header="网络"
+                                    extension:ListViewBehavior.SortField="Network">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -167,7 +178,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="60" Header="GPU">
+                    <GridViewColumn Width="60" Header="GPU"
+                                    extension:ListViewBehavior.SortField="GPU">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -179,8 +191,10 @@
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding GPUEngine, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="GPUEngine"
                         Header="GPU引擎" />
-                    <GridViewColumn Header="电源使用情况">
+                    <GridViewColumn Header="电源使用情况"
+                                    extension:ListViewBehavior.SortField="Power">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -189,7 +203,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="120" Header="电源使用情况趋势">
+                    <GridViewColumn Width="120" Header="电源使用情况趋势"
+                                    extension:ListViewBehavior.SortField="PowerUsageTrend">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
@@ -201,10 +216,12 @@
                     <GridViewColumn
                         Width="170"
                         DisplayMemberBinding="{Binding LastUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="LastUpdateTime"
                         Header="上次更新时间" />
                     <GridViewColumn
                         Width="170"
                         DisplayMemberBinding="{Binding UpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="UpdateTime"
                         Header="更新时间" />
                 </GridView>
             </ListView.View>
