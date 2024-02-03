@@ -93,16 +93,16 @@ namespace SocketClient.Extension
                         ? ListSortDirection.Descending
                         : ListSortDirection.Ascending;
             else
-                sortInfo.CurrentAdorner = new UIElementAdorner(header, new ListSortDecorator());
+                sortInfo.CurrentAdorner = new UIElementAdorner(header!, new ListSortDecorator());
 
-            sortInfo.LastSortColumn = header;
-            listView.SetValue(SortInfoProperty, sortInfo);
+            sortInfo.LastSortColumn = header!;
+            listView!.SetValue(SortInfoProperty, sortInfo);
 
-            AdornerLayer.GetAdornerLayer(header)?.Add(sortInfo.CurrentAdorner);
+            AdornerLayer.GetAdornerLayer(header!)?.Add(sortInfo.CurrentAdorner);
             var sortDescription = new SortDescription()
             {
                 Direction = ((sortInfo.CurrentAdorner.Child as ListSortDecorator)!).SortDirection,
-                PropertyName = header.Column.GetValue(SortFieldProperty) as string ?? header.Column.Header as string
+                PropertyName = header!.Column.GetValue(SortFieldProperty) as string ?? header.Column.Header as string
             };
             listView.Items.SortDescriptions.Add(sortDescription);
         }

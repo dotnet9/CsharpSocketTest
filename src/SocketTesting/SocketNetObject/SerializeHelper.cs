@@ -85,7 +85,7 @@ public partial class SerializeHelper
     {
         if (valueType == typeof(byte))
         {
-            writer.Write(value == null ? default : byte.Parse(value.ToString()));
+            writer.Write(value == null ? default : byte.Parse(value.ToString()!));
         }
         else if (valueType == typeof(byte[]))
         {
@@ -101,39 +101,39 @@ public partial class SerializeHelper
         }
         else if (valueType == typeof(short))
         {
-            writer.Write(value == null ? default : short.Parse(value.ToString()));
+            writer.Write(value == null ? default : short.Parse(value.ToString()!));
         }
         else if (valueType == typeof(ushort))
         {
-            writer.Write(value == null ? default : ushort.Parse(value.ToString()));
+            writer.Write(value == null ? default : ushort.Parse(value.ToString()!));
         }
         else if (valueType == typeof(int))
         {
-            writer.Write(value == null ? default : int.Parse(value.ToString()));
+            writer.Write(value == null ? default : int.Parse(value.ToString()!));
         }
         else if (valueType == typeof(uint))
         {
-            writer.Write(value == null ? default : uint.Parse(value.ToString()));
+            writer.Write(value == null ? default : uint.Parse(value.ToString()!));
         }
         else if (valueType == typeof(long))
         {
-            writer.Write(value == null ? default : long.Parse(value.ToString()));
+            writer.Write(value == null ? default : long.Parse(value.ToString()!));
         }
         else if (valueType == typeof(float))
         {
-            writer.Write(value == null ? default : float.Parse(value.ToString()));
+            writer.Write(value == null ? default : float.Parse(value.ToString()!));
         }
         else if (valueType == typeof(double))
         {
-            writer.Write(value == null ? default : double.Parse(value.ToString()));
+            writer.Write(value == null ? default : double.Parse(value.ToString()!));
         }
         else if (valueType == typeof(decimal))
         {
-            writer.Write(value == null ? default : decimal.Parse(value.ToString()));
+            writer.Write(value == null ? default : decimal.Parse(value.ToString()!));
         }
         else if (valueType == typeof(string))
         {
-            writer.Write(value == null ? string.Empty : value.ToString());
+            writer.Write(value == null ? string.Empty : value.ToString()!);
         }
         else
         {
@@ -141,9 +141,9 @@ public partial class SerializeHelper
         }
     }
 
-    private static void SerializeComplexValue(BinaryWriter writer, object value, Type valueType)
+    private static void SerializeComplexValue(BinaryWriter writer, object? value, Type valueType)
     {
-        int count = 0;
+        var count = 0;
         if (value == null)
         {
             writer.Write(count);
@@ -304,7 +304,7 @@ public partial class SerializeHelper
         return complexObj;
     }
 
-    private static object DeserializeObject(BinaryReader reader, Type type)
+    private static object? DeserializeObject(BinaryReader reader, Type type)
     {
         var data = Activator.CreateInstance(type);
         DeserializeProperties(reader, data);

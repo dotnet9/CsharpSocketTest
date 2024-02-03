@@ -65,7 +65,7 @@ public class CustomSerializeHelper : ISerializeHelper
         Serialize(writer, propertyValue, propertyType);
     }
 
-    private static void Serialize(BinaryWriter writer, object value, Type valueType)
+    private static void Serialize(BinaryWriter writer, object? value, Type valueType)
     {
         var propertyName = valueType.Name;
         if (valueType.IsPrimitive
@@ -80,24 +80,24 @@ public class CustomSerializeHelper : ISerializeHelper
     }
 
 
-    private static void SerializeBase(BinaryWriter writer, object value, Type valueType)
+    private static void SerializeBase(BinaryWriter writer, object? value, Type valueType)
     {
         if (valueType == typeof(byte))
-            writer.Write(value == null ? default : byte.Parse(value.ToString()));
+            writer.Write(value == null ? default : byte.Parse(value.ToString()!));
         else if (valueType == typeof(short))
-            writer.Write(value == null ? default : short.Parse(value.ToString()));
+            writer.Write(value == null ? default : short.Parse(value.ToString()!));
         else if (valueType == typeof(int))
-            writer.Write(value == null ? default : int.Parse(value.ToString()));
+            writer.Write(value == null ? default : int.Parse(value.ToString()!));
         else if (valueType == typeof(long))
-            writer.Write(value == null ? default : long.Parse(value.ToString()));
+            writer.Write(value == null ? default : long.Parse(value.ToString()!));
         else if (valueType == typeof(double))
-            writer.Write(value == null ? default : double.Parse(value.ToString()));
+            writer.Write(value == null ? default : double.Parse(value.ToString()!));
         else if (valueType == typeof(decimal))
-            writer.Write(value == null ? default : decimal.Parse(value.ToString()));
-        else if (valueType == typeof(string)) writer.Write(value == null ? string.Empty : value.ToString());
+            writer.Write(value == null ? default : decimal.Parse(value.ToString()!));
+        else if (valueType == typeof(string)) writer.Write(value == null ? string.Empty : value.ToString()!);
     }
 
-    private static void SerializeComplex(BinaryWriter writer, object value, Type valueType)
+    private static void SerializeComplex(BinaryWriter writer, object? value, Type valueType)
     {
         var propertyName = valueType.Name;
         var count = 0;
@@ -136,7 +136,7 @@ public class CustomSerializeHelper : ISerializeHelper
         }
     }
 
-    private static object DeserializeByType(BinaryReader reader, Type propertyType)
+    private static object? DeserializeByType(BinaryReader reader, Type propertyType)
     {
         var propertyName = propertyType.Name;
         object value;
@@ -176,9 +176,9 @@ public class CustomSerializeHelper : ISerializeHelper
         return value;
     }
 
-    private static object DeserializeComplex(BinaryReader reader, Type propertyType)
+    private static object? DeserializeComplex(BinaryReader reader, Type propertyType)
     {
-        var complextObj = Activator.CreateInstance(propertyType);
+        var complexObj = Activator.CreateInstance(propertyType);
         var count = reader.ReadInt32();
         var addMethod = propertyType.GetMethod("Add")!;
         var genericArguments = propertyType.GetGenericArguments();
@@ -187,19 +187,19 @@ public class CustomSerializeHelper : ISerializeHelper
             var key = DeserializeByType(reader, genericArguments[0]);
             if (genericArguments.Length == 1)
             {
-                addMethod.Invoke(complextObj, new[] { key });
+                addMethod.Invoke(complexObj, [key]);
             }
             else if (genericArguments.Length == 2)
             {
                 var value = DeserializeByType(reader, genericArguments[1]);
-                addMethod.Invoke(complextObj, new[] { key, value });
+                addMethod.Invoke(complexObj, [key, value]);
             }
         }
 
-        return complextObj;
+        return complexObj;
     }
 
-    private static object DeserializeClass(BinaryReader reader, Type type)
+    private static object? DeserializeClass(BinaryReader reader, Type type)
     {
         var data = Activator.CreateInstance(type);
         Deserialize(reader, data);
