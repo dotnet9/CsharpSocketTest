@@ -91,142 +91,144 @@
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding RefreshAllCommand}" Content="刷新所有客户端" />
         </StackPanel>
-        <extension:GridLineDecorator Grid.Row="1">
-            <ListView
-                x:Name="ProcessListView"
-                extension:ListViewBehavior.HeaderSort="True"
-                ItemsSource="{Binding DisplayProcesses, IsAsync=True, Mode=OneWay}"
-                ScrollViewer.CanContentScroll="True"
-                SelectionMode="Extended"
-                VirtualizingPanel.IsContainerVirtualizable="True"
-                VirtualizingPanel.IsVirtualizing="True"
-                VirtualizingPanel.VirtualizationMode="Recycling">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="Height" Value="20" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn
-                            Width="50"
-                            DisplayMemberBinding="{Binding PID, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="PId"
-                            Header="PId" />
-                        <GridViewColumn
-                            Width="120"
-                            DisplayMemberBinding="{Binding Name, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="Name"
-                            Header="进程名称" />
-                        <GridViewColumn
-                            Width="80"
-                            DisplayMemberBinding="{Binding Type, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="Type"
-                            Header="进程类型" />
-                        <GridViewColumn
-                            Width="80"
-                            DisplayMemberBinding="{Binding Status, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="Status"
-                            Header="进程状态" />
-                        <GridViewColumn
-                            Width="120"
-                            DisplayMemberBinding="{Binding Publisher, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="Publisher"
-                            Header="发布者" />
-                        <GridViewColumn
-                            Width="120"
-                            DisplayMemberBinding="{Binding CommandLine, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="CommandLine"
-                            Header="命令行" />
-                        <GridViewColumn Width="80" Header="CPU使用率"
-                                        extension:ListViewBehavior.SortField="CPU">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding CPU, Converter={StaticResource UsageToBackgroundConverter}}"
-                                        Text="{Binding CPU, Converter={StaticResource UsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="80" Header="内存使用率"
-                                        extension:ListViewBehavior.SortField="Memory">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding Memory, Converter={StaticResource UsageToBackgroundConverter}}"
-                                        Text="{Binding Memory, Converter={StaticResource UsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="100" Header="磁盘"
-                                        extension:ListViewBehavior.SortField="Disk">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding Disk, Converter={StaticResource UsageToBackgroundConverter}}"
-                                        Text="{Binding Disk, Converter={StaticResource UsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="100" Header="网络"
-                                        extension:ListViewBehavior.SortField="Network">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding Network, Converter={StaticResource UsageToBackgroundConverter}}"
-                                        Text="{Binding Network, Converter={StaticResource UsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="60" Header="GPU"
-                                        extension:ListViewBehavior.SortField="GPU">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding GPU, Converter={StaticResource UsageToBackgroundConverter}}"
-                                        Text="{Binding GPU, Converter={StaticResource UsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn
-                            Width="120"
-                            DisplayMemberBinding="{Binding GPUEngine, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="GPUEngine"
-                            Header="GPU引擎" />
-                        <GridViewColumn Header="电源使用情况"
-                                        extension:ListViewBehavior.SortField="Power">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding Power, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                        Text="{Binding Power, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="120" Header="电源使用情况趋势"
-                                        extension:ListViewBehavior.SortField="PowerUsageTrend">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Foreground="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                        Text="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn
-                            Width="170"
-                            DisplayMemberBinding="{Binding LastUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="LastUpdateTime"
-                            Header="上次更新时间" />
-                        <GridViewColumn
-                            Width="170"
-                            DisplayMemberBinding="{Binding UpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
-                            extension:ListViewBehavior.SortField="UpdateTime"
-                            Header="更新时间" />
-                    </GridView>
-                </ListView.View>
-            </ListView>
-        </extension:GridLineDecorator>
+        <!--<extension:GridLineDecorator Grid.Row="1">-->
+        <ListView Grid.Row="1"
+                  x:Name="ProcessListView"
+                  extension:ListViewBehavior.HeaderSort="True"
+                  ItemsSource="{Binding DisplayProcesses, IsAsync=True, Mode=OneWay}"
+                  ScrollViewer.CanContentScroll="True"
+                  SelectionMode="Extended"
+                  VirtualizingPanel.IsContainerVirtualizable="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="BorderThickness" Value="0 0 1 1" />
+                    <Setter Property="BorderBrush" Value="Black" />
+                    <Setter Property="Height" Value="20" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn
+                        Width="50"
+                        DisplayMemberBinding="{Binding PID, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="PId"
+                        Header="PId" />
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding Name, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Name"
+                        Header="进程名称" />
+                    <GridViewColumn
+                        Width="80"
+                        DisplayMemberBinding="{Binding Type, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Type"
+                        Header="进程类型" />
+                    <GridViewColumn
+                        Width="80"
+                        DisplayMemberBinding="{Binding Status, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Status"
+                        Header="进程状态" />
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding Publisher, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="Publisher"
+                        Header="发布者" />
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding CommandLine, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="CommandLine"
+                        Header="命令行" />
+                    <GridViewColumn Width="80" Header="CPU使用率"
+                                    extension:ListViewBehavior.SortField="CPU">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding CPU, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding CPU, Converter={StaticResource UsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="80" Header="内存使用率"
+                                    extension:ListViewBehavior.SortField="Memory">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding Memory, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Memory, Converter={StaticResource UsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="100" Header="磁盘"
+                                    extension:ListViewBehavior.SortField="Disk">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding Disk, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Disk, Converter={StaticResource UsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="100" Header="网络"
+                                    extension:ListViewBehavior.SortField="Network">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding Network, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Network, Converter={StaticResource UsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="60" Header="GPU"
+                                    extension:ListViewBehavior.SortField="GPU">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding GPU, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding GPU, Converter={StaticResource UsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding GPUEngine, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="GPUEngine"
+                        Header="GPU引擎" />
+                    <GridViewColumn Header="电源使用情况"
+                                    extension:ListViewBehavior.SortField="Power">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding Power, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding Power, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120" Header="电源使用情况趋势"
+                                    extension:ListViewBehavior.SortField="PowerUsageTrend">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+                                    Text="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn
+                        Width="170"
+                        DisplayMemberBinding="{Binding LastUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="LastUpdateTime"
+                        Header="上次更新时间" />
+                    <GridViewColumn
+                        Width="170"
+                        DisplayMemberBinding="{Binding UpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
+                        extension:ListViewBehavior.SortField="UpdateTime"
+                        Header="更新时间" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <!--</extension:GridLineDecorator>-->
         <GridSplitter
             Grid.Row="2"
             Height="3"
