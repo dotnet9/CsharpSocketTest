@@ -1,0 +1,113 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SocketTest.Server.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:log="clr-namespace:SocketTest.LoggerView;assembly=SocketTest.LoggerView"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="SocketTest.Server.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="SocketTest.Server">
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBox.form">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Height" Value="23" />
+        </Style>
+        <Style Selector="HeaderedContentControl.form">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="15,2" />
+            <Setter Property="Margin" Value="10,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <HeaderedContentControl Grid.Row="0" Header="Tcp服务配置">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="0,0,5,0" Text="IP：" />
+                <TextBox Width="150" Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
+
+                <TextBlock Margin="10,0,5,0" Text="端口：" />
+                <TextBox Width="50" Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
+                <TextBlock Margin="10,0,5,0" Text="模拟总数据量(条)：" />
+                <TextBox Width="80"
+                         Text="{Binding TcpHelper.MockCount, Mode=TwoWay}" />
+                <TextBlock Margin="10,0,5,0" Text="单包数据量(条)：" />
+                <TextBox Width="50"
+                         Text="{Binding TcpHelper.MockPageSize, Mode=TwoWay}" />
+                <Button
+                    Command="{Binding HandleRunTcpCommandCommandAsync}"
+                    Content="{Binding RunTcpCommandContent}" />
+                <Button
+                    Command="{Binding HandleMockDataCommandAsync}"
+                    Content="生成模拟数据" />
+            </StackPanel>
+        </HeaderedContentControl>
+        <HeaderedContentControl Grid.Row="1" Header="Udp组播配置">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="0,0,5,0" Text="IP：" />
+                <TextBox Width="150" Text="{Binding UdpHelper.Ip, Mode=TwoWay}" />
+
+                <TextBlock Margin="10,0,5,0" Text="端口：" />
+                <TextBox Width="50" Text="{Binding UdpHelper.Port, Mode=TwoWay}" />
+                <TextBlock Margin="10,0,5,0" Text="Udp单包上限(byte)：" />
+                <TextBox Width="50"
+                         Text="{Binding UdpHelper.PacketMaxSize, Mode=TwoWay}" />
+                <Button
+                    Command="{Binding HandleRunUdpMulticastCommandAsync}"
+                    Content="{Binding RunUdpCommandContent}" />
+            </StackPanel>
+        </HeaderedContentControl>
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,5"
+            Orientation="Horizontal">
+            <Button Command="{Binding RefreshCommand}" Content="刷新" />
+            <Button Command="{Binding UpdateCommand}" Content="更新" />
+        </StackPanel>
+        <log:LogView Grid.Row="3" />
+        <StackPanel
+            Grid.Row="4"
+            Margin="0,8"
+            VerticalAlignment="Center">
+            <TextBlock Margin="0,5,0,5">
+                <Run Text="TCP服务：" />
+                <Run Text="    心跳时间：" />
+                <Run Foreground="Green" Text="{Binding TcpHelper.HeartbeatTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+                <Run Text="    客户端：" />
+                <Run Foreground="Green" Text="3" />
+                <Run Text="    发送时间：" />
+                <Run Foreground="Green" Text="{Binding TcpHelper.SendTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+                <Run Text="    接收时间：" />
+                <Run Foreground="Green" Text="{Binding TcpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+
+            </TextBlock>
+            <TextBlock>
+                <Run Text="UDP组播：" />
+                <Run Text=" 已发送"></Run>
+                <Run Text="{Binding TcpHelper.UDPPacketsSentCount,Mode=OneWay}"></Run>
+                <Run Text="包"></Run>
+                <Run Text="     组播时间：" />
+                <Run Foreground="Green" Text="2023-12-16 11:27" />
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</Window>

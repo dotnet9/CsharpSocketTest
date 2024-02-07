@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="11.0.7" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.7" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.7" />
+		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.7" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.0.7" />
+		<PackageReference Include="Lorem.Universal.Net" Version="4.0.80" />
+		<PackageReference Include="Semi.Avalonia" Version="11.0.7" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<ProjectReference Include="..\SocketTest.Common\SocketTest.Common.csproj" />
+		<ProjectReference Include="..\SocketTest.Logger\SocketTest.Logger.csproj" />
+		<ProjectReference Include="..\SocketDto\SocketDto.csproj" />
+		<ProjectReference Include="..\SocketNetObject\SocketNetObject.csproj" />
+		<ProjectReference Include="..\SocketTest.LoggerView\SocketTest.LoggerView.csproj" />
+		<ProjectReference Include="..\SocketTest.Mvvm\SocketTest.Mvvm.csproj" />
+	</ItemGroup>
+</Project>

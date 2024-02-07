@@ -1,0 +1,233 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SocketTest.Client.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:log="clr-namespace:SocketTest.LoggerView;assembly=SocketTest.LoggerView"
+        xmlns:converters="clr-namespace:SocketTest.Client.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="SocketTest.Client.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="SocketTest.Client">
+    <Window.Resources>
+        <converters:ProcessPowerUsageToBackgroundConverter x:Key="ProcessPowerUsageToBackgroundConverter" />
+        <converters:ProcessPowerUsageToFormatConverter x:Key="ProcessPowerUsageToFormatConverter" />
+        <converters:UsageToBackgroundConverter x:Key="UsageToBackgroundConverter" />
+        <converters:UsageToFormatConverter x:Key="UsageToFormatConverter" />
+    </Window.Resources>
+    <Window.Styles>
+		<Style Selector="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBox.form">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Height" Value="23" />
+        </Style>
+        <Style Selector="HeaderedContentControl.form">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="15,2" />
+            <Setter Property="Margin" Value="10,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+	<Grid Margin="5">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="3" />
+			<RowDefinition Height="200" />
+			<RowDefinition Height="30" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<StackPanel Orientation="Horizontal">
+			<HeaderedContentControl Header="Tcp服务配置">
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Margin="0,0,5,0" Text="IP：" />
+					<TextBox Width="150"
+                             Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
+
+					<TextBlock Margin="10,0,5,0" Text="端口：" />
+					<TextBox Width="50"
+                             Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
+					<Button
+                        Command="{Binding HandleConnectTcpCommandAsync}"
+                        Content="{Binding RunTcpCommandContent}"
+                       />
+				</StackPanel>
+			</HeaderedContentControl>
+			<HeaderedContentControl Margin="15,0" Header="Udp组播配置">
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Margin="0,0,5,0" Text="IP：" />
+					<TextBox Width="150"
+                             Text="{Binding UdpHelper.Ip, Mode=TwoWay}" />
+
+					<TextBlock Margin="10,0,5,0" Text="端口：" />
+					<TextBox Width="50"
+                             Text="{Binding UdpHelper.Port, Mode=TwoWay}" />
+					<Button
+                        Command="{Binding HandleSubscribeUdpMulticastCommand}"
+                        Content="{Binding RunUdpCommandContent}"
+                         />
+				</StackPanel>
+			</HeaderedContentControl>
+			<Button Command="{Binding RefreshCommand}" Content="刷新" />
+			<Button Command="{Binding RefreshAllCommand}" Content="刷新所有客户端" />
+		</StackPanel>
+
+		<DataGrid Grid.Row="1" CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True" HeadersVisibility="All" IsReadOnly="True"
+                  ItemsSource="{Binding DisplayProcesses, Mode=OneWay}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="50"></DataGridTextColumn>
+				<DataGridTextColumn
+                        Width="50"
+                        Binding="{Binding PID, Mode=OneWay}"
+                        Header="PId" />
+				<DataGridTextColumn
+					Width="120"
+					Binding="{Binding Name, Mode=OneWay}"
+					Header="进程名称" />
+				<DataGridTextColumn
+					Width="80"
+					Binding="{Binding Type, Mode=OneWay}"
+					Header="进程类型" />
+				<DataGridTextColumn
+					Width="80"
+					Binding="{Binding Status, Mode=OneWay}"
+					Header="进程状态" />
+				<DataGridTextColumn
+					Width="120"
+					Binding="{Binding Publisher, Mode=OneWay}"
+					Header="发布者" />
+				<DataGridTextColumn
+					Width="120"
+					Binding="{Binding CommandLine, Mode=OneWay}"
+					Header="命令行" />
+				<DataGridTemplateColumn Width="80" Header="CPU使用率">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding CPU, Converter={StaticResource UsageToBackgroundConverter}}"
+								Text="{Binding CPU, Converter={StaticResource UsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="80" Header="内存使用率">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding Memory, Converter={StaticResource UsageToBackgroundConverter}}"
+								Text="{Binding Memory, Converter={StaticResource UsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="100" Header="磁盘">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding Disk, Converter={StaticResource UsageToBackgroundConverter}}"
+								Text="{Binding Disk, Converter={StaticResource UsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="100" Header="网络">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding Network, Converter={StaticResource UsageToBackgroundConverter}}"
+								Text="{Binding Network, Converter={StaticResource UsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="60" Header="GPU">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding GPU, Converter={StaticResource UsageToBackgroundConverter}}"
+								Text="{Binding GPU, Converter={StaticResource UsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn
+					Width="120"
+					Binding="{Binding GPUEngine, Mode=OneWay}"
+					Header="GPU引擎" />
+				<DataGridTemplateColumn Header="电源使用情况">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding Power, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+								Text="{Binding Power, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="120" Header="电源使用情况趋势">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock
+								Foreground="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
+								Text="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn
+					Width="170"
+					Binding="{Binding LastUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
+					Header="上次更新时间" />
+				<DataGridTextColumn
+					Width="170"
+					Binding="{Binding UpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
+					Header="更新时间" />
+            </DataGrid.Columns>
+        </DataGrid>
+		
+
+		<GridSplitter
+            Grid.Row="2"
+            Height="3"
+            HorizontalAlignment="Stretch"
+            ResizeDirection="Rows" />
+		<log:LogView  Grid.Row="3" Margin="3" />
+		<StackPanel
+            Grid.Row="4"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+			<TextBlock Text="{Binding BaseInfo}" />
+		</StackPanel>
+		<StackPanel
+            Grid.Row="5"
+            Margin="0,8"
+            VerticalAlignment="Center">
+			<TextBlock Margin="0,5,0,5">
+				<Run Text="TCP：" />
+				
+				<Run Text="心跳  发送 " />
+				<Run Foreground="Green"
+                     Text="{Binding TcpHelper.SendHeartbeatTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+				<Run Text=" 响应 " />
+				<Run Foreground="Green"
+                     Text="{Binding TcpHelper.ResponseHeartbeatTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+				<Run Text=" 数据包 发送 " />
+				<Run Foreground="Green" Text="{Binding TcpHelper.SendTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+				<Run Text=" 接收 " />
+				<Run Foreground="Green" Text="{Binding TcpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+
+			</TextBlock>
+			<TextBlock>
+				<Run Text="UDP组播：" />
+				<Run Text="{Binding UdpHelper.ReceiveCount,Mode=OneWay}" />
+				<Run Text=" 时间 " />
+				<Run Foreground="Green" Text="{Binding UdpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+			</TextBlock>
+		</StackPanel>
+	</Grid>
+</Window>
