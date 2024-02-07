@@ -5,7 +5,7 @@
              xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              mc:Ignorable="d"
              x:Class="SocketTest.LoggerView.LogView">
-    <HeaderedContentControl Header="日志">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <SelectableTextBlock x:Name="LogTextView" TextWrapping="Wrap" />
-    </HeaderedContentControl>
+    </ScrollViewer>
 </UserControl>

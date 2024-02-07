@@ -3,5 +3,6 @@
 
 // 普通测试
 //BenchmarkTest.Test();
+
 BenchmarkTest.TestBit();
 Console.ReadKey();

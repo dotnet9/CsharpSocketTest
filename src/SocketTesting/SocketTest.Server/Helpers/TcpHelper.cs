@@ -1,9 +1,4 @@
-﻿using ReactiveUI;
-using SocketDto;
-using SocketNetObject;
-using SocketNetObject.Models;
-using SocketTest.Mvvm;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +7,11 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Threading;
+using ReactiveUI;
+using SocketDto;
+using SocketNetObject;
+using SocketNetObject.Models;
+using SocketTest.Mvvm;
 using SocketTest.Server.Mock;
 
 namespace SocketTest.Server.Helpers;
@@ -107,7 +107,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     private DateTime _heartbeatTime;
 
     /// <summary>
-    /// 心跳时间
+    ///     心跳时间
     /// </summary>
     public DateTime HeartbeatTime
     {
@@ -116,7 +116,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     }
 
     /// <summary>
-    /// 已发送UDP包个数
+    ///     已发送UDP包个数
     /// </summary>
     public int UDPPacketsSentCount { get; set; } = 0;
 
@@ -166,7 +166,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     _server.Bind(ipEndPoint);
                     _server.Listen(10);
 
-                    Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
+                    await Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
 
                     ListenForClients();
                     ProcessingRequests();
@@ -217,10 +217,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
         }
 
         var buffer = command.Serialize(SystemId);
-        foreach (var client in _clients)
-        {
-            client.Value.Send(buffer);
-        }
+        foreach (var client in _clients) client.Value.Send(buffer);
 
         Logger.Logger.Info($"发送命令{command.GetType()}");
     }
@@ -433,7 +430,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
     #region 更新数据
 
-    private System.Timers.Timer? _sendDataTimer;
+    private Timer? _sendDataTimer;
     private bool _isUpdateAll;
 
     public void UpdateAllData(bool isUpdateAll)
@@ -444,7 +441,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
     private void MockUpdate()
     {
-        _sendDataTimer = new System.Timers.Timer();
+        _sendDataTimer = new Timer();
         _sendDataTimer.Interval = 4 * 60 * 1000;
         _sendDataTimer.Elapsed += MockSendData;
         _sendDataTimer.Start();

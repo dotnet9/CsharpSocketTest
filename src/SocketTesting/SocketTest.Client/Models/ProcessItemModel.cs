@@ -1,8 +1,8 @@
-﻿using ReactiveUI;
+﻿using System;
+using ReactiveUI;
 using SocketDto;
 using SocketTest.Common;
 using SocketTest.Mvvm;
-using System;
 
 namespace SocketTest.Client.Models;
 

@@ -23,14 +23,14 @@ public static class ByteSizeConverter
     public static string Format(long byteSize, string[] units)
     {
         double totalSize = byteSize;
-        int index = 0;
-        while (totalSize > 1024 && index < (units.Length - 1))
+        var index = 0;
+        while (totalSize > 1024 && index < units.Length - 1)
         {
             totalSize /= 1024;
             index++;
         }
 
-        string formattedSize = totalSize.ToString("F2");
+        var formattedSize = totalSize.ToString("F2");
 
         return formattedSize + units[index];
     }

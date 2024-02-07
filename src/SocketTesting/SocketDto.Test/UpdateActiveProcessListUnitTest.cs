@@ -29,7 +29,7 @@ public class UpdateActiveProcessListUnitTest
     [Fact]
     public void Test_SerializeUpdateActiveProcessList_Success()
     {
-        var netObject = new UpdateActiveProcessList()
+        var netObject = new UpdateActiveProcessList
         {
             TotalSize = 200,
             PageSize = 3,
@@ -37,16 +37,16 @@ public class UpdateActiveProcessListUnitTest
             PageIndex = 1,
             Processes = Enumerable.Range(0, 4).Select(index => new ActiveProcessItem
             {
-                ProcessData = new ActiveProcessItemData()
-				{
-					CPU = 689,
-					Memory = 489,
-					Disk = 256,
-					Network = 782,
-					GPU = 493,
-					GPUEngine = (byte)GpuEngine.None,
+                ProcessData = new ActiveProcessItemData
+                {
+                    CPU = 689,
+                    Memory = 489,
+                    Disk = 256,
+                    Network = 782,
+                    GPU = 493,
+                    GPUEngine = (byte)GpuEngine.None,
                     PowerUsage = (byte)ProcessPowerUsage.Low,
-                    PowerUsageTrend = (byte)ProcessPowerUsage.Low,
+                    PowerUsageTrend = (byte)ProcessPowerUsage.Low
                 },
                 UpdateTime = 53
             }).ToList()

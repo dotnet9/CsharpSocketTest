@@ -1,5 +1,3 @@
-using System.Data;
-
 namespace SocketDto.Test;
 
 public class ResponseProcessListUnitTest
@@ -33,7 +31,7 @@ public class ResponseProcessListUnitTest
     [Fact]
     public void Test_SerializeResponseProcessList_Success()
     {
-        var netObject = new ResponseProcessList()
+        var netObject = new ResponseProcessList
         {
             TaskId = 3,
             TotalSize = 200,
@@ -48,7 +46,7 @@ public class ResponseProcessListUnitTest
             Name = "Dotnet工具箱",
             Publisher = "沙漠尽头的狼",
             CommandLine = "dotnet Dotnetools.com",
-            ProcessData = new ProcessItemData()
+            ProcessData = new ProcessItemData
             {
                 CPU = 112,
                 Memory = 325,

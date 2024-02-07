@@ -1,25 +1,25 @@
-﻿using ReactiveUI;
-using SocketDto;
-using SocketNetObject;
-using SocketNetObject.Models;
-using SocketTest.Mvvm;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using ReactiveUI;
+using SocketDto;
+using SocketNetObject;
+using SocketNetObject.Models;
+using SocketTest.Mvvm;
 
 namespace SocketTest.Client.Helpers;
 
 public class UdpHelper : ViewModelBase, ISocketBase
 {
-    private UdpClient? _client;
-    private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
     private readonly BlockingCollection<byte[]> _receivedBuffers = new(new ConcurrentQueue<byte[]>());
 
     private readonly BlockingCollection<UpdateActiveProcessList> _receivedResponse = new();
+    private UdpClient? _client;
     private int _receivedPacketsCount;
+    private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
 
     #region 公开属性
 
@@ -50,10 +50,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
     public bool IsStarted
     {
         get => _isStarted;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _isStarted, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _isStarted, value);
     }
 
     private bool _isRunning;
@@ -64,10 +61,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
     public bool IsRunning
     {
         get => _isRunning;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _isRunning, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _isRunning, value);
     }
 
     private DateTime _sendTime;
@@ -78,10 +72,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
     public DateTime SendTime
     {
         get => _sendTime;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _sendTime, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _sendTime, value);
     }
 
     private DateTime _receiveTime;
@@ -92,14 +83,11 @@ public class UdpHelper : ViewModelBase, ISocketBase
     public DateTime ReceiveTime
     {
         get => _receiveTime;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _receiveTime, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
     }
 
     /// <summary>
-    /// 已发送UDP包个数
+    ///     已发送UDP包个数
     /// </summary>
     public static int UDPPacketsSentCount { get; set; }
 
@@ -111,10 +99,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
     public string? ReceiveCount
     {
         get => _receiveCount;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _receiveCount, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _receiveCount, value);
     }
 
     #endregion

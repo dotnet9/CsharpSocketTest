@@ -1,14 +1,15 @@
-﻿using ReactiveUI;
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using Avalonia.Threading;
+using Messager;
+using ReactiveUI;
 using SocketDto;
 using SocketDto.Message;
 using SocketNetObject;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
-using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
-using Avalonia.Threading;
 
 namespace SocketTest.Client.Helpers;
 
@@ -130,7 +131,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     _client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     await _client.ConnectAsync(ipEndPoint);
 
-                    Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
+                    await Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
 
                     ListenForServer();
 
@@ -201,13 +202,12 @@ public class TcpHelper : ViewModelBase, ISocketBase
         Task.Run(() =>
         {
             while (IsRunning)
-            {
                 try
                 {
                     while (_client!.ReadPacket(out var buffer, out var objectInfo))
                     {
                         ReceiveTime = DateTime.Now;
-                        ReceiveResponse(buffer, objectInfo);
+                        ReceiveResponse(buffer, objectInfo!);
                     }
                 }
                 catch (SocketException ex)
@@ -219,7 +219,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
                 {
                     Logger.Logger.Error($"接收数据异常：{ex.Message}");
                 }
-            }
 
             return Task.CompletedTask;
         });
@@ -261,7 +260,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                 $"非法数据包：{netObjectHeadInfo}");
         }
 
-        Messager.Messenger.Default.Publish(this, new TcpMessage(this, command));
+        Messenger.Default.Publish(this, new TcpMessage(this, command));
     }
 
     #endregion

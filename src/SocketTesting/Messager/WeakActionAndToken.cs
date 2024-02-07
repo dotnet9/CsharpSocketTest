@@ -12,9 +12,6 @@ public class WeakActionAndToken
 
     public void ExecuteWithObject<TMessage>(TMessage message) where TMessage : Message
     {
-        if (this.Action is Action<TMessage> factAction)
-        {
-            factAction.Invoke(message);
-        }
+        if (Action is Action<TMessage> factAction) factAction.Invoke(message);
     }
 }

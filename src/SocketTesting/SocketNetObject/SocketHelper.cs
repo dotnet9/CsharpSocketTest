@@ -3,7 +3,7 @@
 public static partial class SerializeHelper
 {
     /// <summary>
-    /// UDP单包控制最大大小
+    ///     UDP单包控制最大大小
     /// </summary>
     public const int MaxUdpPacketSize = 65507;
 
@@ -30,10 +30,8 @@ public static partial class SerializeHelper
         var buffer = new byte[count];
         var bytesReadAllCount = 0;
         while (bytesReadAllCount != count)
-        {
             bytesReadAllCount +=
                 client.Receive(buffer, bytesReadAllCount, count - bytesReadAllCount, SocketFlags.None);
-        }
 
         return buffer;
     }

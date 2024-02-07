@@ -7,10 +7,7 @@ public partial class SerializeHelper
 
     public static byte[] Serialize<T>(this T data, long systemId) where T : INetObject
     {
-        if (data == null)
-        {
-            throw new ArgumentNullException(nameof(data));
-        }
+        if (data == null) throw new ArgumentNullException(nameof(data));
 
         var netObjectInfo = GetNetObjectHead(data.GetType());
         dynamic netObject = data;

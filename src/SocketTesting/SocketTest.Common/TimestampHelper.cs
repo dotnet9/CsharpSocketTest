@@ -3,7 +3,7 @@
 public static class TimestampHelper
 {
     /// <summary>
-    /// 获取从（2000+startYearFrom2000）-01-01 00:00:00到指定日期的时间戳（单位0.1s)
+    ///     获取从（2000+startYearFrom2000）-01-01 00:00:00到指定日期的时间戳（单位0.1s)
     /// </summary>
     /// <param name="dateTime"></param>
     /// <param name="startYearFrom2000"></param>
@@ -16,7 +16,7 @@ public static class TimestampHelper
     }
 
     /// <summary>
-    /// 获取从（2000+startYearFrom2000）-01-01 00:00:00到现在的时间戳（单位ms)
+    ///     获取从（2000+startYearFrom2000）-01-01 00:00:00到现在的时间戳（单位ms)
     /// </summary>
     /// <returns></returns>
     public static uint GetCurrentTimestamp(this byte startYearFrom2000)
@@ -26,7 +26,7 @@ public static class TimestampHelper
 
 
     /// <summary>
-    /// 获取（2000+startYearFrom2000）-01-01 00:00:00起计算的时间戳转本地时间
+    ///     获取（2000+startYearFrom2000）-01-01 00:00:00起计算的时间戳转本地时间
     /// </summary>
     /// <param name="tenthOfSecond">时间戳，单位0.1秒</param>
     /// <param name="startYearFrom2000"></param>

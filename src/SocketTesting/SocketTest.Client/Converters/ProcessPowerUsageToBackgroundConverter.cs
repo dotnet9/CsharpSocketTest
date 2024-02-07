@@ -1,8 +1,8 @@
-﻿using Avalonia.Data.Converters;
+﻿using System;
+using System.Globalization;
+using Avalonia.Data.Converters;
 using Avalonia.Media;
 using SocketDto;
-using System;
-using System.Globalization;
 
 namespace SocketTest.Client.Converters;
 
@@ -10,10 +10,7 @@ public class ProcessPowerUsageToBackgroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value == null)
-        {
-            return Brushes.Green;
-        }
+        if (value == null) return Brushes.Green;
 
         var powerUsageType =
             (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString()!);
@@ -22,7 +19,7 @@ public class ProcessPowerUsageToBackgroundConverter : IValueConverter
             ProcessPowerUsage.VeryLow or ProcessPowerUsage.Low => Brushes.LightGreen,
             ProcessPowerUsage.Moderate => Brushes.Green,
             ProcessPowerUsage.High => Brushes.DarkOrange,
-            _ => Brushes.Red,
+            _ => Brushes.Red
         };
     }
 

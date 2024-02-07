@@ -83,7 +83,9 @@
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding UpdateCommand}" Content="更新" />
         </StackPanel>
-        <log:LogView Grid.Row="3" />
+        <HeaderedContentControl Header="日志" Grid.Row="3">
+            <log:LogView />
+        </HeaderedContentControl>
         <StackPanel
             Grid.Row="4"
             Margin="0,8"

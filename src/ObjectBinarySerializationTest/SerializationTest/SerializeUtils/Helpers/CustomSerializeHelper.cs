@@ -4,7 +4,6 @@ public class CustomSerializeHelper : ISerializeHelper
 {
     private static readonly Dictionary<string, List<PropertyInfo>> ObjectPropertyInfos = new();
     private static readonly List<string> ComplexTypeNames;
-    private static Encoding DefaultEncoding { get; } = Encoding.UTF8;
 
     static CustomSerializeHelper()
     {
@@ -14,6 +13,8 @@ public class CustomSerializeHelper : ISerializeHelper
             typeof(Dictionary<,>).Name
         };
     }
+
+    private static Encoding DefaultEncoding { get; } = Encoding.UTF8;
 
     public byte[] Serialize<T>(T data)
     {
@@ -139,7 +140,7 @@ public class CustomSerializeHelper : ISerializeHelper
     private static object? DeserializeByType(BinaryReader reader, Type propertyType)
     {
         var propertyName = propertyType.Name;
-        object value;
+        object? value;
         if (propertyType.IsPrimitive
             || propertyType.BaseType == typeof(ValueType)
             || propertyType == typeof(string)

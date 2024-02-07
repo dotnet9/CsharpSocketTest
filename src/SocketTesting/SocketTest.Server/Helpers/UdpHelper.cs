@@ -1,14 +1,15 @@
-﻿using ReactiveUI;
+﻿using System;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Timers;
+using ReactiveUI;
 using SocketDto;
 using SocketNetObject;
 using SocketNetObject.Models;
 using SocketTest.Common;
 using SocketTest.Mvvm;
-using System;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 using SocketTest.Server.Mock;
 using Timer = System.Timers.Timer;
 
@@ -200,7 +201,7 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
         _sendDataTimer.Start();
     }
 
-    private async void MockUpdateDataAsync(object? sender, System.Timers.ElapsedEventArgs e)
+    private async void MockUpdateDataAsync(object? sender, ElapsedEventArgs e)
     {
         if (!IsRunning) return;
 
@@ -212,7 +213,7 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
         Logger.Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
     }
 
-    private async void MockSendDataAsync(object? sender, System.Timers.ElapsedEventArgs e)
+    private async void MockSendDataAsync(object? sender, ElapsedEventArgs e)
     {
         if (!IsRunning) return;
 

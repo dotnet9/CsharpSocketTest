@@ -199,16 +199,14 @@ public class BenchmarkTest
 
     public static void TestBit()
     {
-        ProcessData processData = new ProcessData()
+        var processData = new ProcessData
         {
             Cpu = 253, Memory = 510, Disk = 32, Network = 323, Gpu = 32, GpuEngine = 1, PowerUsage = 3,
             PowerUsageTrend = 2, Type = 1, Status = 1
         };
-        byte[] serializedData = processData.Serialize(); // Serialize to byte array  
-        ProcessData deserializedData = ProcessData.Deserialize(serializedData);
+        var serializedData = processData.Serialize(); // Serialize to byte array  
+        var deserializedData = ProcessData.Deserialize(serializedData);
         if (deserializedData.Cpu == processData.Cpu && deserializedData.Memory == processData.Memory)
-        {
             Console.WriteLine("success");
-        }
     }
 }

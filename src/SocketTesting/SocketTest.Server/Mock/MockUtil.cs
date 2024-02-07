@@ -7,7 +7,6 @@ using LoremNET;
 using SocketDto;
 using SocketNetObject;
 using SocketTest.Common;
-using SocketTest.Logger;
 using ProcessItem = SocketDto.ProcessItem;
 
 namespace SocketTest.Server.Mock;
@@ -18,6 +17,14 @@ public static class MockUtil
     private static int _mockCount;
     private static List<ProcessItem>? _mockProcesses;
     private static List<ActiveProcessItem>? _mockUpdateProcesses;
+
+    private static bool _isMockingAll;
+
+    private static readonly string MockStr = Lorem.Words(1, 3);
+    private static readonly short MockShort = (short)Random.Shared.Next(0, 1000);
+    private static readonly uint Timestamp = TimestampStartYear.GetCurrentTimestamp();
+
+    private static readonly Random CustomRandom = new(DateTime.Now.Microsecond);
 
     public static ResponseBaseInfo MockBase(int taskId = default)
     {
@@ -38,10 +45,8 @@ public static class MockUtil
     public static async Task<List<ProcessItem>> MockProcessesAsync(int totalCount, int pageSize, int pageIndex)
     {
         while (!await MockAllProcessAsync(totalCount))
-        {
             // 等待模拟操作完成
             await Task.Delay(TimeSpan.FromMilliseconds(10));
-        }
 
         return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
@@ -49,24 +54,17 @@ public static class MockUtil
     public static async Task<List<ProcessItem>> MockProcessesAsync(int totalCount, int pageSize)
     {
         while (!await MockAllProcessAsync(totalCount))
-        {
             // 等待模拟操作完成
             await Task.Delay(TimeSpan.FromMilliseconds(10));
-        }
 
         var pageCount = GetPageCount(totalCount, pageSize);
         var pageIndex = Random.Shared.Next(0, pageCount);
         return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 
-    private static bool _isMockingAll;
-
     public static async Task<bool> MockAllProcessAsync(int totalCount)
     {
-        if (_isMockingAll)
-        {
-            return false;
-        }
+        if (_isMockingAll) return false;
 
         _isMockingAll = true;
 
@@ -89,7 +87,7 @@ public static class MockUtil
         _mockUpdateProcesses = Enumerable.Range(0, _mockCount)
             .Select(index => new ActiveProcessItem
             {
-                ProcessData = new ActiveProcessItemData()
+                ProcessData = new ActiveProcessItemData
                 {
                     CPU = MockShort,
                     Memory = MockShort,
@@ -105,12 +103,8 @@ public static class MockUtil
             .ToList();
 
         _isMockingAll = false;
-        return true;
+        return await Task.FromResult(true);
     }
-
-    private static readonly string MockStr = Lorem.Words(1, 3);
-    private static readonly short MockShort = (short)Random.Shared.Next(0, 1000);
-    private static readonly uint Timestamp = TimestampStartYear.GetCurrentTimestamp();
 
     private static ProcessItem MockProcess(int id)
     {
@@ -120,7 +114,7 @@ public static class MockUtil
             Name = MockStr,
             Publisher = MockStr,
             CommandLine = MockStr,
-            ProcessData = new ProcessItemData()
+            ProcessData = new ProcessItemData
             {
                 CPU = MockShort,
                 Memory = MockShort,
@@ -143,23 +137,17 @@ public static class MockUtil
         int pageIndex)
     {
         while (!await MockAllProcessAsync(totalCount))
-        {
             // 等待模拟操作完成
             await Task.Delay(TimeSpan.FromMilliseconds(10));
-        }
 
         return _mockUpdateProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 
-    private static readonly Random CustomRandom = new(DateTime.Now.Microsecond);
-
     public static async Task MockUpdateProcessAsync(int totalCount)
     {
         while (!await MockAllProcessAsync(totalCount))
-        {
             // 等待模拟操作完成
             await Task.Delay(TimeSpan.FromMilliseconds(10));
-        }
 
         var cpu = (short)CustomRandom.Next(0, 1000);
         var memory = (short)CustomRandom.Next(0, 1000);
@@ -175,7 +163,7 @@ public static class MockUtil
         _mockUpdateProcesses!.ForEach(process =>
         {
             // 需要重新赋值，才能重新设置buffer
-            process.ProcessData = new ActiveProcessItemData()
+            process.ProcessData = new ActiveProcessItemData
             {
                 CPU = cpu,
                 Memory = memory,

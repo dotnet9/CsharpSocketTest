@@ -1,5 +1,5 @@
-﻿using SocketTest.Logger.Models;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
+using SocketTest.Logger.Models;
 
 namespace SocketTest.Logger;
 

@@ -1,7 +1,7 @@
-using MessagePack;
-using SocketNetObject.Models;
 using System.Text;
 using System.Text.Json;
+using MessagePack;
+using SocketNetObject.Models;
 using Xunit.Abstractions;
 
 namespace SocketDto.Test;
@@ -11,9 +11,9 @@ public class SysteProcessUnitTest
     private readonly ITestOutputHelper _testOutputHelper;
 
     /// <summary>
-    /// 未优化
+    ///     未优化
     /// </summary>
-    private SystemProcess _codeWFObject = new SystemProcess()
+    private readonly SystemProcess _codeWFObject = new()
     {
         PID = 10565,
         Name = "码界工坊",
@@ -31,41 +31,10 @@ public class SysteProcessUnitTest
         Status = "效率模式"
     };
 
-    public SysteProcessUnitTest(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
-
     /// <summary>
-    /// Json序列化大小测试
+    ///     普通优化字段数据类型
     /// </summary>
-    [Fact]
-    public void Test_SerializeJsonData_Success()
-    {
-        var jsonData = JsonSerializer.Serialize(_codeWFObject);
-        _testOutputHelper.WriteLine($"Json长度：{jsonData.Length}");
-
-        var jsonDataBytes = Encoding.UTF8.GetBytes(jsonData);
-        _testOutputHelper.WriteLine($"json二进制长度：{jsonDataBytes.Length}");
-    }
-
-    /// <summary>
-    /// 二进制序列化测试
-    /// </summary>
-    [Fact]
-    public void Test_SerializeToBytes_Success()
-    {
-        var buffer = _codeWFObject.SerializeByNative(1);
-        _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
-
-        var deserializeObj = buffer.DeserializeByNative<SystemProcess>();
-        Assert.Equal("码界工坊", deserializeObj.Name);
-    }
-
-    /// <summary>
-    /// 普通优化字段数据类型
-    /// </summary>
-    private SystemProcess2 _codeWFObject2 = new SystemProcess2()
+    private readonly SystemProcess2 _codeWFObject2 = new()
     {
         PID = 10565,
         Name = "码界工坊",
@@ -84,29 +53,15 @@ public class SysteProcessUnitTest
     };
 
     /// <summary>
-    /// 二进制序列化测试
+    ///     极限优化字段数据类型
     /// </summary>
-    [Fact]
-    public void Test_SerializeToBytes2_Success()
-    {
-        var buffer = _codeWFObject2.SerializeByNative(1);
-        _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
-
-        var deserializeObj = buffer.DeserializeByNative<SystemProcess2>();
-        Assert.Equal("码界工坊", deserializeObj.Name);
-        Assert.Equal(2.2f, deserializeObj.GPU);
-    }
-
-    /// <summary>
-    /// 极限优化字段数据类型
-    /// </summary>
-    private SystemProcess3 _codeWFObject3 = new SystemProcess3()
+    private readonly SystemProcess3 _codeWFObject3 = new()
     {
         PID = 10565,
         Name = "码界工坊",
         Publisher = "沙漠尽头的狼",
         CommandLine = "dotnet CodeWF.Tools.dll",
-        ProcessData = new SystemProcessData()
+        ProcessData = new SystemProcessData
         {
             CPU = 23,
             Memory = 1,
@@ -121,8 +76,53 @@ public class SysteProcessUnitTest
         }
     };
 
+    public SysteProcessUnitTest(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
     /// <summary>
-    /// 二进制极限序列化测试
+    ///     Json序列化大小测试
+    /// </summary>
+    [Fact]
+    public void Test_SerializeJsonData_Success()
+    {
+        var jsonData = JsonSerializer.Serialize(_codeWFObject);
+        _testOutputHelper.WriteLine($"Json长度：{jsonData.Length}");
+
+        var jsonDataBytes = Encoding.UTF8.GetBytes(jsonData);
+        _testOutputHelper.WriteLine($"json二进制长度：{jsonDataBytes.Length}");
+    }
+
+    /// <summary>
+    ///     二进制序列化测试
+    /// </summary>
+    [Fact]
+    public void Test_SerializeToBytes_Success()
+    {
+        var buffer = _codeWFObject.SerializeByNative(1);
+        _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
+
+        var deserializeObj = buffer.DeserializeByNative<SystemProcess>();
+        Assert.Equal("码界工坊", deserializeObj.Name);
+    }
+
+    /// <summary>
+    ///     二进制序列化测试
+    /// </summary>
+    [Fact]
+    public void Test_SerializeToBytes2_Success()
+    {
+        var buffer = _codeWFObject2.SerializeByNative(1);
+        _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
+
+        var deserializeObj = buffer.DeserializeByNative<SystemProcess2>();
+        Assert.Equal("码界工坊", deserializeObj.Name);
+        Assert.Equal(2.2f, deserializeObj.GPU);
+    }
+
+    /// <summary>
+    ///     二进制极限序列化测试
     /// </summary>
     [Fact]
     public void Test_SerializeToBytes3_Success()
@@ -132,12 +132,12 @@ public class SysteProcessUnitTest
 
         var deserializeObj = buffer.DeserializeByNative<SystemProcess3>();
         Assert.Equal("码界工坊", deserializeObj.Name);
-        Assert.Equal(23, deserializeObj.ProcessData.CPU);
+        Assert.Equal(23, deserializeObj.ProcessData!.CPU);
         Assert.Equal(1, deserializeObj.ProcessData.PowerUsage);
     }
 
     /// <summary>
-    /// 二进制极限序列化测试（MessagePack压缩）
+    ///     二进制极限序列化测试（MessagePack压缩）
     /// </summary>
     [Fact]
     public void Test_SerializeToBytes4_Success()
@@ -147,7 +147,7 @@ public class SysteProcessUnitTest
 
         var deserializeObj = buffer.Deserialize<SystemProcess3>();
         Assert.Equal("码界工坊", deserializeObj.Name);
-        Assert.Equal(23, deserializeObj.ProcessData.CPU);
+        Assert.Equal(23, deserializeObj.ProcessData!.CPU);
         Assert.Equal(1, deserializeObj.ProcessData.PowerUsage);
     }
 }
@@ -194,14 +194,16 @@ public class SystemProcess2 : INetObject
 [NetHead(1, 3)]
 public class SystemProcess3 : INetObject
 {
+    private byte[]? _data;
+
+    private SystemProcessData? _processData;
     [Key(0)] public int PID { get; set; }
     [Key(1)] public string? Name { get; set; }
     [Key(2)] public string? Publisher { get; set; }
     [Key(3)] public string? CommandLine { get; set; }
-    private byte[]? _data;
 
     /// <summary>
-    /// 序列化，这是实际需要序列化的数据
+    ///     序列化，这是实际需要序列化的数据
     /// </summary>
     [Key(4)]
     public byte[]? Data
@@ -216,10 +218,8 @@ public class SystemProcess3 : INetObject
         }
     }
 
-    private SystemProcessData? _processData;
-
     /// <summary>
-    /// 进程数据，添加NetIgnoreMember在序列化会忽略
+    ///     进程数据，添加NetIgnoreMember在序列化会忽略
     /// </summary>
     [IgnoreMember]
     [NetIgnoreMember]

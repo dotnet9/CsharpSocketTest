@@ -10,10 +10,7 @@ public partial class SerializeHelper
         // 计算总的bit长度
         foreach (var property in properties)
         {
-            if (!Attribute.IsDefined(property, typeof(NetFieldOffsetAttribute)))
-            {
-                continue;
-            }
+            if (!Attribute.IsDefined(property, typeof(NetFieldOffsetAttribute))) continue;
 
             var offsetAttribute =
                 (NetFieldOffsetAttribute)property.GetCustomAttribute(typeof(NetFieldOffsetAttribute))!;
@@ -25,10 +22,7 @@ public partial class SerializeHelper
 
         foreach (var property in properties)
         {
-            if (!Attribute.IsDefined(property, typeof(NetFieldOffsetAttribute)))
-            {
-                continue;
-            }
+            if (!Attribute.IsDefined(property, typeof(NetFieldOffsetAttribute))) continue;
 
             var offsetAttribute =
                 (NetFieldOffsetAttribute)property.GetCustomAttribute(typeof(NetFieldOffsetAttribute))!;
@@ -46,14 +40,11 @@ public partial class SerializeHelper
 
         foreach (var property in properties)
         {
-            if (!Attribute.IsDefined(property, typeof(NetFieldOffsetAttribute)))
-            {
-                continue;
-            }
+            if (!Attribute.IsDefined(property, typeof(NetFieldOffsetAttribute))) continue;
 
             var offsetAttribute =
                 (NetFieldOffsetAttribute)property.GetCustomAttribute(typeof(NetFieldOffsetAttribute))!;
-            dynamic value = GetValueFromBit(buffer, offsetAttribute.Offset, offsetAttribute.Size,
+            var value = GetValueFromBit(buffer, offsetAttribute.Offset, offsetAttribute.Size,
                 property.PropertyType);
             property.SetValue(obj, value);
         }
@@ -62,7 +53,7 @@ public partial class SerializeHelper
     }
 
     /// <summary>
-    /// 将值按位写入buffer
+    ///     将值按位写入buffer
     /// </summary>
     /// <param name="buffer"></param>
     /// <param name="value"></param>
@@ -72,14 +63,11 @@ public partial class SerializeHelper
     {
         var mask = (1 << size) - 1;
         buffer[offset / 8] |= (byte)((value & mask) << (offset % 8));
-        if (offset % 8 + size > 8)
-        {
-            buffer[offset / 8 + 1] |= (byte)((value & mask) >> (8 - offset % 8));
-        }
+        if (offset % 8 + size > 8) buffer[offset / 8 + 1] |= (byte)((value & mask) >> (8 - offset % 8));
     }
 
     /// <summary>
-    /// 从buffer中按位读取值
+    ///     从buffer中按位读取值
     /// </summary>
     /// <param name="buffer"></param>
     /// <param name="offset"></param>
@@ -90,10 +78,7 @@ public partial class SerializeHelper
     {
         var mask = (1 << size) - 1;
         var bitValue = (buffer[offset / 8] >> (offset % 8)) & mask;
-        if (offset % 8 + size > 8)
-        {
-            bitValue |= (buffer[offset / 8 + 1] << (8 - offset % 8)) & mask;
-        }
+        if (offset % 8 + size > 8) bitValue |= (buffer[offset / 8 + 1] << (8 - offset % 8)) & mask;
 
         dynamic result = Convert.ChangeType(bitValue, propertyType); // 根据属性类型进行转换
         return result;

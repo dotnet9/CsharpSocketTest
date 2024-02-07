@@ -1,27 +1,27 @@
 ﻿namespace SocketNetObject.Models;
 
 /// <summary>
-/// 网络通信对象头部信息
+///     网络通信对象头部信息
 /// </summary>
 public class NetHeadInfo
 {
     /// <summary>
-    /// 数据包大小
+    ///     数据包大小
     /// </summary>
     public int BufferLen { get; set; }
 
     /// <summary>
-    /// 系统标识
+    ///     系统标识
     /// </summary>
     public long SystemId { get; set; }
 
     /// <summary>
-    /// 对象Id
+    ///     对象Id
     /// </summary>
     public byte ObjectId { get; set; }
 
     /// <summary>
-    /// 对象版本号
+    ///     对象版本号
     /// </summary>
     public byte ObjectVersion { get; set; }
 
