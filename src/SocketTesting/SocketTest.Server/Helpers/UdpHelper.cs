@@ -227,7 +227,7 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
         {
             if (!IsRunning) break;
 
-            var response = new UpdateActiveProcessList
+            var response = new UpdateRealtimeProcessList
             {
                 TotalSize = tcpHelper.MockCount,
                 PageSize = pageSize,

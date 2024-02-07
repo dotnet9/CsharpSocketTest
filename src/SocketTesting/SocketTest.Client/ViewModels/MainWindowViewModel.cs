@@ -306,7 +306,7 @@ public class MainWindowViewModel : ViewModelBase
             while (UdpHelper.IsRunning)
             {
                 while (UdpHelper.TryGetResponse(out var response) &&
-                       response is UpdateActiveProcessList updateActiveProcess)
+                       response is UpdateRealtimeProcessList updateActiveProcess)
                     ReceiveUdpData(updateActiveProcess);
 
                 await Task.Delay(TimeSpan.FromMilliseconds(MockConst.UdpDillMilliseconds));
@@ -314,7 +314,7 @@ public class MainWindowViewModel : ViewModelBase
         });
     }
 
-    private void ReceiveUdpData(UpdateActiveProcessList response)
+    private void ReceiveUdpData(UpdateRealtimeProcessList response)
     {
         var startIndex = response.PageIndex * response.PageSize;
         for (var i = 0; i < response.Processes!.Count; i++)

@@ -244,9 +244,9 @@ public class TcpHelper : ViewModelBase, ISocketBase
         {
             command = buffer.Deserialize<ChangeProcessList>();
         }
-        else if (netObjectHeadInfo.IsNetObject<UpdateActiveProcessList>())
+        else if (netObjectHeadInfo.IsNetObject<UpdateRealtimeProcessList>())
         {
-            command = buffer.Deserialize<UpdateActiveProcessList>();
+            command = buffer.Deserialize<UpdateRealtimeProcessList>();
         }
         else if (netObjectHeadInfo.IsNetObject<Heartbeat>())
         {

@@ -3,7 +3,7 @@
 /// <summary>
 ///     TCP心跳包
 /// </summary>
-[NetHead(255, 1)]
+[NetHead(200, 1)]
 [MessagePackObject]
 public class Heartbeat : INetObject
 {

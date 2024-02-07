@@ -16,7 +16,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
 {
     private readonly BlockingCollection<byte[]> _receivedBuffers = new(new ConcurrentQueue<byte[]>());
 
-    private readonly BlockingCollection<UpdateActiveProcessList> _receivedResponse = new();
+    private readonly BlockingCollection<UpdateRealtimeProcessList> _receivedResponse = new();
     private UdpClient? _client;
     private int _receivedPacketsCount;
     private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
@@ -245,7 +245,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
                         || buffer.Length != netObjectInfo!.BufferLen)
                         continue;
 
-                    var updateActiveProcess = buffer.DeserializeByNative<UpdateActiveProcessList>();
+                    var updateActiveProcess = buffer.DeserializeByNative<UpdateRealtimeProcessList>();
 
                     _receivedResponse.Add(updateActiveProcess);
                 }
