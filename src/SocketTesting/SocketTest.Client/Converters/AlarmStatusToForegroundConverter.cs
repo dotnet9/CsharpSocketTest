@@ -3,19 +3,15 @@ using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using SocketDto;
-using SocketTest.Common;
 
 namespace SocketTest.Client.Converters;
 
-public class ProcessPowerUsageToFormatConverter : IValueConverter
+public class AlarmStatusToForegroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value == null) return Brushes.Green;
-
-        var powerUsageType =
-            (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString()!);
-        return powerUsageType.Description();
+        if (value is not ProcessAlarmStatus status) return Brushes.Red;
+        return status == ProcessAlarmStatus.Normal ? Brushes.Green : Brushes.Red;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

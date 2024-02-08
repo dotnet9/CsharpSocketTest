@@ -2,23 +2,25 @@
 using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using SocketDto;
 
 namespace SocketTest.Client.Converters;
 
-public class UsageToBackgroundConverter : IValueConverter
+public class ProcessStatusToForegroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value == null || !short.TryParse(value.ToString(), out var bValue)) return Brushes.Green;
-
-        var dValue = bValue * 1.0 / 10;
-        return dValue switch
+        if (value is ProcessStatus status)
         {
-            < 5 => Brushes.LightGreen,
-            < 10 => Brushes.Green,
-            < 20 => Brushes.DarkOrange,
-            _ => Brushes.Red
-        };
+            return status switch
+            {
+                < ProcessStatus.Running => Brushes.CadetBlue,
+                > ProcessStatus.Running => Brushes.Green,
+                _ => Brushes.Red
+            };
+        }
+
+        return Brushes.CadetBlue;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

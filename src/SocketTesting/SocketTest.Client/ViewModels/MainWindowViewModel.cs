@@ -311,7 +311,7 @@ public class MainWindowViewModel : ViewModelBase
         for (var i = 0; i < response.Processes!.Count; i++)
         {
             if (_receivedProcesses.Count > startIndex)
-                _receivedProcesses[startIndex].Update(response.Processes[i], _timestampStartYear);
+                _receivedProcesses[startIndex].Update(response.Processes[i]);
             else
                 Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
 

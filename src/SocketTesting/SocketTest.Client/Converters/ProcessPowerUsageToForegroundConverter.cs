@@ -6,7 +6,7 @@ using SocketDto;
 
 namespace SocketTest.Client.Converters;
 
-public class ProcessPowerUsageToBackgroundConverter : IValueConverter
+public class ProcessPowerUsageToForegroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

@@ -7,12 +7,12 @@ public class ResponseProcessListUnitTest
     {
         var data = new ProcessItemData
         {
-            CPU = 112,
+            Cpu = 112,
             Memory = 325,
             Disk = 23,
             Network = 593,
-            GPU = 253,
-            GPUEngine = (byte)GpuEngine.None,
+            Gpu = 253,
+            GpuEngine = (byte)GpuEngine.None,
             PowerUsage = (byte)ProcessPowerUsage.Low,
             PowerUsageTrend = (byte)ProcessPowerUsage.Low,
             Type = (byte)ProcessType.Application,
@@ -24,7 +24,7 @@ public class ResponseProcessListUnitTest
 
         // ProcessItemData总共60位，序列化后应该占8个字节
         Assert.Equal(8, buffer.Length);
-        Assert.Equal(data.CPU, desData.CPU);
+        Assert.Equal(data.Cpu, desData.Cpu);
         Assert.Equal(data.Status, desData.Status);
     }
 
@@ -48,12 +48,12 @@ public class ResponseProcessListUnitTest
             CommandLine = "dotnet Dotnetools.com",
             ProcessData = new ProcessItemData
             {
-                CPU = 112,
+                Cpu = 112,
                 Memory = 325,
                 Disk = 23,
                 Network = 593,
-                GPU = 253,
-                GPUEngine = (byte)GpuEngine.None,
+                Gpu = 253,
+                GpuEngine = (byte)GpuEngine.None,
                 PowerUsage = (byte)ProcessPowerUsage.Low,
                 PowerUsageTrend = (byte)ProcessPowerUsage.Low,
                 Type = (byte)ProcessType.Application,
@@ -72,7 +72,7 @@ public class ResponseProcessListUnitTest
         Assert.NotNull(desObject.Processes[0].ProcessData);
         // ProcessItemData总共60位，序列化后应该占8个字节
         Assert.Equal(8, desObject.Processes[0].Data?.Length);
-        Assert.Equal(processItem.ProcessData.CPU, desObject.Processes[0].ProcessData?.CPU);
+        Assert.Equal(processItem.ProcessData.Cpu, desObject.Processes[0].ProcessData?.Cpu);
         Assert.Equal(processItem.LastUpdateTime, desObject.Processes[0].LastUpdateTime);
     }
 

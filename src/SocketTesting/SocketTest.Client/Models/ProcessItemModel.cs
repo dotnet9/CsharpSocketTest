@@ -19,7 +19,7 @@ public class ProcessItemModel : ViewModelBase
 
     private short _gpu;
 
-    private byte _gpuEngine;
+    private GpuEngine _gpuEngine;
 
     private DateTime _lastUpdateTime;
 
@@ -29,15 +29,15 @@ public class ProcessItemModel : ViewModelBase
 
     private short _network;
 
-    private byte _power;
+    private ProcessPowerUsage _powerUsage;
 
-    private byte _powerUsageTrend;
+    private ProcessPowerUsage _powerUsageTrend;
 
     private string? _publisher;
 
-    private string? _status;
+    private ProcessStatus _status;
 
-    private string? _type;
+    private ProcessType _type;
 
     private DateTime _updateTime;
 
@@ -67,7 +67,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     进程类型
     /// </summary>
-    public string? Type
+    public ProcessType Type
     {
         get => _type;
         set => this.RaiseAndSetIfChanged(ref _type, value);
@@ -76,21 +76,21 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     进程状态
     /// </summary>
-    public string? Status
+    public ProcessStatus Status
     {
         get => _status;
         set => this.RaiseAndSetIfChanged(ref _status, value);
     }
 
-    private ProcessOtherStatus _processStatus;
+    private ProcessAlarmStatus _alarmStatus;
 
     /// <summary>
     /// 进程一般状态
     /// </summary>
-    public ProcessOtherStatus ProcessStatus
+    public ProcessAlarmStatus AlarmStatus
     {
-        get => _processStatus;
-        set => this.RaiseAndSetIfChanged(ref _processStatus, value);
+        get => _alarmStatus;
+        set => this.RaiseAndSetIfChanged(ref _alarmStatus, value);
     }
 
     /// <summary>
@@ -159,7 +159,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     GPU引擎
     /// </summary>
-    public byte GpuEngine
+    public GpuEngine GpuEngine
     {
         get => _gpuEngine;
         set => this.RaiseAndSetIfChanged(ref _gpuEngine, value);
@@ -168,16 +168,16 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     电源使用情况
     /// </summary>
-    public byte Power
+    public ProcessPowerUsage PowerUsage
     {
-        get => _power;
-        set => this.RaiseAndSetIfChanged(ref _power, value);
+        get => _powerUsage;
+        set => this.RaiseAndSetIfChanged(ref _powerUsage, value);
     }
 
     /// <summary>
     ///     电源使用情况趋势
     /// </summary>
-    public byte PowerUsageTrend
+    public ProcessPowerUsage PowerUsageTrend
     {
         get => _powerUsageTrend;
         set => this.RaiseAndSetIfChanged(ref _powerUsageTrend, value);
@@ -209,22 +209,21 @@ public class ProcessItemModel : ViewModelBase
         Publisher = process.Publisher;
         CommandLine = process.CommandLine;
 
-        Type = ((ProcessType)Enum.Parse(typeof(ProcessType), process.ProcessData!.Type.ToString())).Description();
-        Status =
-            ((ProcessStatus)Enum.Parse(typeof(ProcessStatus), process.ProcessData!.Status.ToString())).Description();
-        Cpu = process.ProcessData!.CPU;
+        Cpu = process.ProcessData!.Cpu;
         Memory = process.ProcessData!.Memory;
         Disk = process.ProcessData!.Disk;
         Network = process.ProcessData!.Network;
-        Gpu = process.ProcessData!.GPU;
-        GpuEngine = process.ProcessData!.GPUEngine;
-        Power = process.ProcessData!.PowerUsage;
-        PowerUsageTrend = process.ProcessData!.PowerUsageTrend;
+        Gpu = process.ProcessData!.Gpu;
+        GpuEngine = process.ProcessData!.GpuEngineKind;
+        PowerUsage = process.ProcessData!.PowerUsageKind;
+        PowerUsageTrend = process.ProcessData!.PowerUsageTrendKind;
+        Type = process.ProcessData!.TypeKind;
+        Status = process.ProcessData!.StatusKind;
         LastUpdateTime = process.LastUpdateTime.ToDateTime(timestampStartYear);
         UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
     }
 
-    public void Update(RealtimeProcessItem process, byte timestampStartYear)
+    public void Update(RealtimeProcessItem process)
     {
         Cpu = process.ProcessData!.Cpu;
         Memory = process.ProcessData!.Memory;
@@ -234,11 +233,12 @@ public class ProcessItemModel : ViewModelBase
 
     public void Update(GeneralProcessItem process, byte timestampStartYear)
     {
-        ProcessStatus = process.ProcessStatus;
+        Status = process.ProcessData!.ProcessStatusKind;
+        AlarmStatus = process.ProcessData!.AlarmStatusKind;
         Gpu = process.ProcessData!.Gpu;
-        GpuEngine = process.ProcessData!.GpuEngine;
-        Power = process.ProcessData!.PowerUsage;
-        PowerUsageTrend = process.ProcessData!.PowerUsageTrend;
+        GpuEngine = process.ProcessData!.GpuEngineKind;
+        PowerUsage = process.ProcessData!.PowerUsageKind;
+        PowerUsageTrend = process.ProcessData!.PowerUsageTrendKind;
         LastUpdateTime = UpdateTime;
         UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
     }

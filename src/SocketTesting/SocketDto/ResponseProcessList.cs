@@ -54,6 +54,8 @@ public record ProcessItem
 
     private ProcessItemData? _processData;
 
+    #region 网络通信字段
+
     /// <summary>
     ///     进程ID
     /// </summary>
@@ -93,6 +95,20 @@ public record ProcessItem
     }
 
     /// <summary>
+    ///     上次更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms）
+    /// </summary>
+    [Key(5)]
+    public uint LastUpdateTime { get; set; }
+
+    /// <summary>
+    ///     更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms）
+    /// </summary>
+    [Key(6)]
+    public uint UpdateTime { get; set; }
+
+    #endregion
+
+    /// <summary>
     ///     进程数据
     /// </summary>
     [IgnoreMember]
@@ -105,18 +121,6 @@ public record ProcessItem
             _data = _processData?.FieldObjectBuffer();
         }
     }
-
-    /// <summary>
-    ///     上次更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms）
-    /// </summary>
-    [Key(5)]
-    public uint LastUpdateTime { get; set; }
-
-    /// <summary>
-    ///     更新时间（当天时间戳：当日0点0分0秒计算的时间戳，单位ms）
-    /// </summary>
-    [Key(6)]
-    public uint UpdateTime { get; set; }
 }
 
 /// <summary>
@@ -124,11 +128,13 @@ public record ProcessItem
 /// </summary>
 public class ProcessItemData
 {
+    #region 网络通信字段
+
     /// <summary>
     ///     占10bit, CPU（所有内核的总处理利用率），最后一位表示小数位，比如253表示25.3%
     /// </summary>
     [NetFieldOffset(0, 10)]
-    public short CPU { get; set; }
+    public short Cpu { get; set; }
 
     /// <summary>
     ///     占10bit, 内存（进程占用的物理内存），最后一位表示小数位，比如253表示25.3%，值可根据基本信息计算
@@ -152,43 +158,173 @@ public class ProcessItemData
     ///     占10bit, GPU(所有GPU引擎的最高利用率)，最后一位表示小数位，比如253表示25.3
     /// </summary>
     [NetFieldOffset(40, 10)]
-    public short GPU { get; set; }
+    public short Gpu { get; set; }
+
+    private byte _gpuEngine;
 
     /// <summary>
     ///     占1bit，GPU引擎，0：无，1：GPU 0 - 3D
     /// </summary>
     [NetFieldOffset(50, 1)]
-    public byte GPUEngine { get; set; }
+    public byte GpuEngine
+    {
+        get => _gpuEngine;
+        set
+        {
+            _gpuEngine = value;
+            _gpuEngineKind = (GpuEngine)Enum.Parse(typeof(GpuEngine), value.ToString());
+        }
+    }
+
+    private byte _powerUsage;
 
     /// <summary>
     ///     占3bit，电源使用情况（CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高
     /// </summary>
     [NetFieldOffset(51, 3)]
-    public byte PowerUsage { get; set; }
+    public byte PowerUsage
+    {
+        get => _powerUsage;
+        set
+        {
+            _powerUsage = value;
+            _powerUsageKind = (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString());
+        }
+    }
+
+    private byte _powerUsageTrend;
 
     /// <summary>
     ///     占3bit，电源使用情况趋势（一段时间内CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高
     /// </summary>
     [NetFieldOffset(54, 3)]
-    public byte PowerUsageTrend { get; set; }
+    public byte PowerUsageTrend
+    {
+        get => _powerUsageTrend;
+        set
+        {
+            _powerUsageTrend = value;
+            _powerUsageTrendKind = (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString());
+        }
+    }
+
+    private byte _type;
 
     /// <summary>
     ///     占1bit，进程类型，0：应用，1：后台进程
     /// </summary>
     [NetFieldOffset(57, 1)]
-    public byte Type { get; set; }
+    public byte Type
+    {
+        get => _type;
+        set
+        {
+            _type = value;
+            _typeKind = (ProcessType)Enum.Parse(typeof(ProcessType), value.ToString());
+        }
+    }
+
+    private byte _status;
 
     /// <summary>
-    ///     占1bit，进程状态，0：正常运行，1：效率模式，2：挂起
+    ///     占3bit，进程状态，0：新建状态，1：就绪状态，2：运行状态，3：阻塞状态，4：终止状态
     /// </summary>
-    [NetFieldOffset(58, 2)]
-    public byte Status { get; set; }
-}
+    [NetFieldOffset(58, 3)]
+    public byte Status
+    {
+        get => _status;
+        set
+        {
+            _status = value;
+            _statusKind = (ProcessStatus)Enum.Parse(typeof(ProcessStatus), value.ToString());
+        }
+    }
 
-public enum ProcessRunningStatus
-{
-    [Description("未运行")] None,
-    [Description("已运行")] Running
+    #endregion
+
+    #region 程序处理字段
+
+    private GpuEngine _gpuEngineKind;
+
+    /// <summary>
+    ///     GPU引擎
+    /// </summary>
+    [IgnoreMember]
+    public GpuEngine GpuEngineKind
+    {
+        get => _gpuEngineKind;
+        set
+        {
+            _gpuEngineKind = value;
+            GpuEngine = (byte)value;
+        }
+    }
+
+    private ProcessPowerUsage _powerUsageKind;
+
+    /// <summary>
+    ///     电源使用情况
+    /// </summary>
+    [IgnoreMember]
+    public ProcessPowerUsage PowerUsageKind
+    {
+        get => _powerUsageKind;
+        set
+        {
+            _powerUsageKind = value;
+            PowerUsage = (byte)value;
+        }
+    }
+
+    private ProcessPowerUsage _powerUsageTrendKind;
+
+    /// <summary>
+    ///     电源使用情况趋势
+    /// </summary>
+    [IgnoreMember]
+    public ProcessPowerUsage PowerUsageTrendKind
+    {
+        get => _powerUsageTrendKind;
+        set
+        {
+            _powerUsageTrendKind = value;
+            _powerUsageTrend = (byte)value;
+        }
+    }
+
+    private ProcessType _typeKind;
+
+    /// <summary>
+    ///     进程类型
+    /// </summary>
+    [IgnoreMember]
+    public ProcessType TypeKind
+    {
+        get => _typeKind;
+        set
+        {
+            _typeKind = value;
+            _type = (byte)value;
+        }
+    }
+
+    private ProcessStatus _statusKind;
+
+    /// <summary>
+    ///     进程状态
+    /// </summary>
+    [IgnoreMember]
+    public ProcessStatus StatusKind
+    {
+        get => _statusKind;
+        set
+        {
+            _statusKind = value;
+            _status = (byte)value;
+        }
+    }
+
+    #endregion
 }
 
 /// <summary>
@@ -205,9 +341,11 @@ public enum ProcessType
 /// </summary>
 public enum ProcessStatus
 {
-    [Description("正常运行")] Running,
-    [Description("效率模式")] EfficiencyMode,
-    [Description("挂起")] Pending
+    [Description("新建状态")] New,
+    [Description("就绪状态")] Ready,
+    [Description("运行状态")] Running,
+    [Description("阻塞状态")] Blocked,
+    [Description("终止状态")] Terminated
 }
 
 /// <summary>

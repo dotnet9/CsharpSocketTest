@@ -38,23 +38,11 @@ public class UpdateGeneralProcessList : INetObject
 public class GeneralProcessItem
 {
     /// <summary>
-    ///     对象大小，Data字段为3字节，序列化时需要3字节表示byte[]长度，所有3个序列化字段总大小为 sizeof(byte)+ (4 + 3) + sizeof(uint) = 12
+    ///     对象大小，Data字段为3字节，序列化时需要4字节表示byte[]长度，所有2个序列化字段总大小为 (4 + 3) + sizeof(uint) = 11
     /// </summary>
     public const int ObjectSize = sizeof(byte) + (sizeof(int) + 3) + sizeof(uint);
 
     #region 网络传输字段
-
-    private byte _status;
-
-    public byte Status
-    {
-        get => _status;
-        set
-        {
-            _status = value;
-            _processStatus = (ProcessOtherStatus)Enum.Parse(typeof(ProcessOtherStatus), value.ToString());
-        }
-    }
 
     /// <summary>
     ///     见ActiveProcessData定义
@@ -84,19 +72,6 @@ public class GeneralProcessItem
 
     #region 编程字段数据转换辅助字段
 
-    private ProcessOtherStatus _processStatus;
-
-    [NetIgnoreMember]
-    public ProcessOtherStatus ProcessStatus
-    {
-        get => _processStatus;
-        set
-        {
-            _processStatus = value;
-            _status = (byte)value;
-        }
-    }
-
     private GeneralProcessItemData? _processData;
 
     /// <summary>
@@ -118,29 +93,180 @@ public class GeneralProcessItem
 
 public record GeneralProcessItemData
 {
+    #region 网络传输字段
+
+    private byte _processStatus;
+
+    /// <summary>
+    /// 进程状态
+    /// </summary>
+    [NetFieldOffset(0, 3)]
+    public byte ProcessStatus
+    {
+        get => _processStatus;
+        set
+        {
+            _processStatus = value;
+            _processStatusKind = (ProcessStatus)Enum.Parse(typeof(ProcessStatus), value.ToString());
+        }
+    }
+
+    private byte _alarmStatus;
+
+    /// <summary>
+    /// 告警状态
+    /// </summary>
+    [NetFieldOffset(3, 3)]
+    public byte AlarmStatus
+    {
+        get => _alarmStatus;
+        set
+        {
+            _alarmStatus = value;
+            _alarmStatusKind = (ProcessAlarmStatus)Enum.Parse(typeof(ProcessAlarmStatus), value.ToString());
+        }
+    }
+
     /// <summary>
     ///     占10bit, GPU(所有GPU引擎的最高利用率)，最后一位表示小数位，比如253表示25.3
     /// </summary>
-    [NetFieldOffset(0, 10)]
+    [NetFieldOffset(6, 10)]
     public short Gpu { get; set; }
+
+    private byte _gpuEngine;
 
     /// <summary>
     ///     占1bit，GPU引擎，0：无，1：GPU 0 - 3D
     /// </summary>
-    [NetFieldOffset(10, 1)]
-    public byte GpuEngine { get; set; }
+    [NetFieldOffset(16, 1)]
+    public byte GpuEngine
+    {
+        get => _gpuEngine;
+        set
+        {
+            _gpuEngine = value;
+            _gpuEngineKind = (GpuEngine)Enum.Parse(typeof(GpuEngine), value.ToString());
+        }
+    }
+
+    private byte _powerUsage;
 
     /// <summary>
     ///     占3bit，电源使用情况（CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高
     /// </summary>
-    [NetFieldOffset(11, 3)]
-    public byte PowerUsage { get; set; }
+    [NetFieldOffset(17, 3)]
+    public byte PowerUsage
+    {
+        get => _powerUsage;
+        set
+        {
+            _powerUsage = value;
+            _powerUsageKind = (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString());
+        }
+    }
+
+    private byte _powerUsageTrend;
 
     /// <summary>
     ///     占3bit，电源使用情况趋势（一段时间内CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高
     /// </summary>
-    [NetFieldOffset(14, 3)]
-    public byte PowerUsageTrend { get; set; }
+    [NetFieldOffset(20, 3)]
+    public byte PowerUsageTrend
+    {
+        get => _powerUsageTrend;
+        set
+        {
+            _powerUsageTrend = value;
+            _powerUsageTrendKind = (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString());
+        }
+    }
+
+    #endregion
+
+
+    #region 编程字段数据转换辅助字段
+
+    private ProcessStatus _processStatusKind;
+
+    /// <summary>
+    ///     进程状态
+    /// </summary>
+    [IgnoreMember]
+    public ProcessStatus ProcessStatusKind
+    {
+        get => _processStatusKind;
+        set
+        {
+            _processStatusKind = value;
+            _processStatus = (byte)value;
+        }
+    }
+
+    private ProcessAlarmStatus _alarmStatusKind;
+
+    /// <summary>
+    ///     进程状态
+    /// </summary>
+    [IgnoreMember]
+    public ProcessAlarmStatus AlarmStatusKind
+    {
+        get => _alarmStatusKind;
+        set
+        {
+            _alarmStatusKind = value;
+            _alarmStatus = (byte)value;
+        }
+    }
+
+    private GpuEngine _gpuEngineKind;
+
+    /// <summary>
+    ///     GPU引擎
+    /// </summary>
+    [IgnoreMember]
+    public GpuEngine GpuEngineKind
+    {
+        get => _gpuEngineKind;
+        set
+        {
+            _gpuEngineKind = value;
+            GpuEngine = (byte)value;
+        }
+    }
+
+    private ProcessPowerUsage _powerUsageKind;
+
+    /// <summary>
+    ///     电源使用情况
+    /// </summary>
+    [IgnoreMember]
+    public ProcessPowerUsage PowerUsageKind
+    {
+        get => _powerUsageKind;
+        set
+        {
+            _powerUsageKind = value;
+            PowerUsage = (byte)value;
+        }
+    }
+
+    private ProcessPowerUsage _powerUsageTrendKind;
+
+    /// <summary>
+    ///     电源使用情况趋势
+    /// </summary>
+    [IgnoreMember]
+    public ProcessPowerUsage PowerUsageTrendKind
+    {
+        get => _powerUsageTrendKind;
+        set
+        {
+            _powerUsageTrendKind = value;
+            _powerUsageTrend = (byte)value;
+        }
+    }
+
+    #endregion
 
     public override string ToString()
     {
@@ -150,10 +276,10 @@ public record GeneralProcessItemData
 }
 
 /// <summary>
-/// 进程状态（没有意思，只用于测试枚举位域使用）
+/// 进程告警状态（没有意义，只用于测试枚举位域使用）
 /// </summary>
 [Flags]
-public enum ProcessOtherStatus
+public enum ProcessAlarmStatus
 {
     [Description("正常")] Normal = 0,
     [Description("超时")] Overtime = 1,

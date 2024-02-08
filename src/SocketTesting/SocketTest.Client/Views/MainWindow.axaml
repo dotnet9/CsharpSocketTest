@@ -11,9 +11,11 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="SocketTest.Client">
     <Window.Resources>
-        <converters:ProcessPowerUsageToBackgroundConverter x:Key="ProcessPowerUsageToBackgroundConverter" />
-        <converters:ProcessPowerUsageToFormatConverter x:Key="ProcessPowerUsageToFormatConverter" />
-        <converters:UsageToBackgroundConverter x:Key="UsageToBackgroundConverter" />
+		<converters:ProcessPowerUsageToForegroundConverter x:Key="ProcessPowerUsageToForegroundConverter" />
+        <converters:EnumToDescriptionConverter x:Key="EnumToDescriptionConverter" />
+		<converters:UsageToForegroundConverter x:Key="UsageToForegroundConverter" />
+		<converters:ProcessStatusToForegroundConverter x:Key="ProcessStatusToForegroundConverter" />
+		<converters:AlarmStatusToForegroundConverter x:Key="AlarmStatusToForegroundConverter" />
         <converters:UsageToFormatConverter x:Key="UsageToFormatConverter" />
     </Window.Resources>
     <Window.Styles>
@@ -96,16 +98,26 @@
                         Header="进程名称" />
                     <DataGridTextColumn
                         Width="90"
-                        Binding="{Binding Type, Mode=OneWay}"
+                        Binding="{Binding Type, Converter={StaticResource EnumToDescriptionConverter}, Mode=OneWay}"
                         Header="进程类型" />
-                    <DataGridTextColumn
-                        Width="90"
-                        Binding="{Binding Status, Mode=OneWay}"
-                        Header="进程状态" />
-                    <DataGridTextColumn
-                        Width="120"
-                        Binding="{Binding ProcessStatus, Mode=OneWay}"
-                        Header="告警状态" />
+                    <DataGridTemplateColumn Width="90" Header="进程状态">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding Status, Converter={StaticResource ProcessStatusToForegroundConverter}}"
+                                    Text="{Binding Status, Converter={StaticResource EnumToDescriptionConverter}, Mode=OneWay}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="90" Header="告警状态">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Foreground="{Binding AlarmStatus, Converter={StaticResource AlarmStatusToForegroundConverter}}"
+                                    Text="{Binding AlarmStatus, Converter={StaticResource EnumToDescriptionConverter}, Mode=OneWay}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn
                         Width="120"
                         Binding="{Binding Publisher, Mode=OneWay}"
@@ -118,7 +130,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding Cpu, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Foreground="{Binding Cpu, Converter={StaticResource UsageToForegroundConverter}}"
                                     Text="{Binding Cpu, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -127,7 +139,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding Memory, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Foreground="{Binding Memory, Converter={StaticResource UsageToForegroundConverter}}"
                                     Text="{Binding Memory, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -136,7 +148,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding Disk, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Foreground="{Binding Disk, Converter={StaticResource UsageToForegroundConverter}}"
                                     Text="{Binding Disk, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -145,7 +157,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding Network, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Foreground="{Binding Network, Converter={StaticResource UsageToForegroundConverter}}"
                                     Text="{Binding Network, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -154,7 +166,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding Gpu, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Foreground="{Binding Gpu, Converter={StaticResource UsageToForegroundConverter}}"
                                     Text="{Binding Gpu, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -167,8 +179,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding Power, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                    Text="{Binding Power, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
+                                    Foreground="{Binding PowerUsage, Converter={StaticResource ProcessPowerUsageToForegroundConverter}}"
+                                    Text="{Binding PowerUsage, Converter={StaticResource EnumToDescriptionConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -176,8 +188,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToBackgroundConverter}}"
-                                    Text="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToFormatConverter}}" />
+                                    Foreground="{Binding PowerUsageTrend, Converter={StaticResource ProcessPowerUsageToForegroundConverter}}"
+                                    Text="{Binding PowerUsageTrend, Converter={StaticResource EnumToDescriptionConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

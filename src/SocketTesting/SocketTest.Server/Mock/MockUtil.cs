@@ -102,9 +102,10 @@ public static class MockUtil
         _mockUpdateGeneralProcesses = Enumerable.Range(0, _mockCount)
             .Select(index => new GeneralProcessItem()
             {
-                Status = (byte)(DateTime.Now.Microsecond % 7),
                 ProcessData = new GeneralProcessItemData()
                 {
+                    ProcessStatus = (byte)(DateTime.Now.Microsecond % 5),
+                    AlarmStatus = (byte)(DateTime.Now.Microsecond % 8),
                     Gpu = MockShort,
                     GpuEngine = (byte)GpuEngine.Gpu03D,
                     PowerUsage = (byte)ProcessPowerUsage.Low,
@@ -128,16 +129,16 @@ public static class MockUtil
             CommandLine = MockStr,
             ProcessData = new ProcessItemData
             {
-                CPU = MockShort,
+                Cpu = MockShort,
                 Memory = MockShort,
                 Disk = MockShort,
                 Network = MockShort,
-                GPU = MockShort,
-                GPUEngine = (byte)GpuEngine.Gpu03D,
+                Gpu = MockShort,
+                GpuEngine = (byte)GpuEngine.Gpu03D,
                 PowerUsage = (byte)ProcessPowerUsage.Low,
                 PowerUsageTrend = (byte)ProcessPowerUsage.Low,
                 Type = (byte)ProcessType.Application,
-                Status = (byte)ProcessStatus.Pending
+                Status = (byte)ProcessStatus.Ready
             },
             LastUpdateTime = Timestamp,
             UpdateTime = Timestamp
@@ -197,14 +198,15 @@ public static class MockUtil
         });
         _mockUpdateGeneralProcesses!.ForEach(process =>
         {
-            process.Status = (byte)(DateTime.Now.Microsecond % 7);
             // 需要重新赋值，才能重新设置buffer
             process.ProcessData = new GeneralProcessItemData()
             {
-                PowerUsage =
-                    powerUsage,
-                PowerUsageTrend =
-                    powerUsageTrend
+                ProcessStatus = (byte)(DateTime.Now.Millisecond % 5),
+                AlarmStatus = (byte)(DateTime.Now.Millisecond % 8),
+                Gpu = gpu,
+                GpuEngine = (byte)(DateTime.Now.Millisecond % 2),
+                PowerUsage = powerUsage,
+                PowerUsageTrend = powerUsageTrend
             };
             process.UpdateTime = updateTime;
         });
