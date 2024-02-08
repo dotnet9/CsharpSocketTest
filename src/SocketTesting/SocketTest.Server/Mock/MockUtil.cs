@@ -145,17 +145,26 @@ public static class MockUtil
     }
 
 
-    public static async Task<(List<RealtimeProcessItem> RealtimeProcesses, List<GeneralProcessItem> GeneralProcesses)>
-        MockUpdateProcessAsync(int totalCount, int pageSize,
+    public static async Task<List<RealtimeProcessItem>>
+        MockUpdateRealtimeProcessAsync(int totalCount, int pageSize,
             int pageIndex)
     {
         while (!await MockAllProcessAsync(totalCount))
             // 等待模拟操作完成
             await Task.Delay(TimeSpan.FromMilliseconds(10));
 
-        var realtimeProcesses = _mockUpdateRealtimeProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-        var generalProcesses = _mockUpdateGeneralProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-        return (realtimeProcesses, generalProcesses);
+        return _mockUpdateRealtimeProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+    }
+
+    public static async Task<List<GeneralProcessItem>>
+        MockUpdateGeneralProcessAsync(int totalCount, int pageSize,
+            int pageIndex)
+    {
+        while (!await MockAllProcessAsync(totalCount))
+            // 等待模拟操作完成
+            await Task.Delay(TimeSpan.FromMilliseconds(10));
+
+        return _mockUpdateGeneralProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 
     public static async Task MockUpdateProcessAsync(int totalCount)
@@ -209,17 +218,18 @@ public static class MockUtil
     public static void MockUpdateRealtimeProcessPageCount(int totalCount, int packetSize, out int pageSize,
         out int pageCount)
     {
-        // sizeof(int)*5为4个数据包基本信息int字段+Processes长度int4个字节
+        // sizeof(int)*5为4个数据包基本信息int字段+Processes数组长度int4个字节
         pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 5) /
                    RealtimeProcessItem.ObjectSize;
         pageCount = GetPageCount(totalCount, pageSize);
     }
+
     public static void MockUpdateGeneralProcessPageCount(int totalCount, int packetSize, out int pageSize,
         out int pageCount)
     {
-        // sizeof(int)*5为4个数据包基本信息int字段+Processes长度int4个字节
+        // sizeof(int)*5为4个数据包基本信息int字段+Processes数组长度int4个字节
         pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 5) /
-                   GeneralProcessItemData.ObjectSize;
+                   GeneralProcessItem.ObjectSize;
         pageCount = GetPageCount(totalCount, pageSize);
     }
 

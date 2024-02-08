@@ -8,9 +8,14 @@ public class MockConst
     public const int UdpUpdateMilliseconds = 500;
 
     /// <summary>
-    ///     服务端发送UDP数据间隔，单位ms
+    ///     服务端发送UDP实时数据间隔，单位ms
     /// </summary>
-    public const int UdpSendMilliseconds = 500;
+    public const int UdpSendRealtimeMilliseconds = 500;
+
+    /// <summary>
+    ///     服务端发送UDP一般数据间隔，单位ms
+    /// </summary>
+    public const int UdpSendGeneralMilliseconds = 1000;
 
     /// <summary>
     ///     客户端处理UDP数据间隔，单位ms

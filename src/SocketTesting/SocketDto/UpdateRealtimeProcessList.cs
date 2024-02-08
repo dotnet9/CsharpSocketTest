@@ -3,7 +3,7 @@
 /// <summary>
 ///     更新进程变化信息，序列化和反序列不能加压缩，部分双精度因为有效位数太长，可能导致UDP包过大而发送失败，所以UDP包不要加压缩
 /// </summary>
-[NetHead(201, 1)]
+[NetHead(200, 1)]
 public class UpdateRealtimeProcessList : INetObject
 {
     /// <summary>
@@ -38,9 +38,9 @@ public class UpdateRealtimeProcessList : INetObject
 public class RealtimeProcessItem
 {
     /// <summary>
-    ///     对象大小，Data为5字节，序列化时需要4字节表示byte[]长度，所有总大小为4+5+4=13
+    ///     对象大小，Data为5字节，序列化时需要4字节表示byte[]长度，且当前对象只有Data一个序列化字段，所以总大小为4+5=9
     /// </summary>
-    public const int ObjectSize = 13;
+    public const int ObjectSize = sizeof(int) + 5;
 
     /// <summary>
     ///     见ActiveProcessData定义

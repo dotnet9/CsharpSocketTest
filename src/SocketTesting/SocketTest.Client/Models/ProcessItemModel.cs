@@ -82,6 +82,17 @@ public class ProcessItemModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _status, value);
     }
 
+    private ProcessOtherStatus _processStatus;
+
+    /// <summary>
+    /// 进程一般状态
+    /// </summary>
+    public ProcessOtherStatus ProcessStatus
+    {
+        get => _processStatus;
+        set => this.RaiseAndSetIfChanged(ref _processStatus, value);
+    }
+
     /// <summary>
     ///     发布者
     /// </summary>
@@ -103,7 +114,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     CPU使用率
     /// </summary>
-    public short CPU
+    public short Cpu
     {
         get => _cpu;
         set => this.RaiseAndSetIfChanged(ref _cpu, value);
@@ -139,7 +150,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     GPU
     /// </summary>
-    public short GPU
+    public short Gpu
     {
         get => _gpu;
         set => this.RaiseAndSetIfChanged(ref _gpu, value);
@@ -148,7 +159,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     GPU引擎
     /// </summary>
-    public byte GPUEngine
+    public byte GpuEngine
     {
         get => _gpuEngine;
         set => this.RaiseAndSetIfChanged(ref _gpuEngine, value);
@@ -201,26 +212,31 @@ public class ProcessItemModel : ViewModelBase
         Type = ((ProcessType)Enum.Parse(typeof(ProcessType), process.ProcessData!.Type.ToString())).Description();
         Status =
             ((ProcessStatus)Enum.Parse(typeof(ProcessStatus), process.ProcessData!.Status.ToString())).Description();
-        CPU = process.ProcessData!.CPU;
+        Cpu = process.ProcessData!.CPU;
         Memory = process.ProcessData!.Memory;
         Disk = process.ProcessData!.Disk;
         Network = process.ProcessData!.Network;
-        GPU = process.ProcessData!.GPU;
-        GPUEngine = process.ProcessData!.GPUEngine;
+        Gpu = process.ProcessData!.GPU;
+        GpuEngine = process.ProcessData!.GPUEngine;
         Power = process.ProcessData!.PowerUsage;
         PowerUsageTrend = process.ProcessData!.PowerUsageTrend;
         LastUpdateTime = process.LastUpdateTime.ToDateTime(timestampStartYear);
         UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
     }
 
-    public void Update(ActiveProcessItem process, byte timestampStartYear)
+    public void Update(RealtimeProcessItem process, byte timestampStartYear)
     {
-        CPU = process.ProcessData!.CPU;
+        Cpu = process.ProcessData!.Cpu;
         Memory = process.ProcessData!.Memory;
         Disk = process.ProcessData!.Disk;
         Network = process.ProcessData!.Network;
-        GPU = process.ProcessData!.GPU;
-        GPUEngine = process.ProcessData!.GPUEngine;
+    }
+
+    public void Update(GeneralProcessItem process, byte timestampStartYear)
+    {
+        ProcessStatus = process.ProcessStatus;
+        Gpu = process.ProcessData!.Gpu;
+        GpuEngine = process.ProcessData!.GpuEngine;
         Power = process.ProcessData!.PowerUsage;
         PowerUsageTrend = process.ProcessData!.PowerUsageTrend;
         LastUpdateTime = UpdateTime;

@@ -1,17 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using ReactiveUI;
+using SocketNetObject.Models;
+using SocketTest.Mvvm;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Timers;
-using ReactiveUI;
-using SocketDto;
 using SocketNetObject;
-using SocketNetObject.Models;
-using SocketTest.Common;
-using SocketTest.Mvvm;
-using SocketTest.Server.Mock;
-using Timer = System.Timers.Timer;
 
 namespace SocketTest.Server.Helpers;
 
@@ -133,8 +127,6 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
                     _client.JoinMulticastGroup(ipAddress);
                     IsRunning = true;
 
-                    MockSendData();
-
                     Logger.Logger.Info("Udp启动成功");
                     break;
                 }
@@ -173,77 +165,14 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
 
     public void SendCommand(INetObject command)
     {
-    }
+        if (!IsRunning || _client == null) return;
 
-    public bool TryGetResponse(out INetObject? response)
-    {
-        response = null;
-        return false;
-    }
-
-    #endregion
-
-    #region 模拟数据更新
-
-    private Timer? _updateDataTimer;
-    private Timer? _sendDataTimer;
-
-    private void MockSendData()
-    {
-        _updateDataTimer = new Timer();
-        _updateDataTimer.Interval = MockConst.UdpUpdateMilliseconds;
-        _updateDataTimer.Elapsed += MockUpdateDataAsync;
-        _updateDataTimer.Start();
-
-        _sendDataTimer = new Timer();
-        _sendDataTimer.Interval = MockConst.UdpSendMilliseconds;
-        _sendDataTimer.Elapsed += MockSendDataAsync;
-        _sendDataTimer.Start();
-    }
-
-    private async void MockUpdateDataAsync(object? sender, ElapsedEventArgs e)
-    {
-        if (!IsRunning) return;
-
-        var sw = Stopwatch.StartNew();
-
-        await MockUtil.MockUpdateProcessAsync(tcpHelper.MockCount);
-        sw.Stop();
-
-        Logger.Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
-    }
-
-    private async void MockSendDataAsync(object? sender, ElapsedEventArgs e)
-    {
-        if (!IsRunning) return;
-
-        var sw = Stopwatch.StartNew();
-
-        MockUtil.MockUpdateActiveProcessPageCount(tcpHelper.MockCount, PacketMaxSize, out var pageSize,
-            out var pageCount);
-
-        var size = 0;
-        for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
+        var buffer = command.SerializeByNative(tcpHelper.SystemId);
+        var sendCount = _client.Send(buffer, buffer.Length, _udpIpEndPoint);
+        if (sendCount < buffer.Length)
         {
-            if (!IsRunning) break;
-
-            var response = new UpdateRealtimeProcessList
-            {
-                TotalSize = tcpHelper.MockCount,
-                PageSize = pageSize,
-                PageCount = pageCount,
-                PageIndex = pageIndex,
-                Processes = await MockUtil.MockUpdateProcessAsync(tcpHelper.MockCount, pageSize,
-                    pageIndex)
-            };
-
-            var buffer = response.SerializeByNative(tcpHelper.SystemId);
-            tcpHelper.UDPPacketsSentCount++;
-            size += _client!.Send(buffer, buffer.Length, _udpIpEndPoint);
+            Console.WriteLine($"UDP发送失败一包：{buffer.Length}=>{sendCount}");
         }
-
-        Logger.Logger.Info(
-            $"推送实时数据{tcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，成功发送{size}字节，{sw.ElapsedMilliseconds}ms");
     }
 
     #endregion

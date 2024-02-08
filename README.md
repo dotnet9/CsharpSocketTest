@@ -49,9 +49,9 @@
 | ResponseProcessList       | TCP        | 4      | 1        | 响应请求进程详细信息列表     |
 | UpdateProcessList         | TCP        | 5      | 1        | 更新进程详细信息列表         |
 | ChangeProcessList         | TCP        | 6      | 1        | 进程结构变化：增加、减少进程 |
-| Heartbeat                 | TCP        | 200    | 1        | TCP心跳包                    |
-| UpdateRealtimeProcessList | UDP        | 201    | 1        | 更新进程实时数据列表         |
-| UpdateGeneralProcessList  | UDP        | 202    | 1        | 更新进程一般数据列表         |
+| Heartbeat                 | TCP        | 199    | 1        | TCP心跳包                    |
+| UpdateRealtimeProcessList | UDP        | 200    | 1        | 更新进程实时数据列表         |
+| UpdateGeneralProcessList  | UDP        | 201    | 1        | 更新进程一般数据列表         |
 
 ##### RequestBaseInfo【0.0.1】
 

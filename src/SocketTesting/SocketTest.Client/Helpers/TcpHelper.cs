@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -16,7 +17,9 @@ namespace SocketTest.Client.Helpers;
 public class TcpHelper : ViewModelBase, ISocketBase
 {
     private Socket? _client;
-    public long SystemId { get; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
+    public long SystemId { get; private set; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
+
+    public readonly BlockingCollection<SocketMessage> _responses = new(new ConcurrentQueue<SocketMessage>());
 
     #region 公开属性
 
@@ -134,6 +137,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     await Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
 
                     ListenForServer();
+                    CheckResponse();
 
                     Logger.Logger.Info("连接Tcp服务成功");
                     break;
@@ -204,10 +208,11 @@ public class TcpHelper : ViewModelBase, ISocketBase
             while (IsRunning)
                 try
                 {
-                    while (_client!.ReadPacket(out var buffer, out var objectInfo))
+                    while (_client!.ReadPacket(out var buffer, out var headInfo))
                     {
                         ReceiveTime = DateTime.Now;
-                        ReceiveResponse(buffer, objectInfo!);
+                        SystemId = headInfo!.SystemId;
+                        _responses.Add(new SocketMessage(this, headInfo, buffer, _client));
                     }
                 }
                 catch (SocketException ex)
@@ -224,43 +229,23 @@ public class TcpHelper : ViewModelBase, ISocketBase
         });
     }
 
-    private void ReceiveResponse(byte[] buffer, NetHeadInfo netObjectHeadInfo)
+    private void CheckResponse()
     {
-        INetObject command;
+        Task.Run(async () =>
+        {
+            while (!IsRunning)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(10));
+            }
 
-        if (netObjectHeadInfo.IsNetObject<ResponseBaseInfo>())
-        {
-            command = buffer.Deserialize<ResponseBaseInfo>();
-        }
-        else if (netObjectHeadInfo.IsNetObject<ResponseProcessList>())
-        {
-            command = buffer.Deserialize<ResponseProcessList>();
-        }
-        else if (netObjectHeadInfo.IsNetObject<UpdateProcessList>())
-        {
-            command = buffer.Deserialize<UpdateProcessList>();
-        }
-        else if (netObjectHeadInfo.IsNetObject<ChangeProcessList>())
-        {
-            command = buffer.Deserialize<ChangeProcessList>();
-        }
-        else if (netObjectHeadInfo.IsNetObject<UpdateRealtimeProcessList>())
-        {
-            command = buffer.Deserialize<UpdateRealtimeProcessList>();
-        }
-        else if (netObjectHeadInfo.IsNetObject<Heartbeat>())
-        {
-            command = buffer.Deserialize<Heartbeat>();
-            ResponseHeartbeatTime = ReceiveTime;
-            UdpHelper.UDPPacketsSentCount = (command as Heartbeat)!.UDPPacketsSentCount;
-        }
-        else
-        {
-            throw new Exception(
-                $"非法数据包：{netObjectHeadInfo}");
-        }
-
-        Messenger.Default.Publish(this, new TcpMessage(this, command));
+            while (IsRunning)
+            {
+                while (_responses.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
+                {
+                    Messenger.Default.Publish(this, message);
+                }
+            }
+        });
     }
 
     #endregion

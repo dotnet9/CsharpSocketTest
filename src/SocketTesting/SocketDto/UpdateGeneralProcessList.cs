@@ -3,7 +3,7 @@
 /// <summary>
 ///     更新进程变化信息，序列化和反序列不能加压缩，部分双精度因为有效位数太长，可能导致UDP包过大而发送失败，所以UDP包不要加压缩
 /// </summary>
-[NetHead(6, 1)]
+[NetHead(201, 1)]
 public class UpdateGeneralProcessList : INetObject
 {
     /// <summary>
@@ -38,9 +38,9 @@ public class UpdateGeneralProcessList : INetObject
 public class GeneralProcessItem
 {
     /// <summary>
-    ///     对象大小，Data为8字节，序列化时需要4字节表示byte[]长度，所有总大小为4+8+4=16
+    ///     对象大小，Data字段为3字节，序列化时需要3字节表示byte[]长度，所有3个序列化字段总大小为 sizeof(byte)+ (4 + 3) + sizeof(uint) = 12
     /// </summary>
-    public const int ObjectSize = 16;
+    public const int ObjectSize = sizeof(byte) + (sizeof(int) + 3) + sizeof(uint);
 
     #region 网络传输字段
 
@@ -118,11 +118,6 @@ public class GeneralProcessItem
 
 public record GeneralProcessItemData
 {
-    /// <summary>
-    ///     对象大小，Data为3字节，序列化时需要4字节表示byte[]长度，所有总大小为4+3+4=11
-    /// </summary>
-    public const int ObjectSize = 11;
-
     /// <summary>
     ///     占10bit, GPU(所有GPU引擎的最高利用率)，最后一位表示小数位，比如253表示25.3
     /// </summary>

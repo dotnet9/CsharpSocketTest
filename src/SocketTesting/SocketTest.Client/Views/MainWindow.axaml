@@ -104,6 +104,10 @@
                         Header="进程状态" />
                     <DataGridTextColumn
                         Width="120"
+                        Binding="{Binding ProcessStatus, Mode=OneWay}"
+                        Header="告警状态" />
+                    <DataGridTextColumn
+                        Width="120"
                         Binding="{Binding Publisher, Mode=OneWay}"
                         Header="发布者" />
                     <DataGridTextColumn
@@ -114,8 +118,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding CPU, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding CPU, Converter={StaticResource UsageToFormatConverter}}" />
+                                    Foreground="{Binding Cpu, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Cpu, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -150,14 +154,14 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
-                                    Foreground="{Binding GPU, Converter={StaticResource UsageToBackgroundConverter}}"
-                                    Text="{Binding GPU, Converter={StaticResource UsageToFormatConverter}}" />
+                                    Foreground="{Binding Gpu, Converter={StaticResource UsageToBackgroundConverter}}"
+                                    Text="{Binding Gpu, Converter={StaticResource UsageToFormatConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn
                         Width="120"
-                        Binding="{Binding GPUEngine, Mode=OneWay}"
+                        Binding="{Binding GpuEngine, Mode=OneWay}"
                         Header="GPU引擎" />
                     <DataGridTemplateColumn Header="电源使用情况">
                         <DataGridTemplateColumn.CellTemplate>
@@ -178,11 +182,11 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn
-                        Width="180"
+                        Width="200"
                         Binding="{Binding LastUpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
                         Header="上次更新时间" />
                     <DataGridTextColumn
-                        Width="180"
+                        Width="200"
                         Binding="{Binding UpdateTime, StringFormat=yyyy-MM-dd HH:mm:ss fff, Mode=OneWay}"
                         Header="更新时间" />
                 </DataGrid.Columns>

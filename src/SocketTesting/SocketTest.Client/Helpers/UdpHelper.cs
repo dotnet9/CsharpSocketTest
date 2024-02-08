@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using ReactiveUI;
 using SocketDto;
+using SocketDto.Message;
 using SocketNetObject;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
@@ -14,9 +15,7 @@ namespace SocketTest.Client.Helpers;
 
 public class UdpHelper : ViewModelBase, ISocketBase
 {
-    private readonly BlockingCollection<byte[]> _receivedBuffers = new(new ConcurrentQueue<byte[]>());
-
-    private readonly BlockingCollection<UpdateRealtimeProcessList> _receivedResponse = new();
+    private readonly BlockingCollection<SocketMessage> _receivedBuffers = new(new ConcurrentQueue<SocketMessage>());
     private UdpClient? _client;
     private int _receivedPacketsCount;
     private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
@@ -134,7 +133,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     IsRunning = true;
 
                     ReceiveData();
-                    AnalyzeData();
+                    CheckMessage();
                     break;
                 }
                 catch (Exception ex)
@@ -174,13 +173,6 @@ public class UdpHelper : ViewModelBase, ISocketBase
     {
     }
 
-    public bool TryGetResponse(out INetObject? response)
-    {
-        var result = _receivedResponse.TryTake(out var updateActiveProcess);
-        response = updateActiveProcess;
-        return result;
-    }
-
     #endregion
 
     #region 接收处理数据
@@ -200,7 +192,15 @@ public class UdpHelper : ViewModelBase, ISocketBase
 
                     var data = _client.Receive(ref _remoteEp);
                     CountReceivedPackets();
-                    _receivedBuffers.Add(data);
+                    var readIndex = 0;
+                    if (SerializeHelper.ReadHead(data, ref readIndex, out var headInfo))
+                    {
+                        _receivedBuffers.Add(new SocketMessage(this, headInfo!, data));
+                    }
+                    else
+                    {
+                        Logger.Logger.Warning($"收到镶UDP包：{headInfo}");
+                    }
 
                     ReceiveTime = DateTime.Now;
                 }
@@ -225,38 +225,20 @@ public class UdpHelper : ViewModelBase, ISocketBase
         ReceiveCount = $"{_receivedPacketsCount}/{UDPPacketsSentCount}（丢包率{lostPercents:P}）";
     }
 
-    private void AnalyzeData()
+    private void CheckMessage()
     {
         Task.Run(async () =>
         {
+            while (!IsRunning)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(10));
+            }
+
             while (IsRunning)
             {
-                if (!_receivedBuffers.TryTake(out var buffer, TimeSpan.FromMilliseconds(10)))
+                while (_receivedBuffers.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    await Task.Delay(TimeSpan.FromMilliseconds(50));
-                    continue;
-                }
-
-                var sw = Stopwatch.StartNew();
-                var readIndex = 0;
-                try
-                {
-                    if (!SerializeHelper.ReadHead(buffer, ref readIndex, out var netObjectInfo)
-                        || buffer.Length != netObjectInfo!.BufferLen)
-                        continue;
-
-                    var updateActiveProcess = buffer.DeserializeByNative<UpdateRealtimeProcessList>();
-
-                    _receivedResponse.Add(updateActiveProcess);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Logger.Error($"解析实时数据异常，将放弃处理该包：{ex.Message}");
-                }
-                finally
-                {
-                    sw.Stop();
-                    Console.Write($"解析UDP包用时：{sw.ElapsedMilliseconds}ms");
+                    Messager.Messenger.Default.Publish(this, message);
                 }
             }
         });

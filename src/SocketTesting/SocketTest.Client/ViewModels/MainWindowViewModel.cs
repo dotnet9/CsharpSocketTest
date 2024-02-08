@@ -40,11 +40,9 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         this.WhenAnyValue(x => x.TcpHelper.IsStarted)
-            .Select(isStarted => isStarted ? "断开服务" : "连接服务")
-            .ToProperty(this, x => x.RunTcpCommandContent);
+            .Subscribe(newValue => RunTcpCommandContent = newValue ? "断开服务" : "连接服务");
         this.WhenAnyValue(x => x.UdpHelper.IsStarted)
-            .Select(isStarted => isStarted ? "断开服务" : "连接服务")
-            .ToProperty(this, x => x.RunUdpCommandContent);
+            .Subscribe(newValue => RunUdpCommandContent = newValue ? "断开服务" : "连接服务");
 
         var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
         RefreshCommand = ReactiveCommand.Create(HandleRefreshCommand, isTcpRunning);
@@ -102,14 +100,14 @@ public class MainWindowViewModel : ViewModelBase
         if (!TcpHelper.IsStarted)
         {
             TcpHelper.Start();
-            Messenger.Default.Subscribe<TcpMessage>(this, ReadTcpData, ThreadOption.PublisherThread);
+            Messenger.Default.Subscribe<SocketMessage>(this, ReceivedSocketMessage, ThreadOption.PublisherThread);
 
             ReceiveTcpData();
             SendHeartbeat();
         }
         else
         {
-            Messenger.Default.Unsubscribe<TcpMessage>(this, ReadTcpData);
+            Messenger.Default.Unsubscribe<SocketMessage>(this, ReceivedSocketMessage);
             TcpHelper.Stop();
         }
     }
@@ -119,8 +117,6 @@ public class MainWindowViewModel : ViewModelBase
         if (!UdpHelper.IsStarted)
         {
             UdpHelper.Start();
-
-            ReceiveUdpData();
         }
         else
         {
@@ -216,28 +212,40 @@ public class MainWindowViewModel : ViewModelBase
         });
     }
 
-    private void ReadTcpData(TcpMessage message)
+    /// <summary>
+    /// 处理接收的Socket消息
+    /// </summary>
+    /// <param name="message"></param>
+    /// <exception cref="Exception"></exception>
+    private void ReceivedSocketMessage(SocketMessage message)
     {
-        var command = message.NetObject;
-        switch (command)
+        if (message.IsMessage<ResponseBaseInfo>())
         {
-            case ResponseBaseInfo responseBase:
-                ReadTcpData(responseBase);
-                break;
-            case ResponseProcessList responseProcess:
-                ReadTcpData(responseProcess);
-                break;
-            case UpdateProcessList updateProcess:
-                ReadTcpData(updateProcess);
-                break;
-            case ChangeProcessList _:
-                HandleRefreshCommand();
-                break;
-            case Heartbeat responseHeartbeat:
-                ReadTcpData(responseHeartbeat);
-                break;
-            default:
-                throw new Exception($"视图未处理新的数据包{command!.GetType().Name}");
+            ReadTcpData(message.Message<ResponseBaseInfo>());
+        }
+        else if (message.IsMessage<ResponseProcessList>())
+        {
+            ReadTcpData(message.Message<ResponseProcessList>());
+        }
+        else if (message.IsMessage<UpdateProcessList>())
+        {
+            ReadTcpData(message.Message<UpdateProcessList>());
+        }
+        else if (message.IsMessage<ChangeProcessList>())
+        {
+            HandleRefreshCommand();
+        }
+        else if (message.IsMessage<Heartbeat>())
+        {
+            ReadTcpData(message.Message<Heartbeat>());
+        }
+        else if (message.IsMessage<UpdateRealtimeProcessList>())
+        {
+            ReceiveUdpData(message.MessageByNative<UpdateRealtimeProcessList>());
+        }
+        else if (message.IsMessage<UpdateGeneralProcessList>())
+        {
+            ReceiveUdpData(message.MessageByNative<UpdateGeneralProcessList>());
         }
     }
 
@@ -297,24 +305,23 @@ public class MainWindowViewModel : ViewModelBase
 
     #region 接收Udp数据
 
-    private void ReceiveUdpData()
+    private void ReceiveUdpData(UpdateRealtimeProcessList response)
     {
-        Task.Run(async () =>
+        var startIndex = response.PageIndex * response.PageSize;
+        for (var i = 0; i < response.Processes!.Count; i++)
         {
-            while (!UdpHelper.IsRunning) await Task.Delay(TimeSpan.FromMilliseconds(30));
+            if (_receivedProcesses.Count > startIndex)
+                _receivedProcesses[startIndex].Update(response.Processes[i], _timestampStartYear);
+            else
+                Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
 
-            while (UdpHelper.IsRunning)
-            {
-                while (UdpHelper.TryGetResponse(out var response) &&
-                       response is UpdateRealtimeProcessList updateActiveProcess)
-                    ReceiveUdpData(updateActiveProcess);
+            startIndex++;
+        }
 
-                await Task.Delay(TimeSpan.FromMilliseconds(MockConst.UdpDillMilliseconds));
-            }
-        });
+        Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
     }
 
-    private void ReceiveUdpData(UpdateRealtimeProcessList response)
+    private void ReceiveUdpData(UpdateGeneralProcessList response)
     {
         var startIndex = response.PageIndex * response.PageSize;
         for (var i = 0; i < response.Processes!.Count; i++)

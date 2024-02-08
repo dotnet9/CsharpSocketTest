@@ -1,25 +1,24 @@
-﻿using System;
+﻿using Avalonia.Threading;
+using ReactiveUI;
+using SocketDto;
+using SocketDto.Message;
+using SocketNetObject;
+using SocketNetObject.Models;
+using SocketTest.Mvvm;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Timers;
-using Avalonia.Threading;
-using ReactiveUI;
-using SocketDto;
-using SocketNetObject;
-using SocketNetObject.Models;
-using SocketTest.Mvvm;
-using SocketTest.Server.Mock;
 
 namespace SocketTest.Server.Helpers;
 
 public class TcpHelper : ViewModelBase, ISocketBase
 {
     private readonly ConcurrentDictionary<string, Socket> _clients = new();
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<INetObject>> _requests = new();
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<SocketMessage>> _requests = new();
 
     private Socket? _server;
     public long SystemId { get; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
@@ -56,10 +55,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     public bool IsStarted
     {
         get => _isStarted;
-        set
-        {
-            if (value != _isStarted) this.RaiseAndSetIfChanged(ref _isStarted, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _isStarted, value);
     }
 
     private bool _isRunning;
@@ -70,10 +66,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     public bool IsRunning
     {
         get => _isRunning;
-        set
-        {
-            if (value != _isRunning) this.RaiseAndSetIfChanged(ref _isRunning, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _isRunning, value);
     }
 
     private DateTime _sendTime;
@@ -84,10 +77,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     public DateTime SendTime
     {
         get => _sendTime;
-        set
-        {
-            if (value != _sendTime) this.RaiseAndSetIfChanged(ref _sendTime, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _sendTime, value);
     }
 
     private DateTime _receiveTime;
@@ -98,10 +88,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     public DateTime ReceiveTime
     {
         get => _receiveTime;
-        set
-        {
-            if (value != _receiveTime) this.RaiseAndSetIfChanged(ref _receiveTime, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
     }
 
     private DateTime _heartbeatTime;
@@ -170,7 +157,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
                     ListenForClients();
                     ProcessingRequests();
-                    MockUpdate();
 
                     Logger.Logger.Info($"Tcp服务启动成功：{ipEndPoint}，等待客户端连接");
                     break;
@@ -232,11 +218,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
             Logger.Logger.Info($"发送命令{command.GetType()}，{buffer.Length}字节,{sw.ElapsedMilliseconds}ms");
     }
 
-    public bool TryGetResponse(out INetObject? response)
-    {
-        throw new NotImplementedException();
-    }
-
     private static int _taskId;
 
     public static int GetNewTaskId()
@@ -290,8 +271,17 @@ public class TcpHelper : ViewModelBase, ISocketBase
             while (IsRunning)
                 try
                 {
-                    while (tcpClient.ReadPacket(out var buffer, out var objectInfo))
-                        ReadCommand(tcpClient, buffer, objectInfo!);
+                    var tcpClientKey = tcpClient.RemoteEndPoint!.ToString()!;
+                    while (tcpClient.ReadPacket(out var buffer, out var headInfo))
+                    {
+                        if (!_requests.TryGetValue(tcpClientKey, out var value))
+                        {
+                            value = new ConcurrentQueue<SocketMessage>();
+                            _requests[tcpClientKey] = value;
+                        }
+
+                        value.Enqueue(new SocketMessage(this, headInfo!, buffer, tcpClient));
+                    }
                 }
                 catch (SocketException ex)
                 {
@@ -306,32 +296,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
             return Task.CompletedTask;
         });
-    }
-
-    private void ReadCommand(Socket tcpClient, byte[] buffer, NetHeadInfo netObjectHeadInfo)
-    {
-        INetObject command;
-
-        if (netObjectHeadInfo.IsNetObject<RequestBaseInfo>())
-            command = buffer.Deserialize<RequestBaseInfo>();
-        else if (netObjectHeadInfo.IsNetObject<RequestProcessList>())
-            command = buffer.Deserialize<RequestProcessList>();
-        else if (netObjectHeadInfo.IsNetObject<ChangeProcessList>())
-            command = buffer.Deserialize<ChangeProcessList>();
-        else if (netObjectHeadInfo.IsNetObject<Heartbeat>())
-            command = buffer.Deserialize<Heartbeat>();
-        else
-            throw new Exception(
-                $"非法数据包：{netObjectHeadInfo}");
-
-        var tcpClientKey = tcpClient.RemoteEndPoint!.ToString()!;
-        if (!_requests.TryGetValue(tcpClientKey, out var value))
-        {
-            value = new ConcurrentQueue<INetObject>();
-            _requests[tcpClientKey] = value;
-        }
-
-        value.Enqueue(command);
     }
 
     #endregion
@@ -354,7 +318,8 @@ public class TcpHelper : ViewModelBase, ISocketBase
                         continue;
                     }
 
-                    while (request.Value.TryDequeue(out var command)) ProcessingRequest(client, command);
+                    while (request.Value.TryDequeue(out var command)) Messager.Messenger.Default.Publish(this, command);
+                    ;
                 }
 
                 if (needRemoveKeys.Count > 0) needRemoveKeys.ForEach(RemoveClient);
@@ -362,107 +327,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
                 await Task.Delay(TimeSpan.FromMilliseconds(10));
             }
         });
-    }
-
-    private void ProcessingRequest(Socket tcpClient, INetObject request)
-    {
-        switch (request)
-        {
-            case RequestBaseInfo requestBaseInfo:
-                ProcessingRequest(tcpClient, requestBaseInfo);
-                break;
-            case RequestProcessList requestProcess:
-                ProcessingRequest(tcpClient, requestProcess);
-                break;
-            case ChangeProcessList changeProcess:
-                ProcessingRequest(tcpClient, changeProcess);
-                break;
-            case Heartbeat _:
-                ProcessingRequest(tcpClient);
-                break;
-            default:
-                throw new Exception($"未处理命令{request.GetType().Name}");
-        }
-    }
-
-    private void ProcessingRequest(Socket client, RequestBaseInfo request)
-    {
-        SendCommand(client, MockUtil.MockBase(request.TaskId));
-    }
-
-    private async void ProcessingRequest(Socket client, RequestProcessList request)
-    {
-        var pageCount = MockUtil.GetPageCount(MockCount, MockPageSize);
-        var sendCount = 0;
-        for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
-        {
-            var response = new ResponseProcessList
-            {
-                TaskId = request.TaskId,
-                TotalSize = MockCount,
-                PageSize = MockPageSize,
-                PageCount = pageCount,
-                PageIndex = pageIndex,
-                Processes = await MockUtil.MockProcessesAsync(MockCount, MockPageSize, pageIndex)
-            };
-            sendCount += response.Processes.Count;
-            SendCommand(client, response);
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-            var msg = response.TaskId == default ? "推送" : "响应请求";
-            Logger.Logger.Info(
-                $"{msg}【{response.PageIndex + 1}/{response.PageCount}】{response.Processes.Count}条({sendCount}/{response.TotalSize})");
-        }
-    }
-
-    private void ProcessingRequest(Socket client, ChangeProcessList changeProcess)
-    {
-        SendCommand(changeProcess);
-    }
-
-    private void ProcessingRequest(Socket client)
-    {
-        SendCommand(client, new Heartbeat { UDPPacketsSentCount = UDPPacketsSentCount });
-        HeartbeatTime = DateTime.Now;
-    }
-
-    #endregion
-
-    #region 更新数据
-
-    private Timer? _sendDataTimer;
-    private bool _isUpdateAll;
-
-    public void UpdateAllData(bool isUpdateAll)
-    {
-        _isUpdateAll = isUpdateAll;
-        MockSendData(null, null);
-    }
-
-    private void MockUpdate()
-    {
-        _sendDataTimer = new Timer();
-        _sendDataTimer.Interval = 4 * 60 * 1000;
-        _sendDataTimer.Elapsed += MockSendData;
-        _sendDataTimer.Start();
-    }
-
-    private async void MockSendData(object? sender, ElapsedEventArgs? e)
-    {
-        if (_isUpdateAll)
-        {
-            SendCommand(new ChangeProcessList());
-            Logger.Logger.Info("====TCP推送结构变化通知====");
-            return;
-        }
-
-        SendCommand(new UpdateProcessList
-        {
-            Processes = await MockUtil.MockProcessesAsync(MockCount, MockPageSize)
-        });
-        Logger.Logger.Info("====TCP推送更新通知====");
-
-        _isUpdateAll = !_isUpdateAll;
     }
 
     #endregion
