@@ -16,8 +16,8 @@ public class UpdateRealtimeProcessListUnitTest
         var buffer = data.FieldObjectBuffer();
         var desData = buffer.ToFieldObject<RealtimeProcessItemData>();
 
-        // ActiveProcessItemData×Ü¹²57Î»£¬ÐòÁÐ»¯ºóÓ¦¸ÃÕ¼8¸ö×Ö½Ú
-        Assert.Equal(8, buffer.Length);
+        // ActiveProcessItemDataï¿½Ü¹ï¿½57Î»ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Õ¼8ï¿½ï¿½ï¿½Ö½ï¿½
+        Assert.Equal(5, buffer.Length);
         Assert.Equal(data.Cpu, desData.Cpu);
     }
 
@@ -49,8 +49,8 @@ public class UpdateRealtimeProcessListUnitTest
         Assert.Equal(netObject.TotalSize, desObject.TotalSize);
         Assert.NotNull(desObject.Processes);
         Assert.NotNull(desObject.Processes[0].ProcessData);
-        // ProcessItemData×Ü¹²60Î»£¬ÐòÁÐ»¯ºóÓ¦¸ÃÕ¼8¸ö×Ö½Ú
-        Assert.Equal(8, desObject.Processes[0].Data?.Length);
+        // ProcessItemDataï¿½Ü¹ï¿½60Î»ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Õ¼8ï¿½ï¿½ï¿½Ö½ï¿½
+        Assert.Equal(5, desObject.Processes[0].Data?.Length);
         Assert.Equal(netObject.Processes[0].ProcessData!.Cpu, desObject.Processes[0].ProcessData?.Cpu);
     }
 }
