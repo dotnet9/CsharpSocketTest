@@ -113,10 +113,11 @@ TCP、UDP传输数据包定义。
 
 | 字段名          | 数据类型 | 说明                                                         |
 | --------------- | -------- | ------------------------------------------------------------ |
-| PID             | int      | 进程ID                                                       |
+| Pid             | int      | 进程ID                                                       |
 | Name            | string?  | 进程名称                                                     |
 | Type            | byte     | 进程类型，0：应用，1：后台进程                               |
-| Status          | byte     | 进程状态，0：新建状态，1：就绪状态，2：运行状态，3：阻塞状态，4：终止状态 |
+| ProcessStatus   | byte     | 进程状态，0：新建状态，1：就绪状态，2：运行状态，3：阻塞状态，4：终止状态 |
+| AlarmStatus     | byte     | 告警状态，没有特别意义，可组合位域状态，0：正常，1：超时，2：超限，切换用户 |
 | Publisher       | string?  | 发布者                                                       |
 | CommandLine     | string?  | 命令行                                                       |
 | Cpu             | short    | Cpu（所有内核的总处理利用率），最后一位表示小数位，比如253表示25.3% |
@@ -129,6 +130,62 @@ TCP、UDP传输数据包定义。
 | PowerUsageTrend | byte     | 电源使用情况趋势（一段时间内CPU、磁盘和GPU对功耗的影响），0：非常低，1：低，2：中，3：高，4：非常高 |
 | LastUpdateTime  | uint     | 上次更新时间                                                 |
 | UpdateTime      | uint     | 更新时间                                                     |
+
+#### UpdateProcessList【0.0.1】
+
+| 字段名    | 数据类型             | 说明     |
+| --------- | -------------------- | -------- |
+| Processes | `List<ProcessItem>?` | 进程列表 |
+
+#### ChangeProcessList【0.0.1】
+
+| 字段名 | 数据类型 | 说明 |
+| ------ | -------- | ---- |
+|        |          |      |
+
+#### Heartbeat【0.0.1】
+
+| 字段名 | 数据类型 | 说明 |
+| ------ | -------- | ---- |
+|        |          |      |
+
+### 3.2. UDP数据包【0.0.5】
+
+| 对象Id | 对象版本 | 对象名                    | 说明                 |
+| ------ | -------- | ------------------------- | -------------------- |
+| 200    | 1        | UpdateRealtimeProcessList | 更新进程实时数据列表 |
+| 201    | 1        | UpdateGeneralProcessList  | 更新进程一般数据列表 |
+
+#### UpdateRealtimeProcessList【0.0.5】
+
+| 字段名    | 数据类型 | 说明                                                         |
+| --------- | -------- | ------------------------------------------------------------ |
+| TotalSize | int      | 总数据大小                                                   |
+| PageSize  | int      | 分页大小                                                     |
+| PageCount | int      | 总页数                                                       |
+| PageIndex | int      | 页索引，客户端根据收到的进程ID列表、详细信息列表为基础，取当前数据包开始进程索引到结束进程索引进行数据更新 |
+| Cpus      | byte[]   | 一个进程占2字节(short)                                       |
+| Memories  | byte[]   | 一个进程占2字节(short)                                       |
+| Disks     | byte[]   | 一个进程占2字节(short)                                       |
+| Networks  | byte[]   | 一个进程占2字节(short)                                       |
+
+#### UpdateGeneralProcessList【0.0.5】
+
+| 字段名          | 数据类型 | 说明                                                         |
+| --------------- | -------- | ------------------------------------------------------------ |
+| TotalSize       | int      | 总数据大小                                                   |
+| PageSize        | int      | 分页大小                                                     |
+| PageCount       | int      | 总页数                                                       |
+| PageIndex       | int      | 页索引，客户端根据收到的进程ID列表、详细信息列表为基础，取当前数据包开始进程索引到结束进程索引进行数据更新 |
+| ProcessStatuses | byte[]   | 进程状态，一个进程占1字节(byte)                              |
+| AlarmStatuses   | byte[]   | 告警状态，一个进程占1字节(byte)                              |
+| Gpus            | byte[]   | 一个进程占2字节(short)                                       |
+| GpuEngines      | byte[]   | 一个进程占1字节(byte)                                        |
+| PowerUsages     | byte[]   | 一个进程占1字节(byte)                                        |
+| PowerUsageTrend | byte[]   | 一个进程占1字节(byte)                                        |
+| UpdateTimes     | byte[]   | 一个进程占4字节(byte)                                        |
+
+### 3.3. 部分枚举定义
 
 ```csharp
 /// <summary>
@@ -172,61 +229,19 @@ public enum ProcessPowerUsage
     [Description("高")] High,
     [Description("非常高")] VeryHigh
 }
+
+/// <summary>
+///     进程告警状态（没有意义，只用于测试枚举位域使用）
+/// </summary>
+[Flags]
+public enum ProcessAlarmStatus
+{
+    [Description("正常")] Normal = 0,
+    [Description("超时")] Overtime = 1,
+    [Description("超限")] OverLimit = 2,
+    [Description("切换用户")] UserChanged = 4
+}
 ```
-
-#### UpdateProcessList【0.0.1】
-
-| 字段名    | 数据类型             | 说明     |
-| --------- | -------------------- | -------- |
-| Processes | `List<ProcessItem>?` | 进程列表 |
-
-#### ChangeProcessList【0.0.1】
-
-| 字段名 | 数据类型 | 说明 |
-| ------ | -------- | ---- |
-|        |          |      |
-
-#### Heartbeat【0.0.1】
-
-| 字段名 | 数据类型 | 说明 |
-| ------ | -------- | ---- |
-|        |          |      |
-
-### 3.2. UDP数据包【0.0.5】
-
-| 对象Id | 对象版本 | 对象名                    | 说明                 |
-| ------ | -------- | ------------------------- | -------------------- |
-| 200    | 1        | UpdateRealtimeProcessList | 更新进程实时数据列表 |
-| 201    | 1        | UpdateGeneralProcessList  | 更新进程一般数据列表 |
-
-#### UpdateRealtimeProcessList【0.0.5】
-
-| 字段名    | 数据类型 | 说明                                                         |
-| --------- | -------- | ------------------------------------------------------------ |
-| TotalSize | int      | 总数据大小                                                   |
-| PageSize  | int      | 分页大小                                                     |
-| PageCount | int      | 总页数                                                       |
-| PageIndex | int      | 页索引，客户端根据收到的进程ID列表、详细信息列表为基础，取当前数据包开始进程索引到结束进程索引进行数据更新 |
-| Cpu       | byte[]   | 一个进程占2字节(short)                                       |
-| Memory    | byte[]   | 一个进程占2字节(short)                                       |
-| Disk      | byte[]   | 一个进程占2字节(short)                                       |
-| Network   | byte[]   | 一个进程占2字节(short)                                       |
-
-#### UpdateGeneralProcessList【0.0.5】
-
-| 字段名          | 数据类型 | 说明                                                         |
-| --------------- | -------- | ------------------------------------------------------------ |
-| TotalSize       | int      | 总数据大小                                                   |
-| PageSize        | int      | 分页大小                                                     |
-| PageCount       | int      | 总页数                                                       |
-| PageIndex       | int      | 页索引，客户端根据收到的进程ID列表、详细信息列表为基础，取当前数据包开始进程索引到结束进程索引进行数据更新 |
-| ProcessStatuses | byte[]   | 进程状态，一个进程占1字节(byte)                              |
-| AlarmStatuses   | byte[]   | 告警状态，一个进程占1字节(byte)                              |
-| Gpus            | byte[]   | 一个进程占2字节(short)                                       |
-| GpuEngines      | byte[]   | 一个进程占1字节(byte)                                        |
-| PowerUsages     | byte[]   | 一个进程占1字节(byte)                                        |
-| PowerUsageTrend | byte[]   | 一个进程占1字节(byte)                                        |
-| UpdateTimes     | byte[]   | 一个进程占4字节(byte)                                        |
 
 ## 4. 效果
 

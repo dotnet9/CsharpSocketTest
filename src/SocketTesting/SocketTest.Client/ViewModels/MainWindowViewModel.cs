@@ -289,7 +289,7 @@ public class MainWindowViewModel : ViewModelBase
 
         response.Processes?.ForEach(updateProcess =>
         {
-            if (_processIdAndItems.TryGetValue(updateProcess.PID, out var point))
+            if (_processIdAndItems.TryGetValue(updateProcess.Pid, out var point))
                 point.Update(updateProcess, _timestampStartYear);
             else
                 throw new Exception($"收到更新数据包，遇到本地缓存不存在的进程：{updateProcess.Name}");
@@ -307,34 +307,34 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ReceiveUdpData(UpdateRealtimeProcessList response)
     {
-        var startIndex = response.PageIndex * response.PageSize;
-        for (var i = 0; i < response.Processes!.Count; i++)
-        {
-            if (_receivedProcesses.Count > startIndex)
-                _receivedProcesses[startIndex].Update(response.Processes[i]);
-            else
-                Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
+        //var startIndex = response.PageIndex * response.PageSize;
+        //for (var i = 0; i < response.Processes!.Count; i++)
+        //{
+        //    if (_receivedProcesses.Count > startIndex)
+        //        _receivedProcesses[startIndex].Update(response.Processes[i]);
+        //    else
+        //        Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
 
-            startIndex++;
-        }
+        //    startIndex++;
+        //}
 
-        Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
+        //Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
     }
 
     private void ReceiveUdpData(UpdateGeneralProcessList response)
     {
-        var startIndex = response.PageIndex * response.PageSize;
-        for (var i = 0; i < response.Processes!.Count; i++)
-        {
-            if (_receivedProcesses.Count > startIndex)
-                _receivedProcesses[startIndex].Update(response.Processes[i], _timestampStartYear);
-            else
-                Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
+        //var startIndex = response.PageIndex * response.PageSize;
+        //for (var i = 0; i < response.Processes!.Count; i++)
+        //{
+        //    if (_receivedProcesses.Count > startIndex)
+        //        _receivedProcesses[startIndex].Update(response.Processes[i], _timestampStartYear);
+        //    else
+        //        Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
 
-            startIndex++;
-        }
+        //    startIndex++;
+        //}
 
-        Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
+        //Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
     }
 
     #endregion

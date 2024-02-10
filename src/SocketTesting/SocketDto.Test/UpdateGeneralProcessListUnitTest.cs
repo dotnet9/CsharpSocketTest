@@ -1,3 +1,5 @@
+using SocketDto.Enums;
+
 namespace SocketDto.Test;
 
 public class UpdateGeneralProcessListUnitTest
@@ -5,14 +7,14 @@ public class UpdateGeneralProcessListUnitTest
     [Fact]
     public void Test_SerializeProcessItemData_Success()
     {
-        Assert.Equal(0, (int)ProcessAlarmStatus.Normal);
-        Assert.Equal(1, (int)ProcessAlarmStatus.Overtime);
-        Assert.Equal(2, (int)ProcessAlarmStatus.OverLimit);
-        Assert.Equal(3, (int)(ProcessAlarmStatus.Overtime | ProcessAlarmStatus.OverLimit));
-        Assert.Equal(4, (int)ProcessAlarmStatus.UserChanged);
-        Assert.Equal(5, (int)(ProcessAlarmStatus.Overtime | ProcessAlarmStatus.UserChanged));
-        Assert.Equal(6, (int)(ProcessAlarmStatus.OverLimit | ProcessAlarmStatus.UserChanged));
+        Assert.Equal(0, (int)AlarmStatus.Normal);
+        Assert.Equal(1, (int)AlarmStatus.Overtime);
+        Assert.Equal(2, (int)AlarmStatus.OverLimit);
+        Assert.Equal(3, (int)(AlarmStatus.Overtime | AlarmStatus.OverLimit));
+        Assert.Equal(4, (int)AlarmStatus.UserChanged);
+        Assert.Equal(5, (int)(AlarmStatus.Overtime | AlarmStatus.UserChanged));
+        Assert.Equal(6, (int)(AlarmStatus.OverLimit | AlarmStatus.UserChanged));
         Assert.Equal(7,
-            (int)(ProcessAlarmStatus.Overtime | ProcessAlarmStatus.OverLimit | ProcessAlarmStatus.UserChanged));
+            (int)(AlarmStatus.Overtime | AlarmStatus.OverLimit | AlarmStatus.UserChanged));
     }
 }

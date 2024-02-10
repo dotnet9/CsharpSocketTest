@@ -1,8 +1,8 @@
-﻿using System;
-using System.Globalization;
-using Avalonia.Data.Converters;
+﻿using Avalonia.Data.Converters;
 using Avalonia.Media;
-using SocketDto;
+using SocketDto.Enums;
+using System;
+using System.Globalization;
 
 namespace SocketTest.Client.Converters;
 

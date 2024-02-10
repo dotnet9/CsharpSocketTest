@@ -1,33 +1,9 @@
+using SocketDto.Enums;
+
 namespace SocketDto.Test;
 
 public class ResponseProcessListUnitTest
 {
-    [Fact]
-    public void Test_SerializeProcessItemData_Success()
-    {
-        var data = new ProcessItemData
-        {
-            Cpu = 112,
-            Memory = 325,
-            Disk = 23,
-            Network = 593,
-            Gpu = 253,
-            GpuEngine = (byte)GpuEngine.None,
-            PowerUsage = (byte)ProcessPowerUsage.Low,
-            PowerUsageTrend = (byte)ProcessPowerUsage.Low,
-            Type = (byte)ProcessType.Application,
-            Status = (byte)ProcessStatus.Running
-        };
-
-        var buffer = data.FieldObjectBuffer();
-        var desData = buffer.ToFieldObject<ProcessItemData>();
-
-        // ProcessItemData总共60位，序列化后应该占8个字节
-        Assert.Equal(8, buffer.Length);
-        Assert.Equal(data.Cpu, desData.Cpu);
-        Assert.Equal(data.Status, desData.Status);
-    }
-
     [Fact]
     public void Test_SerializeResponseProcessList_Success()
     {
@@ -42,23 +18,20 @@ public class ResponseProcessListUnitTest
         };
         var processItem = new ProcessItem
         {
-            PID = 1,
+            Pid = 1,
             Name = "Dotnet工具箱",
+            Type = (byte)ProcessType.Application,
+            ProcessStatus = (byte)ProcessStatus.Running,
             Publisher = "沙漠尽头的狼",
             CommandLine = "dotnet Dotnetools.com",
-            ProcessData = new ProcessItemData
-            {
-                Cpu = 112,
-                Memory = 325,
-                Disk = 23,
-                Network = 593,
-                Gpu = 253,
-                GpuEngine = (byte)GpuEngine.None,
-                PowerUsage = (byte)ProcessPowerUsage.Low,
-                PowerUsageTrend = (byte)ProcessPowerUsage.Low,
-                Type = (byte)ProcessType.Application,
-                Status = (byte)ProcessStatus.Running
-            },
+            Cpu = 112,
+            Memory = 325,
+            Disk = 23,
+            Network = 593,
+            Gpu = 253,
+            GpuEngine = (byte)GpuEngine.None,
+            PowerUsage = (byte)PowerUsage.Low,
+            PowerUsageTrend = (byte)PowerUsage.Low,
             LastUpdateTime = 23,
             UpdateTime = 53
         };
@@ -69,10 +42,7 @@ public class ResponseProcessListUnitTest
 
         Assert.Equal(netObject.TotalSize, desObject.TotalSize);
         Assert.NotNull(desObject.Processes);
-        Assert.NotNull(desObject.Processes[0].ProcessData);
-        // ProcessItemData总共60位，序列化后应该占8个字节
-        Assert.Equal(8, desObject.Processes[0].Data?.Length);
-        Assert.Equal(processItem.ProcessData.Cpu, desObject.Processes[0].ProcessData?.Cpu);
+        Assert.Equal(processItem.Cpu, desObject.Processes[0].Cpu);
         Assert.Equal(processItem.LastUpdateTime, desObject.Processes[0].LastUpdateTime);
     }
 

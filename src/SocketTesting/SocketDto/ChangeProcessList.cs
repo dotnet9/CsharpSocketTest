@@ -3,7 +3,7 @@
 /// <summary>
 ///     进程结构信息
 /// </summary>
-[NetHead(6, 1)]
+[NetHead(8, 1)]
 [MessagePackObject]
 public class ChangeProcessList : INetObject
 {

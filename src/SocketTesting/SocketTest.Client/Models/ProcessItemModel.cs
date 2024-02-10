@@ -1,6 +1,7 @@
 ﻿using System;
 using ReactiveUI;
 using SocketDto;
+using SocketDto.Enums;
 using SocketTest.Common;
 using SocketTest.Mvvm;
 
@@ -29,9 +30,9 @@ public class ProcessItemModel : ViewModelBase
 
     private short _network;
 
-    private ProcessPowerUsage _powerUsage;
+    private PowerUsage _powerUsage;
 
-    private ProcessPowerUsage _powerUsageTrend;
+    private PowerUsage _powerUsageTrend;
 
     private string? _publisher;
 
@@ -82,12 +83,12 @@ public class ProcessItemModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _status, value);
     }
 
-    private ProcessAlarmStatus _alarmStatus;
+    private AlarmStatus _alarmStatus;
 
     /// <summary>
     /// 进程一般状态
     /// </summary>
-    public ProcessAlarmStatus AlarmStatus
+    public AlarmStatus AlarmStatus
     {
         get => _alarmStatus;
         set => this.RaiseAndSetIfChanged(ref _alarmStatus, value);
@@ -168,7 +169,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     电源使用情况
     /// </summary>
-    public ProcessPowerUsage PowerUsage
+    public PowerUsage PowerUsage
     {
         get => _powerUsage;
         set => this.RaiseAndSetIfChanged(ref _powerUsage, value);
@@ -177,7 +178,7 @@ public class ProcessItemModel : ViewModelBase
     /// <summary>
     ///     电源使用情况趋势
     /// </summary>
-    public ProcessPowerUsage PowerUsageTrend
+    public PowerUsage PowerUsageTrend
     {
         get => _powerUsageTrend;
         set => this.RaiseAndSetIfChanged(ref _powerUsageTrend, value);
@@ -203,43 +204,43 @@ public class ProcessItemModel : ViewModelBase
 
     public void Update(ProcessItem process, byte timestampStartYear)
     {
-        PID = process.PID;
+        PID = process.Pid;
 
         Name = process.Name;
         Publisher = process.Publisher;
         CommandLine = process.CommandLine;
 
-        Cpu = process.ProcessData!.Cpu;
-        Memory = process.ProcessData!.Memory;
-        Disk = process.ProcessData!.Disk;
-        Network = process.ProcessData!.Network;
-        Gpu = process.ProcessData!.Gpu;
-        GpuEngine = process.ProcessData!.GpuEngineKind;
-        PowerUsage = process.ProcessData!.PowerUsageKind;
-        PowerUsageTrend = process.ProcessData!.PowerUsageTrendKind;
-        Type = process.ProcessData!.TypeKind;
-        Status = process.ProcessData!.StatusKind;
+        Cpu = process.Cpu;
+        Memory = process.Memory;
+        Disk = process.Disk;
+        Network = process.Network;
+        Gpu = process.Gpu;
+        GpuEngine = (GpuEngine)Enum.Parse(typeof(GpuEngine), process.GpuEngine.ToString());
+        PowerUsage = (PowerUsage)Enum.Parse(typeof(PowerUsage), process.PowerUsage.ToString());
+        PowerUsageTrend = (PowerUsage)Enum.Parse(typeof(PowerUsage), process.PowerUsageTrend.ToString());
+        Type = (ProcessType)Enum.Parse(typeof(ProcessType), process.Type.ToString());
+        Status = (ProcessStatus)Enum.Parse(typeof(ProcessStatus), process.ProcessStatus.ToString());
         LastUpdateTime = process.LastUpdateTime.ToDateTime(timestampStartYear);
         UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
     }
 
-    public void Update(RealtimeProcessItem process)
-    {
-        Cpu = process.ProcessData!.Cpu;
-        Memory = process.ProcessData!.Memory;
-        Disk = process.ProcessData!.Disk;
-        Network = process.ProcessData!.Network;
-    }
+    //public void Update(RealtimeProcessItem process)
+    //{
+    //    Cpu = process.ProcessData!.Cpu;
+    //    Memory = process.ProcessData!.Memory;
+    //    Disk = process.ProcessData!.Disk;
+    //    Network = process.ProcessData!.Network;
+    //}
 
-    public void Update(GeneralProcessItem process, byte timestampStartYear)
-    {
-        Status = process.ProcessData!.ProcessStatusKind;
-        AlarmStatus = process.ProcessData!.AlarmStatusKind;
-        Gpu = process.ProcessData!.Gpu;
-        GpuEngine = process.ProcessData!.GpuEngineKind;
-        PowerUsage = process.ProcessData!.PowerUsageKind;
-        PowerUsageTrend = process.ProcessData!.PowerUsageTrendKind;
-        LastUpdateTime = UpdateTime;
-        UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
-    }
+    //public void Update(GeneralProcessItem process, byte timestampStartYear)
+    //{
+    //    Status = process.ProcessData!.ProcessStatusKind;
+    //    AlarmStatus = process.ProcessData!.AlarmStatusKind;
+    //    Gpu = process.ProcessData!.Gpu;
+    //    GpuEngine = process.ProcessData!.GpuEngineKind;
+    //    PowerUsage = process.ProcessData!.PowerUsageKind;
+    //    PowerUsageTrend = process.ProcessData!.PowerUsageTrendKind;
+    //    LastUpdateTime = UpdateTime;
+    //    UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
+    //}
 }

@@ -3,7 +3,7 @@
 /// <summary>
 ///     更新进程信息
 /// </summary>
-[NetHead(5, 1)]
+[NetHead(7, 1)]
 [MessagePackObject]
 public class UpdateProcessList : INetObject
 {

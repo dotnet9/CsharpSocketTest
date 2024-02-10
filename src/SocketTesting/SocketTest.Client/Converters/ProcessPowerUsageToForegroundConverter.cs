@@ -1,8 +1,8 @@
-﻿using System;
-using System.Globalization;
-using Avalonia.Data.Converters;
+﻿using Avalonia.Data.Converters;
 using Avalonia.Media;
-using SocketDto;
+using SocketDto.Enums;
+using System;
+using System.Globalization;
 
 namespace SocketTest.Client.Converters;
 
@@ -13,12 +13,12 @@ public class ProcessPowerUsageToForegroundConverter : IValueConverter
         if (value == null) return Brushes.Green;
 
         var powerUsageType =
-            (ProcessPowerUsage)Enum.Parse(typeof(ProcessPowerUsage), value.ToString()!);
+            (PowerUsage)Enum.Parse(typeof(PowerUsage), value.ToString()!);
         return powerUsageType switch
         {
-            ProcessPowerUsage.VeryLow or ProcessPowerUsage.Low => Brushes.LightGreen,
-            ProcessPowerUsage.Moderate => Brushes.Green,
-            ProcessPowerUsage.High => Brushes.DarkOrange,
+            PowerUsage.VeryLow or PowerUsage.Low => Brushes.LightGreen,
+            PowerUsage.Moderate => Brushes.Green,
+            PowerUsage.High => Brushes.DarkOrange,
             _ => Brushes.Red
         };
     }

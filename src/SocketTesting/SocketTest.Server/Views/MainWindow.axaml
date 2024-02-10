@@ -56,9 +56,6 @@
                 <Button
                     Command="{Binding HandleRunTcpCommandCommandAsync}"
                     Content="{Binding RunTcpCommandContent}" />
-                <Button
-                    Command="{Binding HandleMockDataCommandAsync}"
-                    Content="生成模拟数据" />
             </StackPanel>
         </HeaderedContentControl>
         <HeaderedContentControl Grid.Row="1" Header="Udp组播配置">

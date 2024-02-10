@@ -50,7 +50,7 @@ public class ResponseBaseInfo : INetObject
     public string? Ips { get; set; }
 
     /// <summary>
-    ///     通信对象时间戳起始年份，比如：23，表示2023年1月1号开始计算时间戳，后面的时间戳都以这个字段计算为准，精确到0.1s，即100ms，主要用于节约网络对象传输大小
+    ///     通信对象时间戳起始年份，比如：2023，表示2023年1月1号开始计算时间戳，后面的时间戳都以这个字段计算为准，精确到0.1s，即100ms，主要用于节约网络对象传输大小
     /// </summary>
     [Key(7)]
     public byte TimestampStartYear { get; set; }

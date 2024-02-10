@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using LoremNET;
+﻿using LoremNET;
 using SocketDto;
+using SocketDto.Enums;
 using SocketNetObject;
 using SocketTest.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ProcessItem = SocketDto.ProcessItem;
 
 namespace SocketTest.Server.Mock;
@@ -15,224 +15,248 @@ public static class MockUtil
 {
     public const byte TimestampStartYear = 23;
     private static int _mockCount;
+    private static ResponseBaseInfo? _mockResponseBase;
+    private static int[]? _mockProcessIDList;
     private static List<ProcessItem>? _mockProcesses;
-    private static List<RealtimeProcessItem>? _mockUpdateRealtimeProcesses;
-    private static List<GeneralProcessItem>? _mockUpdateGeneralProcesses;
-
-    private static bool _isMockingAll;
-
-    private static readonly string MockStr = Lorem.Words(1, 3);
-    private static readonly short MockShort = (short)Random.Shared.Next(0, 1000);
-    private static readonly uint Timestamp = TimestampStartYear.GetCurrentTimestamp();
 
     private static readonly Random CustomRandom = new(DateTime.Now.Microsecond);
 
-    public static ResponseBaseInfo MockBase(int taskId = default)
+    public static async Task MockAsync(int total)
     {
-        return new ResponseBaseInfo
+        _mockCount = total;
+        await MockBaseAsync();
+        await MockProcessIdListAsync();
+        await MockProcessAsync();
+    }
+
+    private static async Task MockBaseAsync()
+    {
+        _mockResponseBase = new ResponseBaseInfo
         {
-            TaskId = taskId,
             OS = "Windows 11 专业版",
             MemorySize = 64,
             ProcessorCount = 12,
             DiskSize = 2048,
             NetworkBandwidth = 1024,
             Ips = "192.32.35.23",
-            TimestampStartYear = 23,
-            LastUpdateTime = TimestampHelper.GetCurrentTimestamp(23)
+            TimestampStartYear = TimestampStartYear,
+            LastUpdateTime = TimestampStartYear.GetCurrentTimestamp()
         };
+        await Task.CompletedTask;
     }
 
-    public static async Task<List<ProcessItem>> MockProcessesAsync(int totalCount, int pageSize, int pageIndex)
+    private static async Task MockProcessIdListAsync()
     {
-        while (!await MockAllProcessAsync(totalCount))
-            // 等待模拟操作完成
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-        return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+        _mockProcessIDList = Enumerable.Range(1, _mockCount).Select((index, value) => value).ToArray();
+        await Task.CompletedTask;
     }
 
-    public static async Task<List<ProcessItem>> MockProcessesAsync(int totalCount, int pageSize)
-    {
-        while (!await MockAllProcessAsync(totalCount))
-            // 等待模拟操作完成
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
 
+    private static async Task<bool> MockProcessAsync()
+    {
+        var mockStr = Lorem.Words(1, 3);
+        var mockShort = (short)Random.Shared.Next(0, 1000);
+        var timestamp = TimestampStartYear.GetCurrentTimestamp();
+
+        ProcessItem MockProcess(int id)
+        {
+            return new ProcessItem
+            {
+                Pid = id + 1,
+                Name = mockStr,
+                Type = (byte)ProcessType.Application,
+                ProcessStatus = (byte)ProcessStatus.Ready,
+                AlarmStatus = (byte)AlarmStatus.Normal,
+                Publisher = mockStr,
+                CommandLine = mockStr,
+                Cpu = mockShort,
+                Memory = mockShort,
+                Disk = mockShort,
+                Network = mockShort,
+                Gpu = mockShort,
+                GpuEngine = (byte)GpuEngine.Gpu03D,
+                PowerUsage = (byte)PowerUsage.Low,
+                PowerUsageTrend = (byte)PowerUsage.Low,
+                LastUpdateTime = timestamp,
+                UpdateTime = timestamp
+            };
+        }
+
+        _mockProcesses = Enumerable.Range(0, _mockCount).Select(MockProcess).ToList();
+        return await Task.FromResult(true);
+    }
+
+    public static async Task<List<ProcessItem>> MockProcessesAsync(int pageSize, int pageIndex)
+    {
+        return await Task.FromResult(_mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList());
+    }
+
+    public static async Task<List<ProcessItem>> MockRandomProcessesAsync(int totalCount, int pageSize)
+    {
         var pageCount = GetPageCount(totalCount, pageSize);
         var pageIndex = Random.Shared.Next(0, pageCount);
         return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 
-    public static async Task<bool> MockAllProcessAsync(int totalCount)
+
+    private static byte[]? _mockCpus;
+    private static byte[]? _mockMemories;
+    private static byte[]? _mockDisks;
+    private static byte[]? _mockNetworks;
+    private static byte[]? _mockProcessStatuses;
+    private static byte[]? _mockAlarmStatuses;
+    private static byte[]? _mockGpus;
+    private static byte[]? _mockGpuEngines;
+    private static byte[]? _mockPowerUsages;
+    private static byte[]? _mockPowerUsageTrends;
+    private static byte[]? _mockUpdateTimes;
+
+    public static async Task MockCreateUpdateDataAsync()
     {
-        if (_isMockingAll) return false;
-
-        _isMockingAll = true;
-
-        if (_mockCount == totalCount && _mockProcesses?.Count == totalCount &&
-            _mockUpdateRealtimeProcesses?.Count == totalCount)
-        {
-            _isMockingAll = false;
-            return true;
-        }
-
-        var sw = Stopwatch.StartNew();
-        _mockCount = totalCount;
-
-        _mockProcesses?.Clear();
-        _mockUpdateRealtimeProcesses = null;
-        _mockUpdateGeneralProcesses = null;
-
-        _mockProcesses = Enumerable.Range(0, _mockCount).Select(MockProcess).ToList();
-        sw.Stop();
-        Logger.Logger.Info($"模拟{_mockCount}条{sw.ElapsedMilliseconds}ms");
-        _mockUpdateRealtimeProcesses = Enumerable.Range(0, _mockCount)
-            .Select(index => new RealtimeProcessItem()
-            {
-                ProcessData = new RealtimeProcessItemData()
-                {
-                    Cpu = MockShort,
-                    Memory = MockShort,
-                    Disk = MockShort,
-                    Network = MockShort
-                },
-            })
-            .ToList();
-
-        _mockUpdateGeneralProcesses = Enumerable.Range(0, _mockCount)
-            .Select(index => new GeneralProcessItem()
-            {
-                ProcessData = new GeneralProcessItemData()
-                {
-                    ProcessStatus = (byte)(DateTime.Now.Microsecond % 5),
-                    AlarmStatus = (byte)(DateTime.Now.Microsecond % 8),
-                    Gpu = MockShort,
-                    GpuEngine = (byte)GpuEngine.Gpu03D,
-                    PowerUsage = (byte)ProcessPowerUsage.Low,
-                    PowerUsageTrend = (byte)ProcessPowerUsage.Low
-                },
-                UpdateTime = Timestamp
-            })
-            .ToList();
-
-        _isMockingAll = false;
-        return await Task.FromResult(true);
+        _mockCpus = new byte[_mockCount * 2];
+        _mockMemories = new byte[_mockCount * 2];
+        _mockDisks = new byte[_mockCount * 2];
+        _mockNetworks = new byte[_mockCount * 2];
+        _mockProcessStatuses = new byte[_mockCount * 1];
+        _mockAlarmStatuses = new byte[_mockCount * 1];
+        _mockGpus = new byte[_mockCount * 2];
+        _mockGpuEngines = new byte[_mockCount * 1];
+        _mockPowerUsages = new byte[_mockCount * 1];
+        _mockPowerUsageTrends = new byte[_mockCount * 1];
+        _mockUpdateTimes = new byte[_mockCount * 4];
     }
 
-    private static ProcessItem MockProcess(int id)
+    public static async Task MockUpdateDataAsync()
     {
-        return new ProcessItem
+        var mockShort = (short)Random.Shared.Next(0, 1000);
+        var mockProcessStatus = (byte)Random.Shared.Next(0, 5);
+        var mockAlarmStatus = (byte)Random.Shared.Next(0, 8);
+        var mockGpuEngine = (byte)Random.Shared.Next(0, 2);
+        var mockPowerUsage = (byte)Random.Shared.Next(0, 5);
+        var mockPowerUsageTrend = (byte)Random.Shared.Next(0, 5);
+        var timestamp = TimestampStartYear.GetCurrentTimestamp();
+
+        Update(_mockCpus!, mockShort);
+        Update(_mockMemories!, mockShort);
+        Update(_mockDisks!, mockShort);
+        Update(_mockNetworks!, mockShort);
+        Update(_mockProcessStatuses!, mockProcessStatus);
+        Update(_mockAlarmStatuses!, mockAlarmStatus);
+        Update(_mockGpus!, mockShort);
+        Update(_mockGpuEngines!, mockGpuEngine);
+        Update(_mockPowerUsages!, mockPowerUsage);
+        Update(_mockPowerUsageTrends!, mockPowerUsageTrend);
+        Update(_mockUpdateTimes!, timestamp);
+
+        await Task.CompletedTask;
+    }
+
+    public static UpdateRealtimeProcessList MockUpdateRealtimeProcessList(int pageSize, int pageIndex)
+    {
+        var dataCount = GetDataCount(_mockCount, pageSize, pageIndex);
+        var data = new UpdateRealtimeProcessList
         {
-            PID = id + 1,
-            Name = MockStr,
-            Publisher = MockStr,
-            CommandLine = MockStr,
-            ProcessData = new ProcessItemData
-            {
-                Cpu = MockShort,
-                Memory = MockShort,
-                Disk = MockShort,
-                Network = MockShort,
-                Gpu = MockShort,
-                GpuEngine = (byte)GpuEngine.Gpu03D,
-                PowerUsage = (byte)ProcessPowerUsage.Low,
-                PowerUsageTrend = (byte)ProcessPowerUsage.Low,
-                Type = (byte)ProcessType.Application,
-                Status = (byte)ProcessStatus.Ready
-            },
-            LastUpdateTime = Timestamp,
-            UpdateTime = Timestamp
+            Cpus = new byte[dataCount * 2],
+            Memories = new byte[dataCount * 2],
+            Disks = new byte[dataCount * 2],
+            Networks = new byte[dataCount * 2]
         };
+        Buffer.BlockCopy(_mockCpus!, (pageIndex * pageSize * 2), data.Cpus, 0, data.Cpus.Length);
+        Buffer.BlockCopy(_mockMemories!, (pageIndex * pageSize * 2), data.Memories, 0, data.Memories.Length);
+        Buffer.BlockCopy(_mockDisks!, (pageIndex * pageSize * 2), data.Disks, 0, data.Disks.Length);
+        Buffer.BlockCopy(_mockNetworks!, (pageIndex * pageSize * 2), data.Networks, 0, data.Networks.Length);
+
+        return data;
     }
 
-
-    public static async Task<List<RealtimeProcessItem>>
-        MockUpdateRealtimeProcessAsync(int totalCount, int pageSize,
-            int pageIndex)
+    public static UpdateGeneralProcessList MockUpdateGeneralProcessList(int pageSize, int pageIndex)
     {
-        while (!await MockAllProcessAsync(totalCount))
-            // 等待模拟操作完成
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-        return _mockUpdateRealtimeProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-    }
-
-    public static async Task<List<GeneralProcessItem>>
-        MockUpdateGeneralProcessAsync(int totalCount, int pageSize,
-            int pageIndex)
-    {
-        while (!await MockAllProcessAsync(totalCount))
-            // 等待模拟操作完成
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-        return _mockUpdateGeneralProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-    }
-
-    public static async Task MockUpdateProcessAsync(int totalCount)
-    {
-        while (!await MockAllProcessAsync(totalCount))
-            // 等待模拟操作完成
-            await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-        var cpu = (short)CustomRandom.Next(0, 1000);
-        var memory = (short)CustomRandom.Next(0, 1000);
-        var disk = (short)CustomRandom.Next(0, 1000);
-        var network = (short)CustomRandom.Next(0, 1000);
-        var gpu = (short)CustomRandom.Next(0, 1000);
-        var powerUsage =
-            (byte)CustomRandom.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length);
-        var powerUsageTrend =
-            (byte)CustomRandom.Next(0, Enum.GetNames(typeof(ProcessPowerUsage)).Length);
-        var updateTime = TimestampStartYear.GetCurrentTimestamp();
-
-        _mockUpdateRealtimeProcesses!.ForEach(process =>
+        var dataCount = GetDataCount(_mockCount, pageSize, pageIndex);
+        var data = new UpdateGeneralProcessList()
         {
-            // 需要重新赋值，才能重新设置buffer
-            process.ProcessData = new RealtimeProcessItemData()
-            {
-                Cpu = cpu,
-                Memory = memory,
-                Disk = disk,
-                Network = network,
-            };
-        });
-        _mockUpdateGeneralProcesses!.ForEach(process =>
-        {
-            // 需要重新赋值，才能重新设置buffer
-            process.ProcessData = new GeneralProcessItemData()
-            {
-                ProcessStatus = (byte)(DateTime.Now.Millisecond % 5),
-                AlarmStatus = (byte)(DateTime.Now.Millisecond % 8),
-                Gpu = gpu,
-                GpuEngine = (byte)(DateTime.Now.Millisecond % 2),
-                PowerUsage = powerUsage,
-                PowerUsageTrend = powerUsageTrend
-            };
-            process.UpdateTime = updateTime;
-        });
-    }
+            ProcessStatuses = new byte[dataCount * 1],
+            AlarmStatuses = new byte[dataCount * 1],
+            Gpus = new byte[dataCount * 2],
+            GpuEngine = new byte[dataCount * 1],
+            PowerUsage = new byte[dataCount * 1],
+            PowerUsageTrend = new byte[dataCount * 1],
+            UpdateTimes = new byte[dataCount * 1]
+        };
+        Buffer.BlockCopy(_mockProcessStatuses!, (pageIndex * pageSize * 1), data.ProcessStatuses, 0,
+            data.ProcessStatuses.Length);
+        Buffer.BlockCopy(_mockAlarmStatuses!, (pageIndex * pageSize * 1), data.AlarmStatuses, 0,
+            data.AlarmStatuses.Length);
+        Buffer.BlockCopy(_mockGpus!, (pageIndex * pageSize * 2), data.Gpus, 0, data.Gpus.Length);
+        Buffer.BlockCopy(_mockGpuEngines!, (pageIndex * pageSize * 1), data.GpuEngine, 0, data.GpuEngine.Length);
+        Buffer.BlockCopy(_mockPowerUsages!, (pageIndex * pageSize * 1), data.PowerUsage, 0, data.PowerUsage.Length);
+        Buffer.BlockCopy(_mockPowerUsageTrends!, (pageIndex * pageSize * 1), data.PowerUsageTrend, 0,
+            data.PowerUsageTrend.Length);
+        Buffer.BlockCopy(_mockUpdateTimes!, (pageIndex * pageSize * 4), data.UpdateTimes, 0, data.UpdateTimes.Length);
 
-    public static int GetPageCount(int totalCount, int pageSize)
-    {
-        return (totalCount + pageSize - 1) / pageSize;
+        return data;
     }
 
     public static void MockUpdateRealtimeProcessPageCount(int totalCount, int packetSize, out int pageSize,
         out int pageCount)
     {
-        // sizeof(int)*5为4个数据包基本信息int字段+Processes数组长度int4个字节
-        pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 5) /
-                   RealtimeProcessItem.ObjectSize;
+        // (UDP单包大小 - 数据包头部大小 - 4个int字段大小 - 4个byte[]数组长度占位大小) / 4 个byte[]单个进程占8个字节
+        pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 4 - sizeof(int) * 4) /
+                   (sizeof(short) * 4);
         pageCount = GetPageCount(totalCount, pageSize);
     }
 
     public static void MockUpdateGeneralProcessPageCount(int totalCount, int packetSize, out int pageSize,
         out int pageCount)
     {
-        // sizeof(int)*5为4个数据包基本信息int字段+Processes数组长度int4个字节
-        pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 5) /
-                   GeneralProcessItem.ObjectSize;
+        // (UDP单包大小 - 数据包头部大小 - 4个int字段大小 - 7个byte[]数组长度占位大小) / 7 个byte[]单个进程占11个字节
+        pageSize = (packetSize - SerializeHelper.PacketHeadLen - sizeof(int) * 4 - sizeof(int) * 7) /
+                   (sizeof(byte) * 5 + sizeof(short) + sizeof(uint));
         pageCount = GetPageCount(totalCount, pageSize);
+    }
+
+    static unsafe void Update(byte[] array, byte value)
+    {
+        fixed (byte* pArray = array)
+        {
+            var pByte = pArray;
+            for (var i = 0; i < _mockCount; i++)
+            {
+                *pByte = value;
+                pByte++;
+            }
+        }
+    }
+
+    static unsafe void Update(byte[] array, short value)
+    {
+        fixed (byte* pArray = array)
+        {
+            var pByte = (short*)pArray;
+            for (var i = 0; i < _mockCount; i++)
+            {
+                *pByte = value;
+                pByte++;
+            }
+        }
+    }
+
+    static unsafe void Update(byte[] array, uint value)
+    {
+        fixed (byte* pArray = array)
+        {
+            var pByte = (uint*)pArray;
+            for (var i = 0; i < _mockCount; i++)
+            {
+                *pByte = value;
+                pByte++;
+            }
+        }
+    }
+
+
+    public static int GetPageCount(int totalCount, int pageSize)
+    {
+        return (totalCount + pageSize - 1) / pageSize;
     }
 
     public static int GetDataCount(int totalCount, int pageSize, int pageIndex)
