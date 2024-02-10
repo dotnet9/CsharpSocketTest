@@ -76,7 +76,7 @@ TCP、UDP传输数据包定义。
 | DiskSize           | short    | 硬盘总容量（单位GB）                                         |
 | NetworkBandwidth   | short    | 网络带宽（单位Mbps）                                         |
 | Ips                | string?  | 服务器IP地址，多个IP地址以，分隔                             |
-| TimestampStartYear | byte     | 通信对象时间戳起始年份，比如：2023，表示2023年1月1号开始计算时间戳，后面的时间戳都以这个字段计算为准，精确到0.1s，即100ms，主要用于节约网络对象传输大小 |
+| TimestampStartYear | byte     | 通信对象时间戳起始年份，比如：23，表示2023年1月1号开始计算时间戳，后面的时间戳都以这个字段计算为准，精确到0.1s，即100ms，主要用于节约网络对象传输大小 |
 | LastUpdateTime     | uint     | 最后更新时间                                                 |
 
 #### RequestProcessIDList【0.0.5】
