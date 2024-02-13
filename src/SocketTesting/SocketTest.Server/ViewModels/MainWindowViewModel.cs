@@ -22,13 +22,12 @@ namespace SocketTest.Server.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private readonly WindowNotificationManager _notificationManager;
+    public WindowNotificationManager? NotificationManager { get; set; }
     private string? _runTcpCommandContent = "开启服务";
     private string? _runUdpCommandContent = "开启服务";
 
-    public MainWindowViewModel(WindowNotificationManager notificationManager)
+    public MainWindowViewModel()
     {
-        _notificationManager = notificationManager;
         TcpHelper = new TcpHelper();
         UdpHelper = new UdpHelper(TcpHelper);
 
@@ -80,7 +79,7 @@ public class MainWindowViewModel : ViewModelBase
             TcpHelper.Start();
         else
             TcpHelper.Stop();
-        _notificationManager.Show(TcpHelper.IsStarted ? "TCP服务已运行" : "TCP服务已停止");
+        NotificationManager?.Show(TcpHelper.IsStarted ? "TCP服务已运行" : "TCP服务已停止");
 
         return Task.CompletedTask;
     }

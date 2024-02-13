@@ -21,9 +21,7 @@ public class App : Application
 
         {
             desktop.MainWindow = new MainWindow();
-            var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
-            desktop.MainWindow.DataContext =
-                new MainWindowViewModel(new WindowNotificationManager(topLevel) { MaxItems = 3 });
+            desktop.MainWindow.DataContext = new MainWindowViewModel();
         }
 
         base.OnFrameworkInitializationCompleted();
