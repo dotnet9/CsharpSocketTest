@@ -5,6 +5,7 @@ using SocketNetObject;
 using SocketTest.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using ProcessItem = SocketDto.ProcessItem;
@@ -24,9 +25,19 @@ public static class MockUtil
     public static async Task MockAsync(int total)
     {
         _mockCount = total;
+        var stopwatch = new Stopwatch();
+        stopwatch.Restart();
         await MockBaseAsync();
+        stopwatch.Stop();
+        Logger.Logger.Info($"Mock base {stopwatch.ElapsedMilliseconds}ms");
+        stopwatch.Restart();
         await MockProcessIdListAsync();
+        stopwatch.Stop();
+        Logger.Logger.Info($"Mock {total} process id {stopwatch.ElapsedMilliseconds}ms");
+        stopwatch.Restart();
         await MockProcessAsync();
+        stopwatch.Stop();
+        Logger.Logger.Info($"Mock {total} process list {stopwatch.ElapsedMilliseconds}ms");
     }
 
     private static async Task MockBaseAsync()
@@ -47,7 +58,7 @@ public static class MockUtil
 
     private static async Task MockProcessIdListAsync()
     {
-        _mockProcessIDList = Enumerable.Range(1, _mockCount).Select((index, value) => value).ToArray();
+        _mockProcessIDList = Enumerable.Range(1, _mockCount).Select((index, value) => index).ToArray();
         await Task.CompletedTask;
     }
 

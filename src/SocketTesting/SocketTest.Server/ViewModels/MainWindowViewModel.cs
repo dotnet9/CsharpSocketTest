@@ -73,21 +73,32 @@ public class MainWindowViewModel : ViewModelBase
     /// </summary>
     public ReactiveCommand<Unit, Unit>? UpdateCommand { get; }
 
-    public Task HandleRunTcpCommandCommandAsync()
+    public async Task HandleRunTcpCommandCommandAsync()
     {
         if (!TcpHelper.IsStarted)
+        {
             TcpHelper.Start();
+        }
         else
             TcpHelper.Stop();
-        NotificationManager?.Show(TcpHelper.IsStarted ? "TCP服务已运行" : "TCP服务已停止");
 
-        return Task.CompletedTask;
+        NotificationManager?.Show(TcpHelper.IsStarted ? "TCP服务已运行" : "TCP服务已停止");
+        if (TcpHelper.IsStarted)
+        {
+            await MockUtil.MockAsync(TcpHelper.MockCount);
+            NotificationManager?.Show("数据模拟完成，客户端可以正常请求数据了");
+        }
+
+        await Task.CompletedTask;
     }
+
 
     public void HandleRunUdpMulticastCommandAsync()
     {
         if (!UdpHelper.IsStarted)
+        {
             UdpHelper.Start();
+        }
         else
             UdpHelper.Stop();
     }
