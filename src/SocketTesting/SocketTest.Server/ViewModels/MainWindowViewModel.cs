@@ -1,22 +1,18 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Avalonia.Controls.Notifications;
+using Messager;
+using ReactiveUI;
+using SocketDto;
+using SocketDto.Message;
+using SocketTest.Common;
+using SocketTest.Mvvm;
+using SocketTest.Server.Helpers;
+using SocketTest.Server.Mock;
+using System;
 using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia;
-using Avalonia.Controls.Notifications;
-using Messager;
-using ReactiveUI;
-using SocketDto;
-using SocketDto.Message;
-using SocketNetObject;
-using SocketNetObject.Models;
-using SocketTest.Common;
-using SocketTest.Mvvm;
-using SocketTest.Server.Helpers;
-using SocketTest.Server.Mock;
 
 namespace SocketTest.Server.ViewModels;
 
@@ -149,7 +145,17 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ReceiveSocketMessage(Socket client, RequestBaseInfo request)
     {
-        //TcpHelper.SendCommand(client, MockUtil.MockBase(request.TaskId));
+        var msg = $"收到请求基本信息命令";
+        Logger.Logger.Info(msg);
+        NotificationManager?.Show(msg);
+
+        var data = MockUtil.GetBaseInfo().Result!;
+        data.TaskId = request.TaskId;
+        TcpHelper.SendCommand(client, data);
+
+        msg = $"响应基本信息命令：当前操作系统版本号={data.OS}，内存大小={data.MemorySize}GB";
+        Logger.Logger.Info(msg);
+        NotificationManager?.Show(msg);
     }
 
     private async void ReceiveSocketMessage(Socket client, RequestProcessList request)

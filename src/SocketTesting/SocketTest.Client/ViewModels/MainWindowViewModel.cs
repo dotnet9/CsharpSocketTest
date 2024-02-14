@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Timers;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using DynamicData;
 using Messager;
@@ -16,12 +9,23 @@ using SocketDto.Message;
 using SocketTest.Client.Helpers;
 using SocketTest.Client.Models;
 using SocketTest.Common;
+using SocketTest.Logger.Models;
 using SocketTest.Mvvm;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Timers;
+using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    public WindowNotificationManager? NotificationManager { get; set; }
     private readonly List<ProcessItemModel> _receivedProcesses = new();
 
     private string? _baseInfo;
@@ -128,13 +132,13 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (!TcpHelper.IsRunning)
         {
-            Logger.Logger.Error("未连接Tcp服务，无法发送命令");
+            Log("未连接Tcp服务，无法发送命令", LogType.Error);
             return;
         }
 
         ClearData();
         TcpHelper.SendCommand(new RequestBaseInfo { TaskId = TcpHelper.GetNewTaskId() });
-        Logger.Logger.Info("发送刷新命令");
+        Log("发送刷新命令");
     }
 
     private void HandleRefreshAllCommand()
@@ -195,7 +199,12 @@ public class MainWindowViewModel : ViewModelBase
 
     private void Invoke(Action action)
     {
-        Dispatcher.UIThread.InvokeAsync(action.Invoke);
+        Dispatcher.UIThread.Post(action.Invoke);
+    }
+
+    private async Task InvokeAsync(Action action)
+    {
+        await Dispatcher.UIThread.InvokeAsync(action.Invoke);
     }
 
 
@@ -259,6 +268,7 @@ public class MainWindowViewModel : ViewModelBase
         Logger.Logger.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
         Logger.Logger.Info($"【旧】{oldBaseInfo}");
         Logger.Logger.Info($"【新】{BaseInfo}");
+        Log(BaseInfo);
 
         TcpHelper.SendCommand(new RequestProcessList { TaskId = TcpHelper.GetNewTaskId() });
         Logger.Logger.Info("发送请求进程信息命令");
@@ -338,4 +348,33 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     #endregion
+
+    private async Task Log(string msg, LogType type = LogType.Info, bool showNotification = true)
+    {
+        if (type == LogType.Info)
+        {
+            Logger.Logger.Info(msg);
+        }
+        else if (type == LogType.Error)
+        {
+            Logger.Logger.Error(msg);
+        }
+
+
+        await ShowNotificationAsync(showNotification, msg, type);
+    }
+
+    private async Task ShowNotificationAsync(bool showNotification, string msg, LogType type)
+    {
+        if (!showNotification) return;
+
+        var notificationType = type switch
+        {
+            LogType.Warning => NotificationType.Warning,
+            LogType.Error => NotificationType.Error,
+            _ => NotificationType.Information
+        };
+
+        await InvokeAsync(() => NotificationManager?.Show(new Notification(title: "提示", msg, notificationType)));
+    }
 }

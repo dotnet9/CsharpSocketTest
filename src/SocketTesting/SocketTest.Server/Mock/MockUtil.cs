@@ -40,6 +40,11 @@ public static class MockUtil
         Logger.Logger.Info($"Mock {total} process list {stopwatch.ElapsedMilliseconds}ms");
     }
 
+    public static async Task<ResponseBaseInfo?> GetBaseInfo()
+    {
+        return await Task.FromResult(_mockResponseBase);
+    }
+
     private static async Task MockBaseAsync()
     {
         _mockResponseBase = new ResponseBaseInfo

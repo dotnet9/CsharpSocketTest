@@ -185,7 +185,9 @@ public class TcpHelper : ViewModelBase, ISocketBase
         var buffer = command.Serialize(SystemId);
         _client!.Send(buffer);
         if (command is Heartbeat)
+        {
             SendHeartbeatTime = DateTime.Now;
+        }
         else
             Logger.Logger.Info($"发送命令{command.GetType()}");
     }
