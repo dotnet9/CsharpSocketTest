@@ -19,7 +19,7 @@ public static class EnumExtensions
         var descriptions = new List<string>();
         foreach (Enum enumValue in Enum.GetValues(enumType))
         {
-            // 跳过值为0的枚举成员，因为任何数与0进行“或”运行都不会改变该数的值
+            // 跳过值为0的枚举成员，因为任何数与0进行“或”运算都不会改变该数的值
             if (Convert.ToInt64(enumValue) == 0) continue;
 
             if (value.HasFlag(enumValue)) descriptions.Add(GetDescription(enumValue));
