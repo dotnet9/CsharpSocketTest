@@ -8,24 +8,31 @@ public static class EnumExtensions
     public static string Description(this Enum value)
     {
         var enumType = value.GetType();
-        var fields = enumType.GetFields(BindingFlags.Public | BindingFlags.Static);
-        var descriptions = new List<string>();
 
-        foreach (var field in fields)
+        // 1、检查是否是位域枚举的组合值  
+        var isFlagsEnum = enumType.GetCustomAttribute<FlagsAttribute>() != null;
+
+        // 2、非位域枚举直接返回描述
+        if (!isFlagsEnum) return GetDescription(value);
+
+        // 3、位域枚举获取每个标志的描述并用逗号分隔  
+        var descriptions = new List<string>();
+        foreach (Enum enumValue in Enum.GetValues(enumType))
         {
-            var enumValue = (Enum)Enum.Parse(enumType, field.Name);
-            if (!value.HasFlag(enumValue)) continue;
-            if (Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
-            {
-                descriptions.Add(attribute.Description);
-            }
-            else
-            {
-                descriptions.Add(field.Name);
-            }
+            // 跳过值为0的枚举成员，因为任何数与0进行“或”运行都不会改变该数的值
+            if (Convert.ToInt64(enumValue) == 0) continue;
+
+            if (value.HasFlag(enumValue)) descriptions.Add(GetDescription(enumValue));
         }
 
-        // 你可以选择以不同的方式组合这些描述，这里使用逗号加空格连接  
-        return string.Join(", ", descriptions);
+        return descriptions.Count <= 0 ? GetDescription(value) : string.Join(",", descriptions);
+    }
+
+    private static string GetDescription(Enum value)
+    {
+        var fieldInfo = value.GetType().GetField(value.ToString());
+        var attribute =
+            Attribute.GetCustomAttribute(fieldInfo!, typeof(DescriptionAttribute)) as DescriptionAttribute;
+        return attribute?.Description ?? value.ToString();
     }
 }
