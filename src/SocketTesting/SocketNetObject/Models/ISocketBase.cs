@@ -16,11 +16,6 @@ public interface ISocketBase
     public int Port { get; set; }
 
     /// <summary>
-    ///     是否已经开启
-    /// </summary>
-    public bool IsStarted { get; set; }
-
-    /// <summary>
     ///     是否正在运行
     /// </summary>
     public bool IsRunning { get; set; }

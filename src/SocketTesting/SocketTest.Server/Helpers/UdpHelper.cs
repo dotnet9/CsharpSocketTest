@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using SocketNetObject;
+using System.Threading;
 
 namespace SocketTest.Server.Helpers;
 
@@ -36,17 +37,6 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
     {
         get => _port;
         set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isStarted;
-
-    public bool IsStarted
-    {
-        get => _isStarted;
-        set
-        {
-            if (value != _isStarted) this.RaiseAndSetIfChanged(ref _isStarted, value);
-        }
     }
 
     private bool _isRunning;
@@ -106,19 +96,14 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
 
     #region 公开接口方法
 
+    private CancellationTokenSource? _connectServer;
+
     public void Start()
     {
-        if (IsStarted)
-        {
-            Logger.Logger.Warning("Udp组播已经开启");
-            return;
-        }
-
-        IsStarted = true;
-
+        _connectServer = new CancellationTokenSource();
         Task.Run(async () =>
         {
-            while (IsStarted)
+            while (!_connectServer.IsCancellationRequested)
                 try
                 {
                     var ipAddress = IPAddress.Parse(Ip);
@@ -136,21 +121,14 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
                     Logger.Logger.Warning($"运行Udp异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
-        });
+        }, _connectServer.Token);
     }
 
     public void Stop()
     {
-        if (!IsStarted)
-        {
-            Logger.Logger.Warning("Udp组播已经关闭");
-            return;
-        }
-
-        IsStarted = false;
-
         try
         {
+            _connectServer?.Cancel();
             _client?.Close();
             _client = null;
             Logger.Logger.Info("停止Udp");

@@ -23,6 +23,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using SocketDto.Enums;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
@@ -47,14 +48,30 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        this.WhenAnyValue(x => x.TcpHelper.IsStarted)
-            .Subscribe(newValue => RunTcpCommandContent = newValue ? "断开服务" : "连接服务");
-        this.WhenAnyValue(x => x.UdpHelper.IsStarted)
-            .Subscribe(newValue => RunUdpCommandContent = newValue ? "断开服务" : "连接服务");
+        void ListenProperty()
+        {
+            this.WhenAnyValue(x => x.TcpHelper.IsRunning)
+                .Subscribe(newValue => RunTcpCommandContent = newValue ? "断开服务" : "连接服务");
+            this.WhenAnyValue(x => x.UdpHelper.IsRunning)
+                .Subscribe(newValue => RunUdpCommandContent = newValue ? "断开服务" : "连接服务");
+        }
 
-        var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
-        RefreshCommand = ReactiveCommand.Create(HandleRefreshCommand, isTcpRunning);
-        RefreshAllCommand = ReactiveCommand.Create(HandleRefreshAllCommand, isTcpRunning);
+        void RegisterEvent()
+        {
+            Messenger.Default.Subscribe<TcpStatusMessage>(this, ReceiveTcpStatusMessage);
+            Messenger.Default.Subscribe<SocketMessage>(this, ReceivedSocketMessage);
+        }
+
+        void RegisterCommand()
+        {
+            var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
+            RefreshCommand = ReactiveCommand.Create(HandleRefreshCommand, isTcpRunning);
+            RefreshAllCommand = ReactiveCommand.Create(HandleRefreshAllCommand, isTcpRunning);
+        }
+
+        ListenProperty();
+        RegisterEvent();
+        RegisterCommand();
 
         Logger.Logger.Info("连接服务端后获取数据");
     }
@@ -96,33 +113,28 @@ public class MainWindowViewModel : ViewModelBase
     /// <summary>
     ///     刷新数据
     /// </summary>
-    public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
+    public ReactiveCommand<Unit, Unit>? RefreshCommand { get; private set; }
 
     /// <summary>
     ///     刷新数据
     /// </summary>
-    public ReactiveCommand<Unit, Unit> RefreshAllCommand { get; }
+    public ReactiveCommand<Unit, Unit>? RefreshAllCommand { get; private set; }
 
     public void HandleConnectTcpCommandAsync()
     {
-        if (!TcpHelper.IsStarted)
+        if (!TcpHelper.IsRunning)
         {
             TcpHelper.Start();
-            Messenger.Default.Subscribe<SocketMessage>(this, ReceivedSocketMessage, ThreadOption.PublisherThread);
-
-            ReceiveTcpData();
-            SendHeartbeat();
         }
         else
         {
-            Messenger.Default.Unsubscribe<SocketMessage>(this, ReceivedSocketMessage);
             TcpHelper.Stop();
         }
     }
 
     public void HandleSubscribeUdpMulticastCommand()
     {
-        if (!UdpHelper.IsStarted)
+        if (!UdpHelper.IsRunning)
         {
             UdpHelper.Start();
         }
@@ -211,8 +223,13 @@ public class MainWindowViewModel : ViewModelBase
         await Dispatcher.UIThread.InvokeAsync(action.Invoke);
     }
 
+    #region 接收事件
 
-    #region 读取Tcp数据
+    private void ReceiveTcpStatusMessage(TcpStatusMessage message)
+    {
+        TcpHelper.SendCommand(new RequestTargetType());
+        _ = Log("发送命令查询目标终端类型是否是服务端");
+    }
 
     private void ReceiveTcpData()
     {
@@ -232,7 +249,11 @@ public class MainWindowViewModel : ViewModelBase
     /// <exception cref="Exception"></exception>
     private void ReceivedSocketMessage(SocketMessage message)
     {
-        if (message.IsMessage<ResponseBaseInfo>())
+        if (message.IsMessage<ResponseTargetType>())
+        {
+            ReadTcpData(message.Message<ResponseTargetType>());
+        }
+        else if (message.IsMessage<ResponseBaseInfo>())
         {
             ReadTcpData(message.Message<ResponseBaseInfo>());
         }
@@ -259,6 +280,20 @@ public class MainWindowViewModel : ViewModelBase
         else if (message.IsMessage<UpdateGeneralProcessList>())
         {
             ReceiveUdpData(message.MessageByNative<UpdateGeneralProcessList>());
+        }
+    }
+
+    private void ReadTcpData(ResponseTargetType response)
+    {
+        var type = (TerminalType)Enum.Parse(typeof(TerminalType), response.Type.ToString());
+        if (response.Type == (byte)TerminalType.Server)
+        {
+            _ = Log($"正确连接{type.Description()}，程序正常运行");
+        }
+        else
+        {
+            _ = Log($"目标终端非服务端(type: {type.Description()})，请检查地址是否配置正确（重点检查端口），即将断开连接", LogType.Error);
+            HandleConnectTcpCommandAsync();
         }
     }
 
@@ -363,7 +398,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             Logger.Logger.Error(msg);
         }
-
 
         await ShowNotificationAsync(showNotification, msg, type);
     }

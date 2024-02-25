@@ -7,7 +7,8 @@ public class Messenger : IMessenger
 
     private Dictionary<Type, List<WeakActionAndToken>>? recipientsOfSubclassesAction;
 
-    public void Subscribe<TMessage>(object recipient, Action<TMessage> action, ThreadOption threadOption,
+    public void Subscribe<TMessage>(object recipient, Action<TMessage> action,
+        ThreadOption threadOption = ThreadOption.PublisherThread,
         string? tag = null)
         where TMessage : Message
     {

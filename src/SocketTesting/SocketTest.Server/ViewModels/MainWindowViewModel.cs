@@ -15,6 +15,11 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using SocketDto.Enums;
+using SocketDto.Response;
+using SocketTest.Logger.Models;
+using Avalonia.Threading;
+using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
 
@@ -26,19 +31,33 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
+        void ListenProperty()
+        {
+            this.WhenAnyValue(x => x.TcpHelper.IsRunning)
+                .Subscribe(newValue => RunTcpCommandContent = newValue ? "停止服务" : "开启服务");
+            this.WhenAnyValue(x => x.UdpHelper.IsRunning)
+                .Subscribe(newValue => RunUdpCommandContent = newValue ? "停止服务" : "开启服务");
+        }
+
+        void RegisterEvent()
+        {
+            Messenger.Default.Subscribe<SocketMessage>(this, ReceiveSocketMessage, ThreadOption.PublisherThread);
+        }
+
+        void RegisterCommand()
+        {
+            var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
+            RefreshCommand = ReactiveCommand.Create(HandleRefreshCommandAsync, isTcpRunning);
+            UpdateCommand = ReactiveCommand.Create(HandleUpdateCommandAsync, isTcpRunning);
+        }
+
         TcpHelper = new TcpHelper();
         UdpHelper = new UdpHelper(TcpHelper);
 
-        Messenger.Default.Subscribe<SocketMessage>(this, ReceiveSocketMessage, ThreadOption.PublisherThread);
+        ListenProperty();
+        RegisterEvent();
+        RegisterCommand();
 
-        this.WhenAnyValue(x => x.TcpHelper.IsStarted)
-            .Subscribe(newValue => RunTcpCommandContent = newValue ? "停止服务" : "开启服务");
-        this.WhenAnyValue(x => x.UdpHelper.IsStarted)
-            .Subscribe(newValue => RunUdpCommandContent = newValue ? "停止服务" : "开启服务");
-
-        var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
-        RefreshCommand = ReactiveCommand.Create(HandleRefreshCommandAsync, isTcpRunning);
-        UpdateCommand = ReactiveCommand.Create(HandleUpdateCommandAsync, isTcpRunning);
         MockUpdate();
         MockSendData();
 
@@ -64,24 +83,24 @@ public class MainWindowViewModel : ViewModelBase
     /// <summary>
     ///     刷新数据
     /// </summary>
-    public ReactiveCommand<Unit, Unit>? RefreshCommand { get; }
+    public ReactiveCommand<Unit, Unit>? RefreshCommand { get; private set; }
 
     /// <summary>
     ///     更新数据
     /// </summary>
-    public ReactiveCommand<Unit, Unit>? UpdateCommand { get; }
+    public ReactiveCommand<Unit, Unit>? UpdateCommand { get; private set; }
 
     public async Task HandleRunTcpCommandCommandAsync()
     {
-        if (!TcpHelper.IsStarted)
+        if (!TcpHelper.IsRunning)
         {
             TcpHelper.Start();
         }
         else
             TcpHelper.Stop();
 
-        NotificationManager?.Show(TcpHelper.IsStarted ? "TCP服务已运行" : "TCP服务已停止");
-        if (TcpHelper.IsStarted)
+        NotificationManager?.Show(TcpHelper.IsRunning ? "TCP服务已运行" : "TCP服务已停止");
+        if (TcpHelper.IsRunning)
         {
             await MockUtil.MockAsync(TcpHelper.MockCount);
             NotificationManager?.Show("数据模拟完成，客户端可以正常请求数据了");
@@ -93,7 +112,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public void HandleRunUdpMulticastCommandAsync()
     {
-        if (!UdpHelper.IsStarted)
+        if (!UdpHelper.IsRunning)
         {
             UdpHelper.Start();
         }
@@ -127,7 +146,11 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ReceiveSocketMessage(SocketMessage message)
     {
-        if (message.IsMessage<RequestBaseInfo>())
+        if (message.IsMessage<RequestTargetType>())
+        {
+            ReceiveSocketMessage(message.Client!, message.Message<RequestTargetType>());
+        }
+        else if (message.IsMessage<RequestBaseInfo>())
         {
             ReceiveSocketMessage(message.Client!, message.Message<RequestBaseInfo>());
         }
@@ -143,6 +166,21 @@ public class MainWindowViewModel : ViewModelBase
         {
             ReceiveSocketMessage(message.Client!, message.Message<Heartbeat>());
         }
+    }
+
+    private void ReceiveSocketMessage(Socket client, RequestTargetType request)
+    {
+        _ = Log("收到请求终端类型命令");
+        var currentTerminalType = TerminalType.Server;
+
+        var response = new ResponseTargetType()
+        {
+            TaskId = request.TaskId,
+            Type = (byte)currentTerminalType
+        };
+        TcpHelper.SendCommand(client, response);
+
+        _ = Log($"响应请求终端类型命令：当前终端为={currentTerminalType.Description()}");
     }
 
     private void ReceiveSocketMessage(Socket client, RequestBaseInfo request)
@@ -339,4 +377,42 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     #endregion
+
+    private void Invoke(Action action)
+    {
+        Dispatcher.UIThread.Post(action.Invoke);
+    }
+
+    private async Task InvokeAsync(Action action)
+    {
+        await Dispatcher.UIThread.InvokeAsync(action.Invoke);
+    }
+
+    private async Task Log(string msg, LogType type = LogType.Info, bool showNotification = true)
+    {
+        if (type == LogType.Info)
+        {
+            Logger.Logger.Info(msg);
+        }
+        else if (type == LogType.Error)
+        {
+            Logger.Logger.Error(msg);
+        }
+
+        await ShowNotificationAsync(showNotification, msg, type);
+    }
+
+    private async Task ShowNotificationAsync(bool showNotification, string msg, LogType type)
+    {
+        if (!showNotification) return;
+
+        var notificationType = type switch
+        {
+            LogType.Warning => NotificationType.Warning,
+            LogType.Error => NotificationType.Error,
+            _ => NotificationType.Information
+        };
+
+        await InvokeAsync(() => NotificationManager?.Show(new Notification(title: "提示", msg, notificationType)));
+    }
 }

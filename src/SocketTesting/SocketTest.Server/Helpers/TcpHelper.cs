@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SocketTest.Server.Helpers;
@@ -45,17 +46,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
     {
         get => _port;
         set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isStarted;
-
-    /// <summary>
-    ///     是否开启Tcp服务
-    /// </summary>
-    public bool IsStarted
-    {
-        get => _isStarted;
-        set => this.RaiseAndSetIfChanged(ref _isStarted, value);
     }
 
     private bool _isRunning;
@@ -133,20 +123,15 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
     #region 公开接口方法
 
+    private CancellationTokenSource? _connectServer;
+
     public void Start()
     {
-        if (IsStarted)
-        {
-            Logger.Logger.Warning("Tcp服务已经开启");
-            return;
-        }
-
-        IsStarted = true;
-
+        _connectServer = new CancellationTokenSource();
         var ipEndPoint = new IPEndPoint(IPAddress.Parse(Ip), Port);
         Task.Run(async () =>
         {
-            while (IsStarted)
+            while (!_connectServer.IsCancellationRequested)
                 try
                 {
                     _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -167,21 +152,14 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     Logger.Logger.Warning($"运行TCP服务异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
-        });
+        }, _connectServer.Token);
     }
 
     public void Stop()
     {
-        if (!IsStarted)
-        {
-            Logger.Logger.Warning("Tcp服务已经关闭");
-            return;
-        }
-
-        IsStarted = false;
-
         try
         {
+            _connectServer?.Cancel();
             _server?.Close(0);
             _server = null;
             Logger.Logger.Info("停止Tcp服务");

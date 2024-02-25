@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Messager;
@@ -43,17 +44,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
     {
         get => _port;
         set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isStarted;
-
-    /// <summary>
-    ///     是否开启Tcp服务
-    /// </summary>
-    public bool IsStarted
-    {
-        get => _isStarted;
-        set => this.RaiseAndSetIfChanged(ref _isStarted, value);
     }
 
     private bool _isRunning;
@@ -115,20 +105,15 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
     #region 公开接口
 
+    private CancellationTokenSource? _connectServer;
+
     public void Start()
     {
-        if (IsStarted)
-        {
-            Logger.Logger.Warning("Tcp连接已经开启");
-            return;
-        }
-
-        IsStarted = true;
-
+        _connectServer = new CancellationTokenSource();
         var ipEndPoint = new IPEndPoint(IPAddress.Parse(Ip), Port);
         Task.Run(async () =>
         {
-            while (IsStarted)
+            while (!_connectServer.IsCancellationRequested)
                 try
                 {
                     _client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -140,6 +125,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     CheckResponse();
 
                     Logger.Logger.Info("连接Tcp服务成功");
+                    Messenger.Default.Publish(this, new TcpStatusMessage(this, true, Ip, Port));
                     break;
                 }
                 catch (Exception ex)
@@ -148,21 +134,14 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     Logger.Logger.Warning($"连接TCP服务异常，3秒后将重新连接：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
-        });
+        }, _connectServer.Token);
     }
 
     public void Stop()
     {
-        if (!IsStarted)
-        {
-            Logger.Logger.Warning("Tcp连接已经关闭");
-            return;
-        }
-
-        IsStarted = false;
-
         try
         {
+            _connectServer?.Cancel();
             _client?.Close(0);
             Logger.Logger.Info("停止Tcp服务");
         }

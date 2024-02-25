@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
 using SocketDto;
@@ -42,14 +43,6 @@ public class UdpHelper : ViewModelBase, ISocketBase
     {
         get => _port;
         set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isStarted;
-
-    public bool IsStarted
-    {
-        get => _isStarted;
-        set => this.RaiseAndSetIfChanged(ref _isStarted, value);
     }
 
     private bool _isRunning;
@@ -105,19 +98,14 @@ public class UdpHelper : ViewModelBase, ISocketBase
 
     #region 公开接口
 
+    private CancellationTokenSource? _connectServer;
+
     public void Start()
     {
-        if (IsStarted)
-        {
-            Logger.Logger.Warning("Udp订阅已经开启");
-            return;
-        }
-
-        IsStarted = true;
-
+        _connectServer = new CancellationTokenSource();
         Task.Run(async () =>
         {
-            while (IsStarted)
+            while (!_connectServer.IsCancellationRequested)
                 try
                 {
                     _client = new UdpClient();
@@ -142,21 +130,14 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     Logger.Logger.Warning($"运行Udp异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
-        });
+        }, _connectServer.Token);
     }
 
     public void Stop()
     {
-        if (!IsStarted)
-        {
-            Logger.Logger.Warning("Udp订阅已经关闭");
-            return;
-        }
-
-        IsStarted = false;
-
         try
         {
+            _connectServer?.Cancel();
             _client?.Close();
             _client = null;
             Logger.Logger.Info("停止Udp");
