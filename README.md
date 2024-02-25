@@ -7,6 +7,7 @@
 | 2024-02-07 | 1）添加界面截图，2）添加AvaloniaUI分支，1个UDP包拆分2个      | 0.0.3 | 沙漠尽头的狼 |
 | 2024-02-08 | 完善进程状态                                                 | 0.0.4 | 沙漠尽头的狼 |
 | 2024-02-09 | 修改通信对象，优化发包效率：常更新字段直接读取byte[]，优化数据包组装效率 | 0.0.5 | 沙漠尽头的狼 |
+| 2024-02-25 | 添加终端类型查询命令                                         | 0.0.6 | 沙漠尽头的狼 |
 
 [TOC]
 
@@ -41,23 +42,38 @@
 2. UDP包不使用任何压缩框架，对于大数字类型(int\double)压缩反而让数据包体积更大，所以使用`BinnaryReader`、`BinnaryWriter`做序列化和反序列化。
 3. `string`|`List<T>`|`Dictionary<T1,T2>`等集合类型：前4字节用int表示数量，后面部分为实际数据byte[]。
 
-## 3. 网络对象定义【0.0.5】
+## 3. 网络对象定义
 
 TCP、UDP传输数据包定义。
 
-### 3.1. TCP数据包【0.0.5】
+### 3.1. TCP数据包【0.0.6】
 
 | 对象Id | 对象版本 | 对象名                | 说明                                     |
 | ------ | -------- | --------------------- | ---------------------------------------- |
-| 1      | 1        | RequestBaseInfo       | 请求服务基本信息                         |
-| 2      | 1        | ResponseBaseInfo      | 响应请求服务基本信息                     |
-| 3      | 1        | RequestProcessIDList  | 请求进程ID列表                           |
-| 4      | 1        | ResponseProcessIDList | 响应请求进程ID列表，更新实时数据需要使用 |
-| 5      | 1        | RequestProcessList    | 请求进程详细信息列表                     |
-| 6      | 1        | ResponseProcessList   | 响应请求进程详细信息列表                 |
-| 7      | 1        | UpdateProcessList     | 更新进程详细信息列表                     |
-| 8      | 1        | ChangeProcessList     | 进程结构变化：增加、减少进程             |
+| 1      | 1        | RequestTargetType     | 请求目标终端类型                         |
+| 2      | 1        | ResponseTargetType    | 响应目标终端类型                         |
+| 3      | 1        | RequestBaseInfo       | 请求服务基本信息                         |
+| 4      | 1        | ResponseBaseInfo      | 响应请求服务基本信息                     |
+| 5      | 1        | RequestProcessIDList  | 请求进程ID列表                           |
+| 6      | 1        | ResponseProcessIDList | 响应请求进程ID列表，更新实时数据需要使用 |
+| 7      | 1        | RequestProcessList    | 请求进程详细信息列表                     |
+| 8      | 1        | ResponseProcessList   | 响应请求进程详细信息列表                 |
+| 9      | 1        | UpdateProcessList     | 更新进程详细信息列表                     |
+| 10     | 1        | ChangeProcessList     | 进程结构变化：增加、减少进程             |
 | 199    | 1        | Heartbeat             | TCP心跳包                                |
+
+#### RequestTargetType【0.0.6】
+
+| 字段名 | 数据类型 | 说明   |
+| ------ | -------- | ------ |
+| TaskId | int      | 任务Id |
+
+#### ResponseTargetType【0.0.6】
+
+| 字段名 | 数据类型 | 说明                           |
+| ------ | -------- | ------------------------------ |
+| TaskId | int      | 任务Id                         |
+| Type   | byte     | 终端类型，0：Server，1：Client |
 
 #### RequestBaseInfo【0.0.1】
 
