@@ -1,9 +1,9 @@
-﻿namespace SocketDto;
+﻿namespace SocketDto.Response;
 
 /// <summary>
 ///     响应请求进程ID列表信息
 /// </summary>
-[NetHead(4, 1)]
+[NetHead(6, 1)]
 [MessagePackObject]
 public class ResponseProcessIDList : INetObject
 {

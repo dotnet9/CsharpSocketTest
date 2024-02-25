@@ -2,7 +2,9 @@
 using Messager;
 using ReactiveUI;
 using SocketDto;
+using SocketDto.AutoCommand;
 using SocketDto.Message;
+using SocketDto.Requests;
 using SocketTest.Common;
 using SocketTest.Mvvm;
 using SocketTest.Server.Helpers;

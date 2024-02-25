@@ -1,7 +1,7 @@
 ﻿using System;
 using ReactiveUI;
-using SocketDto;
 using SocketDto.Enums;
+using SocketDto.Response;
 using SocketTest.Common;
 using SocketTest.Mvvm;
 

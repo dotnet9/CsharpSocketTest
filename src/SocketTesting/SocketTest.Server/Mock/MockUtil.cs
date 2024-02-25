@@ -1,6 +1,7 @@
 ﻿using LoremNET;
-using SocketDto;
 using SocketDto.Enums;
+using SocketDto.Response;
+using SocketDto.Udp;
 using SocketNetObject;
 using SocketTest.Common;
 using System;
@@ -8,7 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using ProcessItem = SocketDto.ProcessItem;
+using ProcessItem = SocketDto.Response.ProcessItem;
 
 namespace SocketTest.Server.Mock;
 

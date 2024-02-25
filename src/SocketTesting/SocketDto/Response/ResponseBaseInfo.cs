@@ -1,9 +1,9 @@
-﻿namespace SocketDto;
+﻿namespace SocketDto.Response;
 
 /// <summary>
 ///     响应基本信息
 /// </summary>
-[NetHead(2, 1)]
+[NetHead(4, 1)]
 [MessagePackObject]
 public class ResponseBaseInfo : INetObject
 {
