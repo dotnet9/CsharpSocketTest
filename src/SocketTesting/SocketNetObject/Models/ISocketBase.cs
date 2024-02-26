@@ -8,7 +8,7 @@ public interface ISocketBase
     /// <summary>
     ///     IP
     /// </summary>
-    public string Ip { get; set; }
+    public string? Ip { get; set; }
 
     /// <summary>
     ///     端口

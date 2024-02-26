@@ -14,11 +14,13 @@ using SocketTest.Mvvm;
 using SocketTest.Server.Helpers;
 using SocketTest.Server.Mock;
 using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using SocketDto.Udp;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
@@ -330,77 +332,67 @@ public class MainWindowViewModel : ViewModelBase
 
     private async void MockUpdateDataAsync(object? sender, ElapsedEventArgs e)
     {
-        //if (!UdpHelper.IsRunning) return;
+        if (!UdpHelper.IsRunning || !MockUtil.IsInitOver) return;
 
-        //var sw = Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
-        //await MockUtil.MockUpdateProcessAsync(TcpHelper.MockCount);
-        //sw.Stop();
+        await MockUtil.MockUpdateDataAsync();
 
-        //Logger.Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
+        sw.Stop();
+
+        Logger.Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
     }
 
-    private async void MockSendRealtimeDataAsync(object? sender, ElapsedEventArgs e)
+    private void MockSendRealtimeDataAsync(object? sender, ElapsedEventArgs e)
     {
-        //if (!UdpHelper.IsRunning) return;
+        if (!UdpHelper.IsRunning || !MockUtil.IsInitOver) return;
 
-        //var sw = Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
-        //MockUtil.MockUpdateRealtimeProcessPageCount(TcpHelper.MockCount, UdpHelper.PacketMaxSize, out var pageSize,
-        //    out var pageCount);
+        MockUtil.MockUpdateRealtimeProcessPageCount(TcpHelper.MockCount, UdpHelper.PacketMaxSize, out var pageSize,
+            out var pageCount);
 
-        //var size = 0;
-        //for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
-        //{
-        //    if (!UdpHelper.IsRunning) break;
+        for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
+        {
+            if (!UdpHelper.IsRunning) break;
 
-        //    var response = new UpdateRealtimeProcessList
-        //    {
-        //        TotalSize = TcpHelper.MockCount,
-        //        PageSize = pageSize,
-        //        PageCount = pageCount,
-        //        PageIndex = pageIndex,
-        //        Processes = await MockUtil.MockUpdateRealtimeProcessAsync(TcpHelper.MockCount, pageSize,
-        //            pageIndex)
-        //    };
+            var response = MockUtil.MockUpdateRealtimeProcessList(pageSize, pageIndex);
+            response.TotalSize = TcpHelper.MockCount;
+            response.PageSize = pageSize;
+            response.PageCount = pageCount;
+            response.PageIndex = pageIndex;
 
-        //    UdpHelper.SendCommand(response);
-        //    TcpHelper.UDPPacketsSentCount++;
-        //}
+            UdpHelper.SendCommand(response);
+        }
 
-        //Logger.Logger.Info(
-        //    $"推送实时数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，成功发送{size}字节，{sw.ElapsedMilliseconds}ms");
+        Logger.Logger.Info(
+            $"推送实时数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
-    private async void MockSendGeneralDataAsync(object? sender, ElapsedEventArgs e)
+    private void MockSendGeneralDataAsync(object? sender, ElapsedEventArgs e)
     {
-        //if (!UdpHelper.IsRunning) return;
+        if (!UdpHelper.IsRunning || !MockUtil.IsInitOver) return;
 
-        //var sw = Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
-        //MockUtil.MockUpdateGeneralProcessPageCount(TcpHelper.MockCount, UdpHelper.PacketMaxSize, out var pageSize,
-        //    out var pageCount);
+        MockUtil.MockUpdateGeneralProcessPageCount(TcpHelper.MockCount, UdpHelper.PacketMaxSize, out var pageSize,
+            out var pageCount);
 
-        //var size = 0;
-        //for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
-        //{
-        //    if (!UdpHelper.IsRunning) break;
+        for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
+        {
+            if (!UdpHelper.IsRunning) break;
 
-        //    var response = new UpdateGeneralProcessList()
-        //    {
-        //        TotalSize = TcpHelper.MockCount,
-        //        PageSize = pageSize,
-        //        PageCount = pageCount,
-        //        PageIndex = pageIndex,
-        //        Processes = await MockUtil.MockUpdateGeneralProcessAsync(TcpHelper.MockCount, pageSize,
-        //            pageIndex)
-        //    };
-        //    UdpHelper.SendCommand(response);
-        //    TcpHelper.UDPPacketsSentCount++;
-        //}
+            var response = MockUtil.MockUpdateGeneralProcessList(pageSize, pageIndex);
+            response.TotalSize = TcpHelper.MockCount;
+            response.PageSize = pageSize;
+            response.PageCount = pageCount;
+            response.PageIndex = pageIndex;
 
-        //Logger.Logger.Info(
-        //    $"推送一般数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，成功发送{size}字节，{sw.ElapsedMilliseconds}ms");
+            UdpHelper.SendCommand(response);
+        }
+
+        Logger.Logger.Info(
+            $"推送一般数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
     #endregion

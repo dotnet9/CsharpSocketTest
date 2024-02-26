@@ -224,7 +224,6 @@
                 <Run Text="{Binding UdpHelper.Ip,Mode=OneWay}" />
                 <Run Text=":" />
                 <Run Text="{Binding UdpHelper.Port,Mode=OneWay}" />
-                <Run Text="{Binding UdpHelper.ReceiveCount,Mode=OneWay}" />
                 <Run Text=" 时间 " />
                 <Run Foreground="Green" Text="{Binding UdpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
             </TextBlock>

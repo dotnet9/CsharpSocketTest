@@ -96,10 +96,6 @@
             </TextBlock>
             <TextBlock>
                 <Run Text="UDP组播：" />
-                <Run Text=" 已发送"></Run>
-                <Run Text="{Binding TcpHelper.UDPPacketsSentCount,Mode=OneWay}"></Run>
-                <Run Text="包"></Run>
-                <Run Text="     组播时间：" />
                 <Run Foreground="Green" Text="2023-12-16 11:27" />
             </TextBlock>
         </StackPanel>

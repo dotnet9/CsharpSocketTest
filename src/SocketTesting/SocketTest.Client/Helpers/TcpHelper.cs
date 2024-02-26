@@ -24,12 +24,12 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
     #region 公开属性
 
-    private string _ip = "127.0.0.1";
+    private string? _ip = "127.0.0.1";
 
     /// <summary>
     ///     Tcp服务IP
     /// </summary>
-    public string Ip
+    public string? Ip
     {
         get => _ip;
         set => this.RaiseAndSetIfChanged(ref _ip, value);

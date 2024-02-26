@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using ReactiveUI;
 using SocketDto.Enums;
 using SocketDto.Response;
@@ -224,23 +225,24 @@ public class ProcessItemModel : ViewModelBase
         UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
     }
 
-    //public void Update(RealtimeProcessItem process)
-    //{
-    //    Cpu = process.ProcessData!.Cpu;
-    //    Memory = process.ProcessData!.Memory;
-    //    Disk = process.ProcessData!.Disk;
-    //    Network = process.ProcessData!.Network;
-    //}
+    public void Update(short cpu, short memory, short disk, short network)
+    {
+        Cpu = cpu;
+        Memory = memory;
+        Disk = disk;
+        Network = network;
+    }
 
-    //public void Update(GeneralProcessItem process, byte timestampStartYear)
-    //{
-    //    Status = process.ProcessData!.ProcessStatusKind;
-    //    AlarmStatus = process.ProcessData!.AlarmStatusKind;
-    //    Gpu = process.ProcessData!.Gpu;
-    //    GpuEngine = process.ProcessData!.GpuEngineKind;
-    //    PowerUsage = process.ProcessData!.PowerUsageKind;
-    //    PowerUsageTrend = process.ProcessData!.PowerUsageTrendKind;
-    //    LastUpdateTime = UpdateTime;
-    //    UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
-    //}
+    public void Update(byte timestampStartYear, byte processStatus, byte alarmStatus, short gpu, byte gpuEngine,
+        byte powerUsage, byte powerUsageTrend, uint updateTime)
+    {
+        Status = (ProcessStatus)Enum.Parse(typeof(ProcessStatus), processStatus.ToString());
+        AlarmStatus = (AlarmStatus)Enum.Parse(typeof(AlarmStatus), alarmStatus.ToString());
+        Gpu = gpu;
+        GpuEngine = (GpuEngine)Enum.Parse(typeof(GpuEngine), gpuEngine.ToString());
+        PowerUsage = (PowerUsage)Enum.Parse(typeof(PowerUsage), powerUsage.ToString());
+        PowerUsageTrend = (PowerUsage)Enum.Parse(typeof(PowerUsage), powerUsageTrend.ToString());
+        LastUpdateTime = UpdateTime;
+        UpdateTime = updateTime.ToDateTime(timestampStartYear);
+    }
 }

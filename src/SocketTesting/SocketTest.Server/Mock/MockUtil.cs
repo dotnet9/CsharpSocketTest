@@ -22,23 +22,33 @@ public static class MockUtil
     private static List<ProcessItem>? _mockProcesses;
 
     private static readonly Random CustomRandom = new(DateTime.Now.Microsecond);
+    public static bool IsInitOver { get; private set; }
 
     public static async Task MockAsync(int total)
     {
         _mockCount = total;
         var stopwatch = new Stopwatch();
+
         stopwatch.Restart();
         await MockBaseAsync();
         stopwatch.Stop();
         Logger.Logger.Info($"模拟基本信息：{stopwatch.ElapsedMilliseconds}ms");
+
         stopwatch.Restart();
         await MockProcessIdListAsync();
         stopwatch.Stop();
         Logger.Logger.Info($"模拟 {total} 进程ID列表：{stopwatch.ElapsedMilliseconds}ms");
+
         stopwatch.Restart();
         await MockProcessAsync();
         stopwatch.Stop();
         Logger.Logger.Info($"模拟 {total} 进程详细信息列表：{stopwatch.ElapsedMilliseconds}ms");
+
+        stopwatch.Restart();
+        MockCreateUpdateData();
+        stopwatch.Stop();
+        Logger.Logger.Info($"模拟 {total} 进程实时更新yte[]：{stopwatch.ElapsedMilliseconds}ms");
+        IsInitOver = true;
     }
 
     public static async Task<ResponseServiceInfo?> GetBaseInfoAsync()
@@ -113,13 +123,6 @@ public static class MockUtil
         return await Task.FromResult(_mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList());
     }
 
-    public static async Task<List<ProcessItem>> MockRandomProcessesAsync(int totalCount, int pageSize)
-    {
-        var pageCount = GetPageCount(totalCount, pageSize);
-        var pageIndex = Random.Shared.Next(0, pageCount);
-        return _mockProcesses!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-    }
-
 
     private static byte[]? _mockCpus;
     private static byte[]? _mockMemories;
@@ -133,7 +136,7 @@ public static class MockUtil
     private static byte[]? _mockPowerUsageTrends;
     private static byte[]? _mockUpdateTimes;
 
-    public static async Task MockCreateUpdateDataAsync()
+    public static void MockCreateUpdateData()
     {
         _mockCpus = new byte[_mockCount * 2];
         _mockMemories = new byte[_mockCount * 2];
@@ -202,7 +205,7 @@ public static class MockUtil
             GpuEngine = new byte[dataCount * 1],
             PowerUsage = new byte[dataCount * 1],
             PowerUsageTrend = new byte[dataCount * 1],
-            UpdateTimes = new byte[dataCount * 1]
+            UpdateTimes = new byte[dataCount * 4]
         };
         Buffer.BlockCopy(_mockProcessStatuses!, (pageIndex * pageSize * 1), data.ProcessStatuses, 0,
             data.ProcessStatuses.Length);
@@ -289,4 +292,12 @@ public static class MockUtil
 
         return dataCount;
     }
+}
+
+public enum MockDataType
+{
+    Cpu,
+    Memory,
+    Dis,
+    Network
 }

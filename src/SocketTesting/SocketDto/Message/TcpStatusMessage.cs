@@ -1,7 +1,7 @@
 ﻿namespace SocketDto.Message;
 
 /// <summary>
-/// Socket连接状态
+/// Tcp连接状态
 /// </summary>
 /// <param name="sender"></param>
 public class TcpStatusMessage(object sender, bool isConnect, string? ip = default, int port = default)

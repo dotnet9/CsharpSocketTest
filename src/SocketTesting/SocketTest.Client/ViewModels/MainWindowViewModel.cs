@@ -35,6 +35,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private string? _baseInfo;
 
+    private int[]? _processIdArray;
     private Dictionary<int, ProcessItemModel>? _processIdAndItems;
 
     private string? _runTcpCommandContent = "连接服务";
@@ -55,6 +56,7 @@ public class MainWindowViewModel : ViewModelBase
         void RegisterEvent()
         {
             Messenger.Default.Subscribe<TcpStatusMessage>(this, ReceiveTcpStatusMessage);
+            Messenger.Default.Subscribe<UdpStatusMessage>(this, ReceiveUdpStatusMessage);
             Messenger.Default.Subscribe<SocketMessage>(this, ReceivedSocketMessage);
         }
 
@@ -210,6 +212,11 @@ public class MainWindowViewModel : ViewModelBase
         _ = Log("发送命令查询目标终端类型是否是服务端");
     }
 
+    private void ReceiveUdpStatusMessage(UdpStatusMessage message)
+    {
+        _ = Log("Udp组播订阅成功！");
+    }
+
     private void ReceiveTcpData()
     {
         // 开启线程接收数据
@@ -291,6 +298,11 @@ public class MainWindowViewModel : ViewModelBase
     private void ReceivedSocketMessage(ResponseUdpAddress response)
     {
         _ = Log($"收到Udp组播地址=》{response.Ip}:{response.Port}");
+
+        UdpHelper.Ip = response.Ip;
+        UdpHelper.Port = response.Port;
+        UdpHelper.Start();
+        _ = Log("尝试订阅Udp组播");
     }
 
     private void ReceivedSocketMessage(ResponseServiceInfo response)
@@ -313,9 +325,10 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ReceivedSocketMessage(ResponseProcessIDList response)
     {
-        _ = Log($"收到进程ID列表，共{response.IDList?.Length}个进程");
+        _processIdArray = response.IDList!;
+        _ = Log($"收到进程ID列表，共{_processIdArray.Length}个进程");
 
-        TcpHelper.SendCommand(new RequestProcessList() { TaskId = TcpHelper.GetNewTaskId() });
+        TcpHelper.SendCommand(new RequestProcessList { TaskId = TcpHelper.GetNewTaskId() });
         _ = Log("发送请求进程详细信息列表命令");
     }
 
@@ -360,34 +373,96 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ReceivedSocketMessage(UpdateRealtimeProcessList response)
     {
-        //var startIndex = response.PageIndex * response.PageSize;
-        //for (var i = 0; i < response.Processes!.Count; i++)
-        //{
-        //    if (_receivedProcesses.Count > startIndex)
-        //        _receivedProcesses[startIndex].Update(response.Processes[i]);
-        //    else
-        //        Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
+        void LogNotExistProcess(int index)
+        {
+            Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{index}");
+        }
 
-        //    startIndex++;
-        //}
+        try
+        {
+            var startIndex = response.PageIndex * response.PageSize;
+            var dataCount = response.Cpus.Length / 2;
+            for (var i = 0; i < dataCount; i++)
+            {
+                if (_processIdArray?.Length > startIndex && _processIdAndItems?.Count > startIndex)
+                {
+                    var processId = _processIdArray[startIndex];
+                    if (_processIdAndItems.TryGetValue(processId, out var process))
+                    {
+                        var cpu = BitConverter.ToInt16(response.Cpus, i * sizeof(Int16));
+                        var memory = BitConverter.ToInt16(response.Memories, i * sizeof(Int16));
+                        var disk = BitConverter.ToInt16(response.Disks, i * sizeof(Int16));
+                        var network = BitConverter.ToInt16(response.Networks, i * sizeof(Int16));
+                        process.Update(cpu, memory, disk, network);
+                    }
+                    else
+                    {
+                        LogNotExistProcess(startIndex);
+                    }
+                }
+                else
+                {
+                    LogNotExistProcess(startIndex);
+                }
 
-        //Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
+                startIndex++;
+            }
+
+            Console.WriteLine($"【实时】更新数据{dataCount}条");
+        }
+        catch (Exception ex)
+        {
+            Logger.Logger.Error($"【实时】更新数据异常：{ex.Message}");
+        }
     }
 
     private void ReceivedSocketMessage(UpdateGeneralProcessList response)
     {
-        //var startIndex = response.PageIndex * response.PageSize;
-        //for (var i = 0; i < response.Processes!.Count; i++)
-        //{
-        //    if (_receivedProcesses.Count > startIndex)
-        //        _receivedProcesses[startIndex].Update(response.Processes[i], _timestampStartYear);
-        //    else
-        //        Console.WriteLine($"【实时】收到更新数据包，遇到本地缓存不存在的进程，索引：{startIndex}");
+        void LogNotExistProcess(int index)
+        {
+            Console.WriteLine($"【实时】收到更新一般数据包，遇到本地缓存不存在的进程，索引：{index}");
+        }
 
-        //    startIndex++;
-        //}
+        try
+        {
+            var startIndex = response.PageIndex * response.PageSize;
+            var dataCount = response.ProcessStatuses.Length;
+            for (var i = 0; i < dataCount; i++)
+            {
+                if (_processIdArray?.Length > startIndex && _processIdAndItems?.Count > startIndex)
+                {
+                    var processId = _processIdArray[startIndex];
+                    if (_processIdAndItems.TryGetValue(processId, out var process))
+                    {
+                        var processStatus = response.ProcessStatuses[i];
+                        var alarmStatus = response.AlarmStatuses[i];
+                        var gpu = BitConverter.ToInt16(response.Gpus, i * sizeof(short));
+                        var gpuEngine = response.GpuEngine[i];
+                        var powerUsage = response.PowerUsage[i];
+                        var powerUsageTrend = response.PowerUsageTrend[i];
+                        var updateTime = BitConverter.ToUInt32(response.UpdateTimes, i * sizeof(uint));
+                        process.Update(_timestampStartYear, processStatus, alarmStatus, gpu, gpuEngine, powerUsage,
+                            powerUsageTrend, updateTime);
+                    }
+                    else
+                    {
+                        LogNotExistProcess(startIndex);
+                    }
+                }
+                else
+                {
+                    LogNotExistProcess(startIndex);
+                }
 
-        //Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
+                startIndex++;
+            }
+
+            Console.WriteLine($"【实时】更新一般数据{dataCount}条");
+        }
+        catch (Exception ex)
+        {
+            Logger.Logger.Error($"【实时】更新一般数据异常：{ex.Message}");
+        }
     }
 
     #endregion

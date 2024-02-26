@@ -27,12 +27,12 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
     #region 公开属性
 
-    private string _ip = "127.0.0.1";
+    private string? _ip = "127.0.0.1";
 
     /// <summary>
     ///     Tcp服务IP
     /// </summary>
-    public string Ip
+    public string? Ip
     {
         get => _ip;
         set => this.RaiseAndSetIfChanged(ref _ip, value);
@@ -93,11 +93,6 @@ public class TcpHelper : ViewModelBase, ISocketBase
         set => this.RaiseAndSetIfChanged(ref _heartbeatTime, value);
     }
 
-    /// <summary>
-    ///     已发送UDP包个数
-    /// </summary>
-    public int UDPPacketsSentCount { get; set; } = 0;
-
     private int _mockCount = 1000000;
 
     /// <summary>
@@ -129,7 +124,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     public void Start()
     {
         _connectServer = new CancellationTokenSource();
-        var ipEndPoint = new IPEndPoint(IPAddress.Parse(Ip), Port);
+        var ipEndPoint = new IPEndPoint(IPAddress.Parse(Ip!), Port);
         Task.Run(async () =>
         {
             while (!_connectServer.IsCancellationRequested)

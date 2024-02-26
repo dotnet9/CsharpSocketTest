@@ -7,6 +7,8 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using SocketNetObject;
 using System.Threading;
+using Messager;
+using SocketDto.Message;
 
 namespace SocketTest.Server.Helpers;
 
@@ -17,12 +19,12 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
 
     #region 公开属性
 
-    private string _ip = "224.0.0.0";
+    private string? _ip = "224.0.0.0";
 
     /// <summary>
     ///     UDP组播IP
     /// </summary>
-    public string Ip
+    public string? Ip
     {
         get => _ip;
         set => this.RaiseAndSetIfChanged(ref _ip, value);

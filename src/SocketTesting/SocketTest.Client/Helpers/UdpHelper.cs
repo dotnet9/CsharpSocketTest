@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Messager;
 using ReactiveUI;
-using SocketDto;
 using SocketDto.Message;
 using SocketNetObject;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
+using System;
+using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SocketTest.Client.Helpers;
 
@@ -18,23 +17,22 @@ public class UdpHelper : ViewModelBase, ISocketBase
 {
     private readonly BlockingCollection<SocketMessage> _receivedBuffers = new(new ConcurrentQueue<SocketMessage>());
     private UdpClient? _client;
-    private int _receivedPacketsCount;
     private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
 
     #region 公开属性
 
-    private string _ip = "224.0.0.0";
+    private string? _ip;
 
     /// <summary>
     ///     UDP组播IP
     /// </summary>
-    public string Ip
+    public string? Ip
     {
         get => _ip;
         set => this.RaiseAndSetIfChanged(ref _ip, value);
     }
 
-    private int _port = 9540;
+    private int _port;
 
     /// <summary>
     ///     UDP组播端口
@@ -78,22 +76,6 @@ public class UdpHelper : ViewModelBase, ISocketBase
         set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
     }
 
-    /// <summary>
-    ///     已发送UDP包个数
-    /// </summary>
-    public static int UDPPacketsSentCount { get; set; }
-
-    private string? _receiveCount;
-
-    /// <summary>
-    ///     UDP接收情况统计
-    /// </summary>
-    public string? ReceiveCount
-    {
-        get => _receiveCount;
-        set => this.RaiseAndSetIfChanged(ref _receiveCount, value);
-    }
-
     #endregion
 
     #region 公开接口
@@ -116,12 +98,12 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     _client.Client.Bind(new IPEndPoint(IPAddress.Any, Port));
 
                     // 加入组播
-                    _client.JoinMulticastGroup(IPAddress.Parse(Ip));
-                    Logger.Logger.Info("Udp组播订阅成功");
+                    _client.JoinMulticastGroup(IPAddress.Parse(Ip!));
                     IsRunning = true;
 
                     ReceiveData();
                     CheckMessage();
+                    Messenger.Default.Publish(this, new UdpStatusMessage(this, true));
                     break;
                 }
                 catch (Exception ex)
@@ -172,7 +154,6 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     }
 
                     var data = _client.Receive(ref _remoteEp);
-                    CountReceivedPackets();
                     var readIndex = 0;
                     if (SerializeHelper.ReadHead(data, ref readIndex, out var headInfo))
                     {
@@ -198,14 +179,6 @@ public class UdpHelper : ViewModelBase, ISocketBase
         });
     }
 
-    private void CountReceivedPackets()
-    {
-        _receivedPacketsCount++;
-        var lostPackets = UDPPacketsSentCount - _receivedPacketsCount;
-        var lostPercents = lostPackets * 1.0 / UDPPacketsSentCount;
-        ReceiveCount = $"{_receivedPacketsCount}/{UDPPacketsSentCount}（丢包率{lostPercents:P}）";
-    }
-
     private void CheckMessage()
     {
         Task.Run(async () =>
@@ -219,7 +192,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
             {
                 while (_receivedBuffers.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    Messager.Messenger.Default.Publish(this, message);
+                    Messenger.Default.Publish(this, message);
                 }
             }
         });
