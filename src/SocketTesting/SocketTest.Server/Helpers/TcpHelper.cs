@@ -93,7 +93,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
         set => this.RaiseAndSetIfChanged(ref _heartbeatTime, value);
     }
 
-    private int _mockCount = 1000000;
+    private int _mockCount = 200000;
 
     /// <summary>
     ///     模拟数据总量

@@ -121,6 +121,7 @@ public class MainWindowViewModel : ViewModelBase
         else
         {
             TcpHelper.Stop();
+            UdpHelper.Stop();
         }
     }
 
