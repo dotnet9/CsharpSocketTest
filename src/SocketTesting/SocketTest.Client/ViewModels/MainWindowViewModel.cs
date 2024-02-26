@@ -126,13 +126,13 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (!TcpHelper.IsRunning)
         {
-            Log("未连接Tcp服务，无法发送命令", LogType.Error);
+            _ = Log("未连接Tcp服务，无法发送命令", LogType.Error);
             return;
         }
 
         ClearData();
         TcpHelper.SendCommand(new RequestServiceInfo { TaskId = TcpHelper.GetNewTaskId() });
-        Log("发送刷新命令");
+        _ = Log("发送请求服务基本信息命令");
     }
 
     private void HandleRefreshAllCommand()
@@ -201,27 +201,13 @@ public class MainWindowViewModel : ViewModelBase
         await Dispatcher.UIThread.InvokeAsync(action.Invoke);
     }
 
-    #region 发送请求
-
-    private void SendRequestTargetType()
-    {
-        TcpHelper.SendCommand(new RequestTargetType());
-        _ = Log("发送命令查询目标终端类型是否是服务端");
-    }
-
-    private void SendRequestUdpAddress()
-    {
-        TcpHelper.SendCommand(new RequestUdpAddress());
-        _ = Log("发送命令获取Udp组播地址");
-    }
-
-    #endregion
 
     #region 接收事件
 
     private void ReceiveTcpStatusMessage(TcpStatusMessage message)
     {
-        SendRequestTargetType();
+        TcpHelper.SendCommand(new RequestTargetType());
+        _ = Log("发送命令查询目标终端类型是否是服务端");
     }
 
     private void ReceiveTcpData()
@@ -244,23 +230,27 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (message.IsMessage<ResponseTargetType>())
         {
-            ReceivedMessage(message.Message<ResponseTargetType>());
+            ReceivedSocketMessage(message.Message<ResponseTargetType>());
         }
         else if (message.IsMessage<ResponseUdpAddress>())
         {
-            ReceivedMessage(message.Message<ResponseUdpAddress>());
+            ReceivedSocketMessage(message.Message<ResponseUdpAddress>());
         }
         else if (message.IsMessage<ResponseServiceInfo>())
         {
-            ReceivedMessage(message.Message<ResponseServiceInfo>());
+            ReceivedSocketMessage(message.Message<ResponseServiceInfo>());
+        }
+        else if (message.IsMessage<ResponseProcessIDList>())
+        {
+            ReceivedSocketMessage(message.Message<ResponseProcessIDList>());
         }
         else if (message.IsMessage<ResponseProcessList>())
         {
-            ReceivedMessage(message.Message<ResponseProcessList>());
+            ReceivedSocketMessage(message.Message<ResponseProcessList>());
         }
         else if (message.IsMessage<UpdateProcessList>())
         {
-            ReceivedMessage(message.Message<UpdateProcessList>());
+            ReceivedSocketMessage(message.Message<UpdateProcessList>());
         }
         else if (message.IsMessage<ChangeProcessList>())
         {
@@ -268,39 +258,42 @@ public class MainWindowViewModel : ViewModelBase
         }
         else if (message.IsMessage<Heartbeat>())
         {
-            ReceivedMessage(message.Message<Heartbeat>());
+            ReceivedSocketMessage(message.Message<Heartbeat>());
         }
         else if (message.IsMessage<UpdateRealtimeProcessList>())
         {
-            ReceivedMessage(message.MessageByNative<UpdateRealtimeProcessList>());
+            ReceivedSocketMessage(message.MessageByNative<UpdateRealtimeProcessList>());
         }
         else if (message.IsMessage<UpdateGeneralProcessList>())
         {
-            ReceivedMessage(message.MessageByNative<UpdateGeneralProcessList>());
+            ReceivedSocketMessage(message.MessageByNative<UpdateGeneralProcessList>());
         }
     }
 
-    private void ReceivedMessage(ResponseTargetType response)
+    private void ReceivedSocketMessage(ResponseTargetType response)
     {
         var type = (TerminalType)Enum.Parse(typeof(TerminalType), response.Type.ToString());
         if (response.Type == (byte)TerminalType.Server)
         {
             _ = Log($"正确连接{type.Description()}，程序正常运行");
-            SendRequestUdpAddress();
+
+            TcpHelper.SendCommand(new RequestUdpAddress());
+            _ = Log("发送命令获取Udp组播地址");
+
+            HandleRefreshCommand();
         }
         else
         {
             _ = Log($"目标终端非服务端(type: {type.Description()})，请检查地址是否配置正确（重点检查端口），即将断开连接", LogType.Error);
-            HandleConnectTcpCommandAsync();
         }
     }
 
-    private void ReceivedMessage(ResponseUdpAddress response)
+    private void ReceivedSocketMessage(ResponseUdpAddress response)
     {
         _ = Log($"收到Udp组播地址=》{response.Ip}:{response.Port}");
     }
 
-    private void ReceivedMessage(ResponseServiceInfo response)
+    private void ReceivedSocketMessage(ResponseServiceInfo response)
     {
         _timestampStartYear = response.TimestampStartYear;
         var oldBaseInfo = BaseInfo;
@@ -310,15 +303,23 @@ public class MainWindowViewModel : ViewModelBase
         Logger.Logger.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
         Logger.Logger.Info($"【旧】{oldBaseInfo}");
         Logger.Logger.Info($"【新】{BaseInfo}");
-        Log(BaseInfo);
+        _ = Log(BaseInfo);
 
-        TcpHelper.SendCommand(new RequestProcessList { TaskId = TcpHelper.GetNewTaskId() });
-        Logger.Logger.Info("发送请求进程信息命令");
+        TcpHelper.SendCommand(new RequestProcessIDList() { TaskId = TcpHelper.GetNewTaskId() });
+        _ = Log("发送请求进程ID列表命令");
 
         ClearData();
     }
 
-    private void ReceivedMessage(ResponseProcessList response)
+    private void ReceivedSocketMessage(ResponseProcessIDList response)
+    {
+        _ = Log($"收到进程ID列表，共{response.IDList?.Length}个进程");
+
+        TcpHelper.SendCommand(new RequestProcessList() { TaskId = TcpHelper.GetNewTaskId() });
+        _ = Log("发送请求进程详细信息列表命令");
+    }
+
+    private void ReceivedSocketMessage(ResponseProcessList response)
     {
         var processes =
             response.Processes?.ConvertAll(process => new ProcessItemModel(process, _timestampStartYear));
@@ -335,7 +336,7 @@ public class MainWindowViewModel : ViewModelBase
             $"{msg}【{response.PageIndex + 1}/{response.PageCount}】进程{processes.Count}条({_receivedProcesses.Count}/{response.TotalSize})");
     }
 
-    private void ReceivedMessage(UpdateProcessList response)
+    private void ReceivedSocketMessage(UpdateProcessList response)
     {
         if (_processIdAndItems == null) return;
 
@@ -349,7 +350,7 @@ public class MainWindowViewModel : ViewModelBase
         Logger.Logger.Info($"更新数据{response.Processes?.Count}条");
     }
 
-    private void ReceivedMessage(Heartbeat response)
+    private void ReceivedSocketMessage(Heartbeat response)
     {
     }
 
@@ -357,7 +358,7 @@ public class MainWindowViewModel : ViewModelBase
 
     #region 接收Udp数据
 
-    private void ReceivedMessage(UpdateRealtimeProcessList response)
+    private void ReceivedSocketMessage(UpdateRealtimeProcessList response)
     {
         //var startIndex = response.PageIndex * response.PageSize;
         //for (var i = 0; i < response.Processes!.Count; i++)
@@ -373,7 +374,7 @@ public class MainWindowViewModel : ViewModelBase
         //Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
     }
 
-    private void ReceivedMessage(UpdateGeneralProcessList response)
+    private void ReceivedSocketMessage(UpdateGeneralProcessList response)
     {
         //var startIndex = response.PageIndex * response.PageSize;
         //for (var i = 0; i < response.Processes!.Count; i++)

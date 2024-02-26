@@ -18,7 +18,7 @@ public static class MockUtil
     public const byte TimestampStartYear = 23;
     private static int _mockCount;
     private static ResponseServiceInfo? _mockResponseBase;
-    private static int[]? _mockProcessIDList;
+    private static int[]? _mockProcessIdList;
     private static List<ProcessItem>? _mockProcesses;
 
     private static readonly Random CustomRandom = new(DateTime.Now.Microsecond);
@@ -30,20 +30,25 @@ public static class MockUtil
         stopwatch.Restart();
         await MockBaseAsync();
         stopwatch.Stop();
-        Logger.Logger.Info($"Mock base {stopwatch.ElapsedMilliseconds}ms");
+        Logger.Logger.Info($"模拟基本信息：{stopwatch.ElapsedMilliseconds}ms");
         stopwatch.Restart();
         await MockProcessIdListAsync();
         stopwatch.Stop();
-        Logger.Logger.Info($"Mock {total} process id {stopwatch.ElapsedMilliseconds}ms");
+        Logger.Logger.Info($"模拟 {total} 进程ID列表：{stopwatch.ElapsedMilliseconds}ms");
         stopwatch.Restart();
         await MockProcessAsync();
         stopwatch.Stop();
-        Logger.Logger.Info($"Mock {total} process list {stopwatch.ElapsedMilliseconds}ms");
+        Logger.Logger.Info($"模拟 {total} 进程详细信息列表：{stopwatch.ElapsedMilliseconds}ms");
     }
 
-    public static async Task<ResponseServiceInfo?> GetBaseInfo()
+    public static async Task<ResponseServiceInfo?> GetBaseInfoAsync()
     {
         return await Task.FromResult(_mockResponseBase);
+    }
+
+    public static async Task<int[]?> GetProcessIdListAsync()
+    {
+        return await Task.FromResult(_mockProcessIdList);
     }
 
     private static async Task MockBaseAsync()
@@ -64,7 +69,7 @@ public static class MockUtil
 
     private static async Task MockProcessIdListAsync()
     {
-        _mockProcessIDList = Enumerable.Range(1, _mockCount).Select((index, value) => index).ToArray();
+        _mockProcessIdList = Enumerable.Range(1, _mockCount).Select((index, value) => index).ToArray();
         await Task.CompletedTask;
     }
 

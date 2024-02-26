@@ -140,14 +140,17 @@ public class MainWindowViewModel : ViewModelBase
         {
             ReceiveSocketMessage(message.Client!, message.Message<RequestTargetType>());
         }
-
-        if (message.IsMessage<RequestUdpAddress>())
+        else if (message.IsMessage<RequestUdpAddress>())
         {
             ReceiveSocketMessage(message.Client!, message.Message<RequestUdpAddress>());
         }
         else if (message.IsMessage<RequestServiceInfo>())
         {
             ReceiveSocketMessage(message.Client!, message.Message<RequestServiceInfo>());
+        }
+        else if (message.IsMessage<RequestProcessIDList>())
+        {
+            ReceiveSocketMessage(message.Client!, message.Message<RequestProcessIDList>());
         }
         else if (message.IsMessage<RequestProcessList>())
         {
@@ -195,42 +198,56 @@ public class MainWindowViewModel : ViewModelBase
 
     private void ReceiveSocketMessage(Socket client, RequestServiceInfo request)
     {
-        var msg = $"收到请求基本信息命令";
-        Logger.Logger.Info(msg);
-        NotificationManager?.Show(msg);
+        _ = Log("收到请求基本信息命令");
 
-        var data = MockUtil.GetBaseInfo().Result!;
+        var data = MockUtil.GetBaseInfoAsync().Result!;
         data.TaskId = request.TaskId;
         TcpHelper.SendCommand(client, data);
 
-        msg = $"响应基本信息命令：当前操作系统版本号={data.OS}，内存大小={data.MemorySize}GB";
-        Logger.Logger.Info(msg);
-        NotificationManager?.Show(msg);
+        _ = Log($"响应基本信息命令：当前操作系统版本号={data.OS}，内存大小={data.MemorySize}GB");
+    }
+
+    private void ReceiveSocketMessage(Socket client, RequestProcessIDList request)
+    {
+        _ = Log("收到请求进程ID列表命令");
+
+        var response = new ResponseProcessIDList()
+        {
+            TaskId = request.TaskId,
+            IDList = MockUtil.GetProcessIdListAsync().Result
+        };
+        TcpHelper.SendCommand(client, response);
+
+        _ = Log($"响应进程ID列表命令：{response.IDList?.Length}");
     }
 
     private async void ReceiveSocketMessage(Socket client, RequestProcessList request)
     {
-        //var pageCount = MockUtil.GetPageCount(TcpHelper.MockCount, TcpHelper.MockPageSize);
-        //var sendCount = 0;
-        //for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
-        //{
-        //    var response = new ResponseProcessList
-        //    {
-        //        TaskId = request.TaskId,
-        //        TotalSize = TcpHelper.MockCount,
-        //        PageSize = TcpHelper.MockPageSize,
-        //        PageCount = pageCount,
-        //        PageIndex = pageIndex,
-        //        Processes = await MockUtil.MockProcessesAsync(TcpHelper.MockCount, TcpHelper.MockPageSize, pageIndex)
-        //    };
-        //    sendCount += response.Processes.Count;
-        //    TcpHelper.SendCommand(client, response);
-        //    await Task.Delay(TimeSpan.FromMilliseconds(10));
+        _ = Log("收到请求进程详细信息列表命令");
+        await Task.Run(async () =>
+        {
+            var pageCount = MockUtil.GetPageCount(TcpHelper.MockCount, TcpHelper.MockPageSize);
+            var sendCount = 0;
+            for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
+            {
+                var response = new ResponseProcessList
+                {
+                    TaskId = request.TaskId,
+                    TotalSize = TcpHelper.MockCount,
+                    PageSize = TcpHelper.MockPageSize,
+                    PageCount = pageCount,
+                    PageIndex = pageIndex,
+                    Processes = await MockUtil.MockProcessesAsync(TcpHelper.MockPageSize, pageIndex)
+                };
+                sendCount += response.Processes.Count;
+                TcpHelper.SendCommand(client, response);
+                await Task.Delay(TimeSpan.FromMilliseconds(10));
 
-        //    var msg = response.TaskId == default ? "推送" : "响应请求";
-        //    Logger.Logger.Info(
-        //        $"{msg}【{response.PageIndex + 1}/{response.PageCount}】{response.Processes.Count}条({sendCount}/{response.TotalSize})");
-        //}
+                var msg = response.TaskId == default ? "推送" : "响应请求";
+                Logger.Logger.Info(
+                    $"{msg}【{response.PageIndex + 1}/{response.PageCount}】{response.Processes.Count}条({sendCount}/{response.TotalSize})");
+            }
+        });
     }
 
     private void ReceiveSocketMessage(Socket client, ChangeProcessList changeProcess)
