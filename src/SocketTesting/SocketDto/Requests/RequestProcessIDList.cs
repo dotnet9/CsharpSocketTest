@@ -3,7 +3,7 @@
 /// <summary>
 ///     请求进程ID列表信息
 /// </summary>
-[NetHead(5, 1)]
+[NetHead(7, 1)]
 [MessagePackObject]
 public class RequestProcessIDList : INetObject
 {

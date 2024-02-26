@@ -1,11 +1,15 @@
 ﻿using Avalonia.Controls.Notifications;
+using Avalonia.Threading;
 using Messager;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
+using SocketDto.Enums;
 using SocketDto.Message;
 using SocketDto.Requests;
+using SocketDto.Response;
 using SocketTest.Common;
+using SocketTest.Logger.Models;
 using SocketTest.Mvvm;
 using SocketTest.Server.Helpers;
 using SocketTest.Server.Mock;
@@ -15,10 +19,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using SocketDto.Enums;
-using SocketDto.Response;
-using SocketTest.Logger.Models;
-using Avalonia.Threading;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
@@ -26,22 +26,20 @@ namespace SocketTest.Server.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     public WindowNotificationManager? NotificationManager { get; set; }
-    private string? _runTcpCommandContent = "开启服务";
-    private string? _runUdpCommandContent = "开启服务";
+    private string? _runCommandContent = "开启服务";
 
     public MainWindowViewModel()
     {
         void ListenProperty()
         {
             this.WhenAnyValue(x => x.TcpHelper.IsRunning)
-                .Subscribe(newValue => RunTcpCommandContent = newValue ? "停止服务" : "开启服务");
-            this.WhenAnyValue(x => x.UdpHelper.IsRunning)
-                .Subscribe(newValue => RunUdpCommandContent = newValue ? "停止服务" : "开启服务");
+                .Subscribe(newValue => RunCommandContent = newValue ? "停止服务" : "开启服务");
         }
 
         void RegisterEvent()
         {
-            Messenger.Default.Subscribe<SocketMessage>(this, ReceiveSocketMessage, ThreadOption.PublisherThread);
+            Messenger.Default.Subscribe<SocketMessage>(this, ReceiveSocketMessage);
+            Messenger.Default.Subscribe<TcpStatusMessage>(this, ReceiveTcpStatusMessage);
         }
 
         void RegisterCommand()
@@ -67,18 +65,11 @@ public class MainWindowViewModel : ViewModelBase
     public TcpHelper TcpHelper { get; set; }
     public UdpHelper UdpHelper { get; set; }
 
-    public string? RunTcpCommandContent
+    public string? RunCommandContent
     {
-        get => _runTcpCommandContent;
-        set => this.RaiseAndSetIfChanged(ref _runTcpCommandContent, value);
+        get => _runCommandContent;
+        set => this.RaiseAndSetIfChanged(ref _runCommandContent, value);
     }
-
-    public string? RunUdpCommandContent
-    {
-        get => _runUdpCommandContent;
-        set => this.RaiseAndSetIfChanged(ref _runUdpCommandContent, value);
-    }
-
 
     /// <summary>
     ///     刷新数据
@@ -90,34 +81,20 @@ public class MainWindowViewModel : ViewModelBase
     /// </summary>
     public ReactiveCommand<Unit, Unit>? UpdateCommand { get; private set; }
 
-    public async Task HandleRunTcpCommandCommandAsync()
+    public async Task HandleRunCommandCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
             TcpHelper.Start();
-        }
-        else
-            TcpHelper.Stop();
-
-        NotificationManager?.Show(TcpHelper.IsRunning ? "TCP服务已运行" : "TCP服务已停止");
-        if (TcpHelper.IsRunning)
-        {
-            await MockUtil.MockAsync(TcpHelper.MockCount);
-            NotificationManager?.Show("数据模拟完成，客户端可以正常请求数据了");
-        }
-
-        await Task.CompletedTask;
-    }
-
-
-    public void HandleRunUdpMulticastCommandAsync()
-    {
-        if (!UdpHelper.IsRunning)
-        {
             UdpHelper.Start();
         }
         else
+        {
+            TcpHelper.Stop();
             UdpHelper.Stop();
+        }
+
+        await Task.CompletedTask;
     }
 
     private void HandleRefreshCommandAsync()
@@ -144,15 +121,33 @@ public class MainWindowViewModel : ViewModelBase
 
     #region 处理Socket信息
 
+    private void ReceiveTcpStatusMessage(TcpStatusMessage message)
+    {
+        _ = Log(message.IsConnect ? "TCP服务已运行" : "TCP服务已停止");
+        if (message.IsConnect)
+        {
+            Task.Run(async () =>
+            {
+                await MockUtil.MockAsync(TcpHelper.MockCount);
+                _ = Log("数据模拟完成，客户端可以正常请求数据了");
+            });
+        }
+    }
+
     private void ReceiveSocketMessage(SocketMessage message)
     {
         if (message.IsMessage<RequestTargetType>())
         {
             ReceiveSocketMessage(message.Client!, message.Message<RequestTargetType>());
         }
-        else if (message.IsMessage<RequestBaseInfo>())
+
+        if (message.IsMessage<RequestUdpAddress>())
         {
-            ReceiveSocketMessage(message.Client!, message.Message<RequestBaseInfo>());
+            ReceiveSocketMessage(message.Client!, message.Message<RequestUdpAddress>());
+        }
+        else if (message.IsMessage<RequestServiceInfo>())
+        {
+            ReceiveSocketMessage(message.Client!, message.Message<RequestServiceInfo>());
         }
         else if (message.IsMessage<RequestProcessList>())
         {
@@ -183,7 +178,22 @@ public class MainWindowViewModel : ViewModelBase
         _ = Log($"响应请求终端类型命令：当前终端为={currentTerminalType.Description()}");
     }
 
-    private void ReceiveSocketMessage(Socket client, RequestBaseInfo request)
+    private void ReceiveSocketMessage(Socket client, RequestUdpAddress request)
+    {
+        _ = Log("收到请求Udp组播地址命令");
+
+        var response = new ResponseUdpAddress()
+        {
+            TaskId = request.TaskId,
+            Ip = UdpHelper.Ip,
+            Port = UdpHelper.Port,
+        };
+        TcpHelper.SendCommand(client, response);
+
+        _ = Log($"响应请求Udp组播地址命令：{response.Ip}:{response.Port}");
+    }
+
+    private void ReceiveSocketMessage(Socket client, RequestServiceInfo request)
     {
         var msg = $"收到请求基本信息命令";
         Logger.Logger.Info(msg);

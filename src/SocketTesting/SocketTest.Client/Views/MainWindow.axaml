@@ -11,11 +11,11 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="SocketTest.Client">
     <Window.Resources>
-		<converters:ProcessPowerUsageToForegroundConverter x:Key="ProcessPowerUsageToForegroundConverter" />
+        <converters:ProcessPowerUsageToForegroundConverter x:Key="ProcessPowerUsageToForegroundConverter" />
         <converters:EnumToDescriptionConverter x:Key="EnumToDescriptionConverter" />
-		<converters:UsageToForegroundConverter x:Key="UsageToForegroundConverter" />
-		<converters:ProcessStatusToForegroundConverter x:Key="ProcessStatusToForegroundConverter" />
-		<converters:AlarmStatusToForegroundConverter x:Key="AlarmStatusToForegroundConverter" />
+        <converters:UsageToForegroundConverter x:Key="UsageToForegroundConverter" />
+        <converters:ProcessStatusToForegroundConverter x:Key="ProcessStatusToForegroundConverter" />
+        <converters:AlarmStatusToForegroundConverter x:Key="AlarmStatusToForegroundConverter" />
         <converters:UsageToFormatConverter x:Key="UsageToFormatConverter" />
     </Window.Resources>
     <Window.Styles>
@@ -37,8 +37,6 @@
         </Style>
     </Window.Styles>
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
@@ -52,34 +50,16 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <HeaderedContentControl Header="Tcp服务配置">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0,0,5,0" Text="IP：" />
-                    <TextBox Width="150"
-                             Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
+            <TextBlock Margin="0,0,5,0" Text="服务端IP：" />
+            <TextBox Width="150"
+                     Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
 
-                    <TextBlock Margin="10,0,5,0" Text="端口：" />
-                    <TextBox Width="50"
-                             Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
-                    <Button
-                        Command="{Binding HandleConnectTcpCommandAsync}"
-                        Content="{Binding RunTcpCommandContent}" />
-                </StackPanel>
-            </HeaderedContentControl>
-            <HeaderedContentControl Margin="15,0" Header="Udp组播配置">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0,0,5,0" Text="IP：" />
-                    <TextBox Width="150"
-                             Text="{Binding UdpHelper.Ip, Mode=TwoWay}" />
-
-                    <TextBlock Margin="10,0,5,0" Text="端口：" />
-                    <TextBox Width="50"
-                             Text="{Binding UdpHelper.Port, Mode=TwoWay}" />
-                    <Button
-                        Command="{Binding HandleSubscribeUdpMulticastCommand}"
-                        Content="{Binding RunUdpCommandContent}" />
-                </StackPanel>
-            </HeaderedContentControl>
+            <TextBlock Margin="10,0,5,0" Text="端口：" />
+            <TextBox Width="50"
+                     Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
+            <Button
+                Command="{Binding HandleConnectTcpCommandAsync}"
+                Content="{Binding RunTcpCommandContent}" />
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding RefreshAllCommand}" Content="刷新所有客户端" />
         </StackPanel>
@@ -241,6 +221,9 @@
             </TextBlock>
             <TextBlock>
                 <Run Text="UDP组播：" />
+                <Run Text="{Binding UdpHelper.Ip,Mode=OneWay}" />
+                <Run Text=":" />
+                <Run Text="{Binding UdpHelper.Port,Mode=OneWay}" />
                 <Run Text="{Binding UdpHelper.ReceiveCount,Mode=OneWay}" />
                 <Run Text=" 时间 " />
                 <Run Foreground="Green" Text="{Binding UdpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />

@@ -39,8 +39,6 @@ public class MainWindowViewModel : ViewModelBase
 
     private string? _runTcpCommandContent = "连接服务";
 
-    private string? _runUdpCommandContent = "连接服务";
-
     private string? _searchKey;
 
     private Timer? _sendDataTimer;
@@ -52,8 +50,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             this.WhenAnyValue(x => x.TcpHelper.IsRunning)
                 .Subscribe(newValue => RunTcpCommandContent = newValue ? "断开服务" : "连接服务");
-            this.WhenAnyValue(x => x.UdpHelper.IsRunning)
-                .Subscribe(newValue => RunUdpCommandContent = newValue ? "断开服务" : "连接服务");
         }
 
         void RegisterEvent()
@@ -85,12 +81,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _runTcpCommandContent;
         set => this.RaiseAndSetIfChanged(ref _runTcpCommandContent, value);
-    }
-
-    public string? RunUdpCommandContent
-    {
-        get => _runUdpCommandContent;
-        set => this.RaiseAndSetIfChanged(ref _runUdpCommandContent, value);
     }
 
 
@@ -132,18 +122,6 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public void HandleSubscribeUdpMulticastCommand()
-    {
-        if (!UdpHelper.IsRunning)
-        {
-            UdpHelper.Start();
-        }
-        else
-        {
-            UdpHelper.Stop();
-        }
-    }
-
     private void HandleRefreshCommand()
     {
         if (!TcpHelper.IsRunning)
@@ -153,7 +131,7 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         ClearData();
-        TcpHelper.SendCommand(new RequestBaseInfo { TaskId = TcpHelper.GetNewTaskId() });
+        TcpHelper.SendCommand(new RequestServiceInfo { TaskId = TcpHelper.GetNewTaskId() });
         Log("发送刷新命令");
     }
 
@@ -223,12 +201,27 @@ public class MainWindowViewModel : ViewModelBase
         await Dispatcher.UIThread.InvokeAsync(action.Invoke);
     }
 
+    #region 发送请求
+
+    private void SendRequestTargetType()
+    {
+        TcpHelper.SendCommand(new RequestTargetType());
+        _ = Log("发送命令查询目标终端类型是否是服务端");
+    }
+
+    private void SendRequestUdpAddress()
+    {
+        TcpHelper.SendCommand(new RequestUdpAddress());
+        _ = Log("发送命令获取Udp组播地址");
+    }
+
+    #endregion
+
     #region 接收事件
 
     private void ReceiveTcpStatusMessage(TcpStatusMessage message)
     {
-        TcpHelper.SendCommand(new RequestTargetType());
-        _ = Log("发送命令查询目标终端类型是否是服务端");
+        SendRequestTargetType();
     }
 
     private void ReceiveTcpData()
@@ -251,19 +244,23 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (message.IsMessage<ResponseTargetType>())
         {
-            ReadTcpData(message.Message<ResponseTargetType>());
+            ReceivedMessage(message.Message<ResponseTargetType>());
         }
-        else if (message.IsMessage<ResponseBaseInfo>())
+        else if (message.IsMessage<ResponseUdpAddress>())
         {
-            ReadTcpData(message.Message<ResponseBaseInfo>());
+            ReceivedMessage(message.Message<ResponseUdpAddress>());
+        }
+        else if (message.IsMessage<ResponseServiceInfo>())
+        {
+            ReceivedMessage(message.Message<ResponseServiceInfo>());
         }
         else if (message.IsMessage<ResponseProcessList>())
         {
-            ReadTcpData(message.Message<ResponseProcessList>());
+            ReceivedMessage(message.Message<ResponseProcessList>());
         }
         else if (message.IsMessage<UpdateProcessList>())
         {
-            ReadTcpData(message.Message<UpdateProcessList>());
+            ReceivedMessage(message.Message<UpdateProcessList>());
         }
         else if (message.IsMessage<ChangeProcessList>())
         {
@@ -271,24 +268,25 @@ public class MainWindowViewModel : ViewModelBase
         }
         else if (message.IsMessage<Heartbeat>())
         {
-            ReadTcpData(message.Message<Heartbeat>());
+            ReceivedMessage(message.Message<Heartbeat>());
         }
         else if (message.IsMessage<UpdateRealtimeProcessList>())
         {
-            ReceiveUdpData(message.MessageByNative<UpdateRealtimeProcessList>());
+            ReceivedMessage(message.MessageByNative<UpdateRealtimeProcessList>());
         }
         else if (message.IsMessage<UpdateGeneralProcessList>())
         {
-            ReceiveUdpData(message.MessageByNative<UpdateGeneralProcessList>());
+            ReceivedMessage(message.MessageByNative<UpdateGeneralProcessList>());
         }
     }
 
-    private void ReadTcpData(ResponseTargetType response)
+    private void ReceivedMessage(ResponseTargetType response)
     {
         var type = (TerminalType)Enum.Parse(typeof(TerminalType), response.Type.ToString());
         if (response.Type == (byte)TerminalType.Server)
         {
             _ = Log($"正确连接{type.Description()}，程序正常运行");
+            SendRequestUdpAddress();
         }
         else
         {
@@ -297,7 +295,12 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void ReadTcpData(ResponseBaseInfo response)
+    private void ReceivedMessage(ResponseUdpAddress response)
+    {
+        _ = Log($"收到Udp组播地址=》{response.Ip}:{response.Port}");
+    }
+
+    private void ReceivedMessage(ResponseServiceInfo response)
     {
         _timestampStartYear = response.TimestampStartYear;
         var oldBaseInfo = BaseInfo;
@@ -315,7 +318,7 @@ public class MainWindowViewModel : ViewModelBase
         ClearData();
     }
 
-    private void ReadTcpData(ResponseProcessList response)
+    private void ReceivedMessage(ResponseProcessList response)
     {
         var processes =
             response.Processes?.ConvertAll(process => new ProcessItemModel(process, _timestampStartYear));
@@ -332,7 +335,7 @@ public class MainWindowViewModel : ViewModelBase
             $"{msg}【{response.PageIndex + 1}/{response.PageCount}】进程{processes.Count}条({_receivedProcesses.Count}/{response.TotalSize})");
     }
 
-    private void ReadTcpData(UpdateProcessList response)
+    private void ReceivedMessage(UpdateProcessList response)
     {
         if (_processIdAndItems == null) return;
 
@@ -346,7 +349,7 @@ public class MainWindowViewModel : ViewModelBase
         Logger.Logger.Info($"更新数据{response.Processes?.Count}条");
     }
 
-    private void ReadTcpData(Heartbeat response)
+    private void ReceivedMessage(Heartbeat response)
     {
     }
 
@@ -354,7 +357,7 @@ public class MainWindowViewModel : ViewModelBase
 
     #region 接收Udp数据
 
-    private void ReceiveUdpData(UpdateRealtimeProcessList response)
+    private void ReceivedMessage(UpdateRealtimeProcessList response)
     {
         //var startIndex = response.PageIndex * response.PageSize;
         //for (var i = 0; i < response.Processes!.Count; i++)
@@ -370,7 +373,7 @@ public class MainWindowViewModel : ViewModelBase
         //Console.WriteLine($"【实时】更新数据{response.Processes?.Count}条");
     }
 
-    private void ReceiveUdpData(UpdateGeneralProcessList response)
+    private void ReceivedMessage(UpdateGeneralProcessList response)
     {
         //var startIndex = response.PageIndex * response.PageSize;
         //for (var i = 0; i < response.Processes!.Count; i++)

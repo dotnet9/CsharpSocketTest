@@ -3,9 +3,9 @@
 /// <summary>
 ///     响应基本信息
 /// </summary>
-[NetHead(4, 1)]
+[NetHead(6, 1)]
 [MessagePackObject]
-public class ResponseBaseInfo : INetObject
+public class ResponseServiceInfo : INetObject
 {
     /// <summary>
     ///     任务Id

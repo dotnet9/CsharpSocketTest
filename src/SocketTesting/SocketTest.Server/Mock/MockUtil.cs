@@ -17,7 +17,7 @@ public static class MockUtil
 {
     public const byte TimestampStartYear = 23;
     private static int _mockCount;
-    private static ResponseBaseInfo? _mockResponseBase;
+    private static ResponseServiceInfo? _mockResponseBase;
     private static int[]? _mockProcessIDList;
     private static List<ProcessItem>? _mockProcesses;
 
@@ -41,14 +41,14 @@ public static class MockUtil
         Logger.Logger.Info($"Mock {total} process list {stopwatch.ElapsedMilliseconds}ms");
     }
 
-    public static async Task<ResponseBaseInfo?> GetBaseInfo()
+    public static async Task<ResponseServiceInfo?> GetBaseInfo()
     {
         return await Task.FromResult(_mockResponseBase);
     }
 
     private static async Task MockBaseAsync()
     {
-        _mockResponseBase = new ResponseBaseInfo
+        _mockResponseBase = new ResponseServiceInfo
         {
             OS = "Windows 11 专业版",
             MemorySize = 64,

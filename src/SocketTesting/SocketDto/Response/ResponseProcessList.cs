@@ -3,7 +3,7 @@
 /// <summary>
 ///     响应请求进程信息
 /// </summary>
-[NetHead(8, 1)]
+[NetHead(10, 1)]
 [MessagePackObject]
 public class ResponseProcessList : INetObject
 {

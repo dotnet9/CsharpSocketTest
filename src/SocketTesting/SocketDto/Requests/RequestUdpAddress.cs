@@ -1,11 +1,11 @@
-﻿namespace SocketDto;
+﻿namespace SocketDto.Requests;
 
 /// <summary>
-///     请求进程信息
+///     请求Udp组播地址
 /// </summary>
-[NetHead(9, 1)]
+[NetHead(3, 1)]
 [MessagePackObject]
-public class RequestProcessList : INetObject
+public class RequestUdpAddress : INetObject
 {
     /// <summary>
     ///     任务Id

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Threading;
+using Messager;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.Message;
@@ -144,6 +145,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     ProcessingRequests();
 
                     Logger.Logger.Info($"Tcp服务启动成功：{ipEndPoint}，等待客户端连接");
+                    Messenger.Default.Publish(this, new TcpStatusMessage(this, true));
                     break;
                 }
                 catch (Exception ex)

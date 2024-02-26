@@ -5,7 +5,7 @@ namespace SocketDto.AutoCommand;
 /// <summary>
 ///     更新进程信息
 /// </summary>
-[NetHead(9, 1)]
+[NetHead(11, 1)]
 [MessagePackObject]
 public class UpdateProcessList : INetObject
 {
