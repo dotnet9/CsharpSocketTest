@@ -8,6 +8,7 @@
 | 2024-02-08 | 完善进程状态                                                 | 0.0.4 | 沙漠尽头的狼 |
 | 2024-02-09 | 修改通信对象，优化发包效率：常更新字段直接读取byte[]，优化数据包组装效率 | 0.0.5 | 沙漠尽头的狼 |
 | 2024-02-25 | 添加终端类型查询命令                                         | 0.0.6 | 沙漠尽头的狼 |
+| 2024-02-26 | 添加Udp组播地址请求命令，客户端不需要手工配置                | 0.0.7 | 沙漠尽头的狼 |
 
 [TOC]
 
@@ -46,20 +47,22 @@
 
 TCP、UDP传输数据包定义。
 
-### 3.1. TCP数据包【0.0.6】
+### 3.1. TCP数据包【0.0.7】
 
 | 对象Id | 对象版本 | 对象名                | 说明                                     |
 | ------ | -------- | --------------------- | ---------------------------------------- |
 | 1      | 1        | RequestTargetType     | 请求目标终端类型                         |
 | 2      | 1        | ResponseTargetType    | 响应目标终端类型                         |
-| 3      | 1        | RequestBaseInfo       | 请求服务基本信息                         |
-| 4      | 1        | ResponseBaseInfo      | 响应请求服务基本信息                     |
-| 5      | 1        | RequestProcessIDList  | 请求进程ID列表                           |
-| 6      | 1        | ResponseProcessIDList | 响应请求进程ID列表，更新实时数据需要使用 |
-| 7      | 1        | RequestProcessList    | 请求进程详细信息列表                     |
-| 8      | 1        | ResponseProcessList   | 响应请求进程详细信息列表                 |
-| 9      | 1        | UpdateProcessList     | 更新进程详细信息列表                     |
-| 10     | 1        | ChangeProcessList     | 进程结构变化：增加、减少进程             |
+| 3      | 1        | RequestUdpAddress     | 请求Udp组播地址                          |
+| 4      | 1        | ResponseUdpAddress    | 响应Udp组播地址                          |
+| 5      | 1        | RequestServiceInfo    | 请求服务基本信息                         |
+| 6      | 1        | ResponseServiceInfo   | 响应请求服务基本信息                     |
+| 7      | 1        | RequestProcessIDList  | 请求进程ID列表                           |
+| 8      | 1        | ResponseProcessIDList | 响应请求进程ID列表，更新实时数据需要使用 |
+| 9      | 1        | RequestProcessList    | 请求进程详细信息列表                     |
+| 10     | 1        | ResponseProcessList   | 响应请求进程详细信息列表                 |
+| 11     | 1        | UpdateProcessList     | 更新进程详细信息列表                     |
+| 12     | 1        | ChangeProcessList     | 进程结构变化：增加、减少进程             |
 | 199    | 1        | Heartbeat             | TCP心跳包                                |
 
 #### RequestTargetType【0.0.6】
@@ -75,13 +78,27 @@ TCP、UDP传输数据包定义。
 | TaskId | int      | 任务Id                         |
 | Type   | byte     | 终端类型，0：Server，1：Client |
 
-#### RequestBaseInfo【0.0.1】
+#### RequestUdpAddress【0.0.7】
 
 | 字段名 | 数据类型 | 说明   |
 | ------ | -------- | ------ |
 | TaskId | int      | 任务Id |
 
-#### ResponseBaseInfo【0.0.2】
+#### ResponseUdpAddress【0.0.7】
+
+| 字段名 | 数据类型 | 说明     |
+| ------ | -------- | -------- |
+| TaskId | int      | 任务Id   |
+| Ip     | string   | 组播地址 |
+| Port   | int      | 组播端口 |
+
+#### RequestServiceInfo【0.0.7】
+
+| 字段名 | 数据类型 | 说明   |
+| ------ | -------- | ------ |
+| TaskId | int      | 任务Id |
+
+#### ResponseServiceInfo【0.0.7】
 
 | 字段名             | 数据类型 | 说明                                                         |
 | ------------------ | -------- | ------------------------------------------------------------ |
