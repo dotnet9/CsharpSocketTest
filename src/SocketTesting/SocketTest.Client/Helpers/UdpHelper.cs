@@ -155,13 +155,14 @@ public class UdpHelper : ViewModelBase, ISocketBase
 
                     var data = _client.Receive(ref _remoteEp);
                     var readIndex = 0;
-                    if (SerializeHelper.ReadHead(data, ref readIndex, out var headInfo))
+                    if (SerializeHelper.ReadHead(data, ref readIndex, out var headInfo) &&
+                        data.Length >= headInfo?.BufferLen)
                     {
                         _receivedBuffers.Add(new SocketMessage(this, headInfo!, data));
                     }
                     else
                     {
-                        Logger.Logger.Warning($"收到镶UDP包：{headInfo}");
+                        Logger.Logger.Warning($"收到错误UDP包：{headInfo}");
                     }
 
                     ReceiveTime = DateTime.Now;
