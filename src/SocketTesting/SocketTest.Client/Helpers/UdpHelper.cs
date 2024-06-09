@@ -1,5 +1,4 @@
-﻿using Messager;
-using ReactiveUI;
+﻿using ReactiveUI;
 using SocketDto.Message;
 using SocketNetObject;
 using SocketNetObject.Models;
@@ -10,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeWF.EventBus;
 
 namespace SocketTest.Client.Helpers;
 

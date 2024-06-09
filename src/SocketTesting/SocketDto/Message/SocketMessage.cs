@@ -10,7 +10,7 @@ namespace SocketDto.Message;
 /// <param name="buffer"></param>
 /// <param name="client"></param>
 public class SocketMessage(object sender, NetHeadInfo netHead, byte[] buffer, Socket? client = null)
-    : Messager.Message(sender)
+    : CodeWF.EventBus.Message(sender)
 {
     /// <summary>
     /// 数据包头部信息

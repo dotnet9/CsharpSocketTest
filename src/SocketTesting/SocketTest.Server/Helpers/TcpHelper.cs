@@ -1,5 +1,5 @@
 ﻿using Avalonia.Threading;
-using Messager;
+using CodeWF.EventBus;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.Message;
@@ -293,7 +293,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                         continue;
                     }
 
-                    while (request.Value.TryDequeue(out var command)) Messager.Messenger.Default.Publish(this, command);
+                    while (request.Value.TryDequeue(out var command)) Messenger.Default.Publish(this, command);
                     ;
                 }
 

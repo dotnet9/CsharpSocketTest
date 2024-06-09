@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Messager\Messager.csproj" />
+    <PackageReference Include="CodeWF.EventBus" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SocketNetObject\SocketNetObject.csproj" />
     <ProjectReference Include="..\SocketTest.Common\SocketTest.Common.csproj" />
   </ItemGroup>

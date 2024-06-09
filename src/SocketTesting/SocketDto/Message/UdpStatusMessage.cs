@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="sender"></param>
 public class UdpStatusMessage(object sender, bool isConnect)
-    : Messager.Message(sender)
+    : CodeWF.EventBus.Message(sender)
 {
     public bool IsConnect { get; } = isConnect;
 }

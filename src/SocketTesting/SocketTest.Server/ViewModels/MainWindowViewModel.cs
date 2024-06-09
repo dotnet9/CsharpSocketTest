@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
-using Messager;
+using CodeWF.EventBus;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
@@ -20,7 +20,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using SocketDto.Udp;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
@@ -38,12 +37,6 @@ public class MainWindowViewModel : ViewModelBase
                 .Subscribe(newValue => RunCommandContent = newValue ? "停止服务" : "开启服务");
         }
 
-        void RegisterEvent()
-        {
-            Messenger.Default.Subscribe<SocketMessage>(this, ReceiveSocketMessage);
-            Messenger.Default.Subscribe<TcpStatusMessage>(this, ReceiveTcpStatusMessage);
-        }
-
         void RegisterCommand()
         {
             var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
@@ -55,7 +48,7 @@ public class MainWindowViewModel : ViewModelBase
         UdpHelper = new UdpHelper(TcpHelper);
 
         ListenProperty();
-        RegisterEvent();
+        Messenger.Default.Subscribe(this);
         RegisterCommand();
 
         MockUpdate();
@@ -123,6 +116,7 @@ public class MainWindowViewModel : ViewModelBase
 
     #region 处理Socket信息
 
+    [EventHandler]
     private void ReceiveTcpStatusMessage(TcpStatusMessage message)
     {
         _ = Log(message.IsConnect ? "TCP服务已运行" : "TCP服务已停止");
@@ -136,6 +130,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    [EventHandler]
     private void ReceiveSocketMessage(SocketMessage message)
     {
         if (message.IsMessage<RequestTargetType>())
