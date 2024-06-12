@@ -10,6 +10,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.EventBus;
+using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
 
 namespace SocketTest.Client.Helpers;
 

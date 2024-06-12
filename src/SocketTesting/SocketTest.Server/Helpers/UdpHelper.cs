@@ -7,6 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
 
 namespace SocketTest.Server.Helpers;
 
@@ -145,7 +147,7 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
     {
         if (!IsRunning || _client == null) return;
 
-        var buffer = command.SerializeByNative(tcpHelper.SystemId);
+        var buffer = command.Serialize(tcpHelper.SystemId);
         var sendCount = _client.Send(buffer, buffer.Length, _udpIpEndPoint);
         if (sendCount < buffer.Length)
         {

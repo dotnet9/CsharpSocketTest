@@ -44,7 +44,7 @@ public class SocketMessage(object sender, NetHeadInfo netHead, byte[] buffer, So
     /// <returns></returns>
     public T Message<T>() where T : new()
     {
-        return Buffer.Deserialize<T>();
+        return MessagePackHelper.Deserialize<T>(Buffer);
     }
 
     /// <summary>
@@ -54,6 +54,6 @@ public class SocketMessage(object sender, NetHeadInfo netHead, byte[] buffer, So
     /// <returns></returns>
     public T MessageByNative<T>() where T : new()
     {
-        return Buffer.DeserializeByNative<T>();
+        return Buffer.Deserialize<T>();
     }
 }

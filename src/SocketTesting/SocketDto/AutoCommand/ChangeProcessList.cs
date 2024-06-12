@@ -1,4 +1,4 @@
-﻿namespace SocketDto;
+﻿namespace SocketDto.AutoCommand;
 
 /// <summary>
 ///     进程结构信息

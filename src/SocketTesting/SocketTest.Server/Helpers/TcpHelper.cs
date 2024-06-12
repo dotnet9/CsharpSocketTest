@@ -14,6 +14,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
 
 namespace SocketTest.Server.Helpers;
 

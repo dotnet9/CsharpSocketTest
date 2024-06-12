@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using CodeWF.NetWeaver;
 using ProcessItem = SocketDto.Response.ProcessItem;
 
 namespace SocketTest.Server.Mock;

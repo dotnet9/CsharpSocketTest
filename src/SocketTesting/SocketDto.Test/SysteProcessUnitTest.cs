@@ -1,12 +1,14 @@
 using System.Text;
 using System.Text.Json;
+using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
 using MessagePack;
 using SocketNetObject.Models;
 using Xunit.Abstractions;
 
 namespace SocketDto.Test;
 
-public class SysteProcessUnitTest
+public class SystemProcessUnitTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -76,7 +78,7 @@ public class SysteProcessUnitTest
         }
     };
 
-    public SysteProcessUnitTest(ITestOutputHelper testOutputHelper)
+    public SystemProcessUnitTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
     }
@@ -100,10 +102,10 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes_Success()
     {
-        var buffer = _codeWFObject.SerializeByNative(1);
+        var buffer = _codeWFObject.Serialize(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
 
-        var deserializeObj = buffer.DeserializeByNative<SystemProcess>();
+        var deserializeObj = buffer.Deserialize<SystemProcess>();
         Assert.Equal("码界工坊", deserializeObj.Name);
     }
 
@@ -113,10 +115,10 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes2_Success()
     {
-        var buffer = _codeWFObject2.SerializeByNative(1);
+        var buffer = _codeWFObject2.Serialize(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
 
-        var deserializeObj = buffer.DeserializeByNative<SystemProcess2>();
+        var deserializeObj = buffer.Deserialize<SystemProcess2>();
         Assert.Equal("码界工坊", deserializeObj.Name);
         Assert.Equal(2.2f, deserializeObj.GPU);
     }
@@ -127,10 +129,10 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes3_Success()
     {
-        var buffer = _codeWFObject3.SerializeByNative(1);
+        var buffer = _codeWFObject3.Serialize(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
 
-        var deserializeObj = buffer.DeserializeByNative<SystemProcess3>();
+        var deserializeObj = buffer.Deserialize<SystemProcess3>();
         Assert.Equal("码界工坊", deserializeObj.Name);
         Assert.Equal(23, deserializeObj.ProcessData!.CPU);
         Assert.Equal(1, deserializeObj.ProcessData.PowerUsage);
@@ -142,7 +144,7 @@ public class SysteProcessUnitTest
     [Fact]
     public void Test_SerializeToBytes4_Success()
     {
-        var buffer = _codeWFObject3.Serialize(1);
+        var buffer = MessagePackHelper.Serialize(_codeWFObject3, 1);
         _testOutputHelper.WriteLine($"加入MessagePack压缩序列化后二进制长度：{buffer.Length}");
 
         var deserializeObj = buffer.Deserialize<SystemProcess3>();
