@@ -163,7 +163,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
             return;
         }
 
-        var buffer = command.Serialize(SystemId);
+        var buffer = MessagePackHelper.Serialize(command, SystemId);
         _client!.Send(buffer);
         if (command is Heartbeat)
         {

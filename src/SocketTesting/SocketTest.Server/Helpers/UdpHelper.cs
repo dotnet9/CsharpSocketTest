@@ -1,5 +1,6 @@
-﻿using ReactiveUI;
-using SocketNetObject;
+﻿using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
+using ReactiveUI;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
 using System;
@@ -7,8 +8,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeWF.NetWeaver;
-using CodeWF.NetWeaver.Base;
 
 namespace SocketTest.Server.Helpers;
 

@@ -179,7 +179,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
             return;
         }
 
-        var buffer = command.Serialize(SystemId);
+        var buffer = MessagePackHelper.Serialize(command, SystemId);
         foreach (var client in _clients) client.Value.Send(buffer);
 
         Logger.Logger.Info($"发送命令{command.GetType()}");
@@ -188,7 +188,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     public void SendCommand(Socket client, INetObject command)
     {
         var sw = Stopwatch.StartNew();
-        var buffer = command.Serialize(SystemId);
+        var buffer = MessagePackHelper.Serialize(command, SystemId);
         client.Send(buffer);
 
         if (command is not Heartbeat)
