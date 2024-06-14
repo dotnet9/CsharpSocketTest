@@ -16,5 +16,7 @@ public class UpdateGeneralProcessListUnitTest
         Assert.Equal(6, (int)(AlarmStatus.OverLimit | AlarmStatus.UserChanged));
         Assert.Equal(7,
             (int)(AlarmStatus.Overtime | AlarmStatus.OverLimit | AlarmStatus.UserChanged));
+        Assert.Equal(7,
+            (int)(AlarmStatus.Overtime | AlarmStatus.Overtime | AlarmStatus.Overtime  | AlarmStatus.OverLimit | AlarmStatus.Overtime | AlarmStatus.UserChanged));
     }
 }
