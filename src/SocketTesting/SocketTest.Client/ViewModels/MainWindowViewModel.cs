@@ -1,12 +1,13 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
+using CodeWF.EventBus;
 using DynamicData;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
 using SocketDto.Enums;
-using SocketDto.Message;
+using SocketDto.EventBus;
 using SocketDto.Requests;
 using SocketDto.Response;
 using SocketDto.Udp;
@@ -23,7 +24,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using CodeWF.EventBus;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
@@ -61,7 +61,7 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         ListenProperty();
-        Messenger.Default.Subscribe(this);
+        EventBus.Default.Subscribe(this);
         RegisterCommand();
 
         Logger.Logger.Info("连接服务端后获取数据");
@@ -201,14 +201,14 @@ public class MainWindowViewModel : ViewModelBase
     #region 接收事件
 
     [EventHandler]
-    private void ReceiveTcpStatusMessage(TcpStatusMessage message)
+    private void ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
     {
         TcpHelper.SendCommand(new RequestTargetType());
         _ = Log("发送命令查询目标终端类型是否是服务端");
     }
 
     [EventHandler]
-    private void ReceiveUdpStatusMessage(UdpStatusMessage message)
+    private void ReceiveUdpStatusMessage(ChangeUDPStatusCommand message)
     {
         _ = Log("Udp组播订阅成功！");
     }
@@ -230,7 +230,7 @@ public class MainWindowViewModel : ViewModelBase
     /// <param name="message"></param>
     /// <exception cref="Exception"></exception>
     [EventHandler]
-    private void ReceivedSocketMessage(SocketMessage message)
+    private void ReceivedSocketMessage(SocketCommand message)
     {
         if (message.IsMessage<ResponseTargetType>())
         {

@@ -1,6 +1,7 @@
-﻿using ReactiveUI;
-using SocketDto.Message;
-using SocketNetObject;
+﻿using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
+using ReactiveUI;
+using SocketDto.EventBus;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
 using System;
@@ -10,14 +11,12 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.EventBus;
-using CodeWF.NetWeaver;
-using CodeWF.NetWeaver.Base;
 
 namespace SocketTest.Client.Helpers;
 
 public class UdpHelper : ViewModelBase, ISocketBase
 {
-    private readonly BlockingCollection<SocketMessage> _receivedBuffers = new(new ConcurrentQueue<SocketMessage>());
+    private readonly BlockingCollection<SocketCommand> _receivedBuffers = new(new ConcurrentQueue<SocketCommand>());
     private UdpClient? _client;
     private IPEndPoint _remoteEp = new(IPAddress.Any, 0);
 
@@ -105,7 +104,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
 
                     ReceiveData();
                     CheckMessage();
-                    Messenger.Default.Publish(this, new UdpStatusMessage(this, true));
+                    await EventBus.Default.PublishAsync(this, new ChangeUDPStatusCommand(true));
                     break;
                 }
                 catch (Exception ex)
@@ -160,7 +159,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     if (SerializeHelper.ReadHead(data, ref readIndex, out var headInfo) &&
                         data.Length >= headInfo?.BufferLen)
                     {
-                        _receivedBuffers.Add(new SocketMessage(this, headInfo!, data));
+                        _receivedBuffers.Add(new SocketCommand(headInfo!, data));
                     }
                     else
                     {
@@ -195,7 +194,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
             {
                 while (_receivedBuffers.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    Messenger.Default.Publish(this, message);
+                    await EventBus.Default.PublishAsync(this, message);
                 }
             }
         });

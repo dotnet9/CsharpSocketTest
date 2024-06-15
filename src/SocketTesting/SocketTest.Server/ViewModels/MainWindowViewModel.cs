@@ -5,7 +5,6 @@ using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
 using SocketDto.Enums;
-using SocketDto.Message;
 using SocketDto.Requests;
 using SocketDto.Response;
 using SocketTest.Common;
@@ -20,6 +19,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using SocketDto.EventBus;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
@@ -48,7 +48,7 @@ public class MainWindowViewModel : ViewModelBase
         UdpHelper = new UdpHelper(TcpHelper);
 
         ListenProperty();
-        Messenger.Default.Subscribe(this);
+        EventBus.Default.Subscribe(this);
         RegisterCommand();
 
         MockUpdate();
@@ -117,7 +117,7 @@ public class MainWindowViewModel : ViewModelBase
     #region 处理Socket信息
 
     [EventHandler]
-    private void ReceiveTcpStatusMessage(TcpStatusMessage message)
+    private void ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
     {
         _ = Log(message.IsConnect ? "TCP服务已运行" : "TCP服务已停止");
         if (message.IsConnect)
@@ -131,7 +131,7 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     [EventHandler]
-    private void ReceiveSocketMessage(SocketMessage message)
+    private void ReceiveSocketMessage(SocketCommand message)
     {
         if (message.IsMessage<RequestTargetType>())
         {

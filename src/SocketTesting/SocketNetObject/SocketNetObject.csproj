@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodeWF.NetWeaver" Version="1.0.0" />
-    <PackageReference Include="MessagePack" Version="2.6.100-alpha" />
+    <PackageReference Include="MessagePack" Version="3.0.54-alpha" />
   </ItemGroup>
 
 </Project>

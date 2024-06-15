@@ -1,16 +1,15 @@
 ﻿using System.Net.Sockets;
 
-namespace SocketDto.Message;
+namespace SocketDto.EventBus;
 
 /// <summary>
 /// Socket信息，收到其他端网络对象后转换为此对象，在进程之内传递
 /// </summary>
-/// <param name="sender"></param>
 /// <param name="netHead"></param>
 /// <param name="buffer"></param>
 /// <param name="client"></param>
-public class SocketMessage(object sender, NetHeadInfo netHead, byte[] buffer, Socket? client = null)
-    : CodeWF.EventBus.Message(sender)
+public class SocketCommand(NetHeadInfo netHead, byte[] buffer, Socket? client = null)
+    : Command
 {
     /// <summary>
     /// 数据包头部信息

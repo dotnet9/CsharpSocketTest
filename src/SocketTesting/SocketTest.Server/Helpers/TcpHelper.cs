@@ -1,8 +1,9 @@
 ﻿using Avalonia.Threading;
-using CodeWF.EventBus;
+using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
 using ReactiveUI;
 using SocketDto;
-using SocketDto.Message;
+using SocketDto.EventBus;
 using SocketNetObject;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
@@ -14,15 +15,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeWF.NetWeaver;
-using CodeWF.NetWeaver.Base;
+using CodeWF.EventBus;
 
 namespace SocketTest.Server.Helpers;
 
 public class TcpHelper : ViewModelBase, ISocketBase
 {
     private readonly ConcurrentDictionary<string, Socket> _clients = new();
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<SocketMessage>> _requests = new();
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<SocketCommand>> _requests = new();
 
     private Socket? _server;
     public long SystemId { get; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
@@ -142,7 +142,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     ProcessingRequests();
 
                     Logger.Logger.Info($"Tcp服务启动成功：{ipEndPoint}，等待客户端连接");
-                    Messenger.Default.Publish(this, new TcpStatusMessage(this, true));
+                    await EventBus.Default.PublishAsync(this, new ChangeTCPStatusCommand(true));
                     break;
                 }
                 catch (Exception ex)
@@ -253,11 +253,11 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     {
                         if (!_requests.TryGetValue(tcpClientKey, out var value))
                         {
-                            value = new ConcurrentQueue<SocketMessage>();
+                            value = new ConcurrentQueue<SocketCommand>();
                             _requests[tcpClientKey] = value;
                         }
 
-                        value.Enqueue(new SocketMessage(this, headInfo!, buffer, tcpClient));
+                        value.Enqueue(new SocketCommand(headInfo!, buffer, tcpClient));
                     }
                 }
                 catch (SocketException ex)
@@ -295,8 +295,10 @@ public class TcpHelper : ViewModelBase, ISocketBase
                         continue;
                     }
 
-                    while (request.Value.TryDequeue(out var command)) Messenger.Default.Publish(this, command);
-                    ;
+                    while (request.Value.TryDequeue(out var command))
+                    {
+                        await EventBus.Default.PublishAsync(this, command);
+                    }
                 }
 
                 if (needRemoveKeys.Count > 0) needRemoveKeys.ForEach(RemoveClient);

@@ -1,7 +1,9 @@
 ﻿using Avalonia.Threading;
+using CodeWF.NetWeaver;
+using CodeWF.NetWeaver.Base;
 using ReactiveUI;
 using SocketDto;
-using SocketDto.Message;
+using SocketDto.EventBus;
 using SocketNetObject;
 using SocketNetObject.Models;
 using SocketTest.Mvvm;
@@ -12,8 +14,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.EventBus;
-using CodeWF.NetWeaver;
-using CodeWF.NetWeaver.Base;
 
 namespace SocketTest.Client.Helpers;
 
@@ -22,7 +22,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     private Socket? _client;
     public long SystemId { get; private set; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
 
-    public readonly BlockingCollection<SocketMessage> _responses = new(new ConcurrentQueue<SocketMessage>());
+    public readonly BlockingCollection<SocketCommand> _responses = new(new ConcurrentQueue<SocketCommand>());
 
     #region 公开属性
 
@@ -127,7 +127,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     CheckResponse();
 
                     Logger.Logger.Info("连接Tcp服务成功");
-                    Messenger.Default.Publish(this, new TcpStatusMessage(this, true, Ip, Port));
+                    await EventBus.Default.PublishAsync(this, new ChangeTCPStatusCommand(true, Ip, Port));
                     break;
                 }
                 catch (Exception ex)
@@ -195,7 +195,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     {
                         ReceiveTime = DateTime.Now;
                         SystemId = headInfo!.SystemId;
-                        _responses.Add(new SocketMessage(this, headInfo, buffer, _client));
+                        _responses.Add(new SocketCommand(headInfo, buffer, _client));
                     }
                 }
                 catch (SocketException ex)
@@ -225,7 +225,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
             {
                 while (_responses.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    Messenger.Default.Publish(this, message);
+                    await EventBus.Default.PublishAsync(this, message);
                 }
             }
         });
