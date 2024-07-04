@@ -104,7 +104,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
 
                     ReceiveData();
                     CheckMessage();
-                    await EventBus.Default.PublishAsync(this, new ChangeUDPStatusCommand(true));
+                    await EventBus.Default.PublishAsync(new ChangeUDPStatusCommand(true));
                     break;
                 }
                 catch (Exception ex)
@@ -194,7 +194,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
             {
                 while (_receivedBuffers.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    await EventBus.Default.PublishAsync(this, message);
+                    await EventBus.Default.PublishAsync(message);
                 }
             }
         });

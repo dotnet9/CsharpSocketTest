@@ -142,7 +142,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     ProcessingRequests();
 
                     Logger.Logger.Info($"Tcp服务启动成功：{ipEndPoint}，等待客户端连接");
-                    await EventBus.Default.PublishAsync(this, new ChangeTCPStatusCommand(true));
+                    await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true));
                     break;
                 }
                 catch (Exception ex)
@@ -297,7 +297,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
 
                     while (request.Value.TryDequeue(out var command))
                     {
-                        await EventBus.Default.PublishAsync(this, command);
+                        await EventBus.Default.PublishAsync(command);
                     }
                 }
 

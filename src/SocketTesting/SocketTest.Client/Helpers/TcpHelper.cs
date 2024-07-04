@@ -127,7 +127,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     CheckResponse();
 
                     Logger.Logger.Info("连接Tcp服务成功");
-                    await EventBus.Default.PublishAsync(this, new ChangeTCPStatusCommand(true, Ip, Port));
+                    await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true, Ip, Port));
                     break;
                 }
                 catch (Exception ex)
@@ -225,7 +225,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
             {
                 while (_responses.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    await EventBus.Default.PublishAsync(this, message);
+                    await EventBus.Default.PublishAsync(message);
                 }
             }
         });
