@@ -14,7 +14,6 @@ using SocketDto.Udp;
 using SocketTest.Client.Helpers;
 using SocketTest.Client.Models;
 using SocketTest.Common;
-using SocketTest.Logger.Models;
 using SocketTest.Mvvm;
 using System;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using CodeWF.LogViewer.Avalonia.Log4Net;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
@@ -64,7 +64,7 @@ public class MainWindowViewModel : ViewModelBase
         EventBus.Default.Subscribe(this);
         RegisterCommand();
 
-        Logger.Logger.Info("连接服务端后获取数据");
+        LogFactory.Instance.Log.Info("连接服务端后获取数据");
     }
 
     public Window? Owner { get; set; }
@@ -135,12 +135,12 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (!TcpHelper.IsRunning)
         {
-            Logger.Logger.Error("未连接Tcp服务，无法发送命令");
+            LogFactory.Instance.Log.Error("未连接Tcp服务，无法发送命令");
             return;
         }
 
         TcpHelper.SendCommand(new ChangeProcessList());
-        Logger.Logger.Info("发送刷新所有客户端命令");
+        LogFactory.Instance.Log.Info("发送刷新所有客户端命令");
     }
 
     private IEnumerable<ProcessItemModel> FilterData(IEnumerable<ProcessItemModel> processes)
@@ -181,7 +181,7 @@ public class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             if (exceptionAction == null)
-                Logger.Logger.Error($"执行{actionName}异常：{ex.Message}");
+                LogFactory.Instance.Log.Error($"执行{actionName}异常：{ex.Message}");
             else
                 exceptionAction.Invoke(ex);
         }
@@ -309,9 +309,9 @@ public class MainWindowViewModel : ViewModelBase
         BaseInfo =
             $"更新时间【{response.LastUpdateTime.ToDateTime(response.TimestampStartYear):yyyy:MM:dd HH:mm:ss fff}】：操作系统【{response.OS}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.DiskSize}GB】-带宽【{response.NetworkBandwidth}Mbps】";
 
-        Logger.Logger.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
-        Logger.Logger.Info($"【旧】{oldBaseInfo}");
-        Logger.Logger.Info($"【新】{BaseInfo}");
+        LogFactory.Instance.Log.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
+        LogFactory.Instance.Log.Info($"【旧】{oldBaseInfo}");
+        LogFactory.Instance.Log.Info($"【新】{BaseInfo}");
         _ = Log(BaseInfo);
 
         TcpHelper.SendCommand(new RequestProcessIDList() { TaskId = TcpHelper.GetNewTaskId() });
@@ -342,7 +342,7 @@ public class MainWindowViewModel : ViewModelBase
             _processIdAndItems = _receivedProcesses.ToDictionary(process => process.PID);
 
         var msg = response.TaskId == default ? "收到推送" : "收到请求响应";
-        Logger.Logger.Info(
+        LogFactory.Instance.Log.Info(
             $"{msg}【{response.PageIndex + 1}/{response.PageCount}】进程{processes.Count}条({_receivedProcesses.Count}/{response.TotalSize})");
     }
 
@@ -357,7 +357,7 @@ public class MainWindowViewModel : ViewModelBase
             else
                 throw new Exception($"收到更新数据包，遇到本地缓存不存在的进程：{updateProcess.Name}");
         });
-        Logger.Logger.Info($"更新数据{response.Processes?.Count}条");
+        LogFactory.Instance.Log.Info($"更新数据{response.Processes?.Count}条");
     }
 
     private void ReceivedSocketMessage(Heartbeat response)
@@ -409,7 +409,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Logger.Logger.Error($"【实时】更新数据异常：{ex.Message}");
+            LogFactory.Instance.Log.Error($"【实时】更新数据异常：{ex.Message}");
         }
     }
 
@@ -458,7 +458,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Logger.Logger.Error($"【实时】更新一般数据异常：{ex.Message}");
+            LogFactory.Instance.Log.Error($"【实时】更新一般数据异常：{ex.Message}");
         }
     }
 
@@ -468,11 +468,11 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (type == LogType.Info)
         {
-            Logger.Logger.Info(msg);
+            LogFactory.Instance.Log.Info(msg);
         }
         else if (type == LogType.Error)
         {
-            Logger.Logger.Error(msg);
+            LogFactory.Instance.Log.Error(msg);
         }
 
         await ShowNotificationAsync(showNotification, msg, type);
@@ -484,7 +484,7 @@ public class MainWindowViewModel : ViewModelBase
 
         var notificationType = type switch
         {
-            LogType.Warning => NotificationType.Warning,
+            LogType.Warn => NotificationType.Warning,
             LogType.Error => NotificationType.Error,
             _ => NotificationType.Information
         };

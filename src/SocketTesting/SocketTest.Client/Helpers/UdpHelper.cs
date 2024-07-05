@@ -11,6 +11,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.EventBus;
+using CodeWF.LogViewer.Avalonia.Log4Net;
 
 namespace SocketTest.Client.Helpers;
 
@@ -110,7 +111,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
                 catch (Exception ex)
                 {
                     IsRunning = false;
-                    Logger.Logger.Warning($"运行Udp异常，3秒后将重新运行：{ex.Message}");
+                    LogFactory.Instance.Log.Warn($"运行Udp异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
         }, _connectServer.Token);
@@ -123,11 +124,11 @@ public class UdpHelper : ViewModelBase, ISocketBase
             _connectServer?.Cancel();
             _client?.Close();
             _client = null;
-            Logger.Logger.Info("停止Udp");
+            LogFactory.Instance.Log.Info("停止Udp");
         }
         catch (Exception ex)
         {
-            Logger.Logger.Warning($"停止Udp异常：{ex.Message}");
+            LogFactory.Instance.Log.Warn($"停止Udp异常：{ex.Message}");
         }
 
         IsRunning = false;
@@ -163,20 +164,20 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     }
                     else
                     {
-                        Logger.Logger.Warning($"收到错误UDP包：{headInfo}");
+                        LogFactory.Instance.Log.Warn($"收到错误UDP包：{headInfo}");
                     }
 
                     ReceiveTime = DateTime.Now;
                 }
                 catch (SocketException ex)
                 {
-                    Logger.Logger.Error(ex.SocketErrorCode == SocketError.Interrupted
+                    LogFactory.Instance.Log.Error(ex.SocketErrorCode == SocketError.Interrupted
                         ? "Udp中断，停止接收数据！"
                         : $"接收Udp数据异常：{ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    Logger.Logger.Error($"接收Udp数据异常：{ex.Message}");
+                    LogFactory.Instance.Log.Error($"接收Udp数据异常：{ex.Message}");
                 }
         });
     }

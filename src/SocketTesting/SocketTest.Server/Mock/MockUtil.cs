@@ -1,15 +1,15 @@
-﻿using LoremNET;
+﻿using CodeWF.LogViewer.Avalonia.Log4Net;
+using CodeWF.NetWeaver;
+using LoremNET;
 using SocketDto.Enums;
 using SocketDto.Response;
 using SocketDto.Udp;
-using SocketNetObject;
 using SocketTest.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using CodeWF.NetWeaver;
 using ProcessItem = SocketDto.Response.ProcessItem;
 
 namespace SocketTest.Server.Mock;
@@ -33,22 +33,22 @@ public static class MockUtil
         stopwatch.Restart();
         await MockBaseAsync();
         stopwatch.Stop();
-        Logger.Logger.Info($"模拟基本信息：{stopwatch.ElapsedMilliseconds}ms");
+        LogFactory.Instance.Log.Info($"模拟基本信息：{stopwatch.ElapsedMilliseconds}ms");
 
         stopwatch.Restart();
         await MockProcessIdListAsync();
         stopwatch.Stop();
-        Logger.Logger.Info($"模拟 {total} 进程ID列表：{stopwatch.ElapsedMilliseconds}ms");
+        LogFactory.Instance.Log.Info($"模拟 {total} 进程ID列表：{stopwatch.ElapsedMilliseconds}ms");
 
         stopwatch.Restart();
         await MockProcessAsync();
         stopwatch.Stop();
-        Logger.Logger.Info($"模拟 {total} 进程详细信息列表：{stopwatch.ElapsedMilliseconds}ms");
+        LogFactory.Instance.Log.Info($"模拟 {total} 进程详细信息列表：{stopwatch.ElapsedMilliseconds}ms");
 
         stopwatch.Restart();
         MockCreateUpdateData();
         stopwatch.Stop();
-        Logger.Logger.Info($"模拟 {total} 进程实时更新yte[]：{stopwatch.ElapsedMilliseconds}ms");
+        LogFactory.Instance.Log.Info($"模拟 {total} 进程实时更新yte[]：{stopwatch.ElapsedMilliseconds}ms");
         IsInitOver = true;
     }
 

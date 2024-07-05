@@ -5,10 +5,10 @@ using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
 using SocketDto.Enums;
+using SocketDto.EventBus;
 using SocketDto.Requests;
 using SocketDto.Response;
 using SocketTest.Common;
-using SocketTest.Logger.Models;
 using SocketTest.Mvvm;
 using SocketTest.Server.Helpers;
 using SocketTest.Server.Mock;
@@ -19,7 +19,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using SocketDto.EventBus;
+using CodeWF.LogViewer.Avalonia.Log4Net;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
@@ -54,7 +54,7 @@ public class MainWindowViewModel : ViewModelBase
         MockUpdate();
         MockSendData();
 
-        Logger.Logger.Info("连接服务端后获取数据");
+        LogFactory.Instance.Log.Info("连接服务端后获取数据");
     }
 
     public TcpHelper TcpHelper { get; set; }
@@ -96,7 +96,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (!TcpHelper.IsRunning)
         {
-            Logger.Logger.Error("未运行Tcp服务，无法发送命令");
+            LogFactory.Instance.Log.Error("未运行Tcp服务，无法发送命令");
             return;
         }
 
@@ -107,7 +107,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (!TcpHelper.IsRunning)
         {
-            Logger.Logger.Error("未运行Tcp服务，无法发送命令");
+            LogFactory.Instance.Log.Error("未运行Tcp服务，无法发送命令");
             return;
         }
 
@@ -241,7 +241,7 @@ public class MainWindowViewModel : ViewModelBase
                 await Task.Delay(TimeSpan.FromMilliseconds(10));
 
                 var msg = response.TaskId == default ? "推送" : "响应请求";
-                Logger.Logger.Info(
+                LogFactory.Instance.Log.Info(
                     $"{msg}【{response.PageIndex + 1}/{response.PageCount}】{response.Processes.Count}条({sendCount}/{response.TotalSize})");
             }
         });
@@ -285,7 +285,7 @@ public class MainWindowViewModel : ViewModelBase
         if (_isUpdateAll)
         {
             TcpHelper.SendCommand(new ChangeProcessList());
-            Logger.Logger.Info("====TCP推送结构变化通知====");
+            LogFactory.Instance.Log.Info("====TCP推送结构变化通知====");
             return;
         }
 
@@ -293,7 +293,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             Processes = await MockUtil.MockProcessesAsync(TcpHelper.MockCount, TcpHelper.MockPageSize)
         });
-        Logger.Logger.Info("====TCP推送更新通知====");
+        LogFactory.Instance.Log.Info("====TCP推送更新通知====");
 
         _isUpdateAll = !_isUpdateAll;
     }
@@ -335,7 +335,7 @@ public class MainWindowViewModel : ViewModelBase
 
         sw.Stop();
 
-        Logger.Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
+        LogFactory.Instance.Log.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
     }
 
     private void MockSendRealtimeDataAsync(object? sender, ElapsedEventArgs e)
@@ -360,7 +360,7 @@ public class MainWindowViewModel : ViewModelBase
             UdpHelper.SendCommand(response);
         }
 
-        Logger.Logger.Info(
+        LogFactory.Instance.Log.Info(
             $"推送实时数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
@@ -386,7 +386,7 @@ public class MainWindowViewModel : ViewModelBase
             UdpHelper.SendCommand(response);
         }
 
-        Logger.Logger.Info(
+        LogFactory.Instance.Log.Info(
             $"推送一般数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
@@ -406,11 +406,11 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (type == LogType.Info)
         {
-            Logger.Logger.Info(msg);
+            LogFactory.Instance.Log.Info(msg);
         }
         else if (type == LogType.Error)
         {
-            Logger.Logger.Error(msg);
+            LogFactory.Instance.Log.Error(msg);
         }
 
         await ShowNotificationAsync(showNotification, msg, type);
@@ -422,7 +422,7 @@ public class MainWindowViewModel : ViewModelBase
 
         var notificationType = type switch
         {
-            LogType.Warning => NotificationType.Warning,
+            LogType.Warn => NotificationType.Warning,
             LogType.Error => NotificationType.Error,
             _ => NotificationType.Information
         };

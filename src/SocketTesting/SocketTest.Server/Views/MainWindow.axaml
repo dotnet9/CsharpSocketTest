@@ -3,7 +3,7 @@
         xmlns:vm="using:SocketTest.Server.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:log="clr-namespace:SocketTest.LoggerView;assembly=SocketTest.LoggerView"
+        xmlns:log="https://codewf.com"
         mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="550" Width="650" Height="550"
         x:Class="SocketTest.Server.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"

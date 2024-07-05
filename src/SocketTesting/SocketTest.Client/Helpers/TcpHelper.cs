@@ -14,6 +14,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.EventBus;
+using CodeWF.LogViewer.Avalonia.Log4Net;
 
 namespace SocketTest.Client.Helpers;
 
@@ -126,14 +127,14 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     ListenForServer();
                     CheckResponse();
 
-                    Logger.Logger.Info("连接Tcp服务成功");
+                    LogFactory.Instance.Log.Info("连接Tcp服务成功");
                     await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true, Ip, Port));
                     break;
                 }
                 catch (Exception ex)
                 {
                     IsRunning = false;
-                    Logger.Logger.Warning($"连接TCP服务异常，3秒后将重新连接：{ex.Message}");
+                    LogFactory.Instance.Log.Warn($"连接TCP服务异常，3秒后将重新连接：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
         }, _connectServer.Token);
@@ -145,11 +146,11 @@ public class TcpHelper : ViewModelBase, ISocketBase
         {
             _connectServer?.Cancel();
             _client?.Close(0);
-            Logger.Logger.Info("停止Tcp服务");
+            LogFactory.Instance.Log.Info("停止Tcp服务");
         }
         catch (Exception ex)
         {
-            Logger.Logger.Warning($"停止TCP服务异常：{ex.Message}");
+            LogFactory.Instance.Log.Warn($"停止TCP服务异常：{ex.Message}");
         }
 
         IsRunning = false;
@@ -159,7 +160,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     {
         if (!IsRunning)
         {
-            Logger.Logger.Error("Tcp服务未连接，无法发送命令");
+            LogFactory.Instance.Log.Error("Tcp服务未连接，无法发送命令");
             return;
         }
 
@@ -170,7 +171,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
             SendHeartbeatTime = DateTime.Now;
         }
         else
-            Logger.Logger.Info($"发送命令{command.GetType()}");
+            LogFactory.Instance.Log.Info($"发送命令{command.GetType()}");
     }
 
     private static int _taskId;
@@ -200,12 +201,12 @@ public class TcpHelper : ViewModelBase, ISocketBase
                 }
                 catch (SocketException ex)
                 {
-                    Logger.Logger.Error($"接收数据异常：{ex.Message}");
+                    LogFactory.Instance.Log.Error($"接收数据异常：{ex.Message}");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    Logger.Logger.Error($"接收数据异常：{ex.Message}");
+                    LogFactory.Instance.Log.Error($"接收数据异常：{ex.Message}");
                 }
 
             return Task.CompletedTask;
