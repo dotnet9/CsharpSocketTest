@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto.Enums;
 using SocketDto.Response;
@@ -47,7 +48,7 @@ public class ProcessItemModel : ViewModelBase
     {
     }
 
-    public ProcessItemModel(ProcessItem process, byte timestampStartYear)
+    public ProcessItemModel(ProcessItem process, int timestampStartYear)
     {
         Update(process, timestampStartYear);
     }
@@ -203,7 +204,7 @@ public class ProcessItemModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _updateTime, value);
     }
 
-    public void Update(ProcessItem process, byte timestampStartYear)
+    public void Update(ProcessItem process, int timestampStartYear)
     {
         PID = process.Pid;
 
@@ -221,8 +222,8 @@ public class ProcessItemModel : ViewModelBase
         PowerUsageTrend = (PowerUsage)Enum.Parse(typeof(PowerUsage), process.PowerUsageTrend.ToString());
         Type = (ProcessType)Enum.Parse(typeof(ProcessType), process.Type.ToString());
         Status = (ProcessStatus)Enum.Parse(typeof(ProcessStatus), process.ProcessStatus.ToString());
-        LastUpdateTime = process.LastUpdateTime.ToDateTime(timestampStartYear);
-        UpdateTime = process.UpdateTime.ToDateTime(timestampStartYear);
+        LastUpdateTime = process.LastUpdateTime.FromSpecialUnixTimeSecondsToDateTime(timestampStartYear);
+        UpdateTime = process.UpdateTime.FromSpecialUnixTimeSecondsToDateTime(timestampStartYear);
     }
 
     public void Update(short cpu, short memory, short disk, short network)
@@ -233,7 +234,7 @@ public class ProcessItemModel : ViewModelBase
         Network = network;
     }
 
-    public void Update(byte timestampStartYear, byte processStatus, byte alarmStatus, short gpu, byte gpuEngine,
+    public void Update(int timestampStartYear, byte processStatus, byte alarmStatus, short gpu, byte gpuEngine,
         byte powerUsage, byte powerUsageTrend, uint updateTime)
     {
         Status = (ProcessStatus)Enum.Parse(typeof(ProcessStatus), processStatus.ToString());
@@ -243,6 +244,6 @@ public class ProcessItemModel : ViewModelBase
         PowerUsage = (PowerUsage)Enum.Parse(typeof(PowerUsage), powerUsage.ToString());
         PowerUsageTrend = (PowerUsage)Enum.Parse(typeof(PowerUsage), powerUsageTrend.ToString());
         LastUpdateTime = UpdateTime;
-        UpdateTime = updateTime.ToDateTime(timestampStartYear);
+        UpdateTime = updateTime.FromSpecialUnixTimeSecondsToDateTime(timestampStartYear);
     }
 }

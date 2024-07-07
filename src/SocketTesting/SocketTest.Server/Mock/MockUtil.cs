@@ -10,13 +10,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using CodeWF.Tools.Extensions;
 using ProcessItem = SocketDto.Response.ProcessItem;
 
 namespace SocketTest.Server.Mock;
 
 public static class MockUtil
 {
-    public const byte TimestampStartYear = 23;
+    public const int TimestampStartYear = 2023;
     private static int _mockCount;
     private static ResponseServiceInfo? _mockResponseBase;
     private static int[]? _mockProcessIdList;
@@ -73,7 +74,7 @@ public static class MockUtil
             NetworkBandwidth = 1024,
             Ips = "192.32.35.23",
             TimestampStartYear = TimestampStartYear,
-            LastUpdateTime = TimestampStartYear.GetCurrentTimestamp()
+            LastUpdateTime = DateTime.Now.GetSpecialUnixTimeSeconds(TimestampStartYear)
         };
         await Task.CompletedTask;
     }
@@ -89,7 +90,7 @@ public static class MockUtil
     {
         var mockStr = Lorem.Words(1, 3);
         var mockShort = (short)Random.Shared.Next(0, 1000);
-        var timestamp = TimestampStartYear.GetCurrentTimestamp();
+        var timestamp = DateTime.Now.GetSpecialUnixTimeSeconds(TimestampStartYear);
 
         ProcessItem MockProcess(int id)
         {
@@ -160,7 +161,7 @@ public static class MockUtil
         var mockGpuEngine = (byte)Random.Shared.Next(0, 2);
         var mockPowerUsage = (byte)Random.Shared.Next(0, 5);
         var mockPowerUsageTrend = (byte)Random.Shared.Next(0, 5);
-        var timestamp = TimestampStartYear.GetCurrentTimestamp();
+        var timestamp = DateTime.Now.GetSpecialUnixTimeSeconds(TimestampStartYear);
 
         Update(_mockCpus!, mockShort);
         Update(_mockMemories!, mockShort);

@@ -1,4 +1,5 @@
-﻿using MessagePack.Resolvers;
+﻿using CodeWF.Tools.Extensions;
+using MessagePack.Resolvers;
 
 namespace SerializationTest.Test;
 
@@ -41,27 +42,25 @@ public class BenchmarkTest
                         FirstName = $"名{Lorem.Words(1, 3)}",
                         LastName = $"姓{Lorem.Words(1, 3)}",
                         NickName = $"昵称{Lorem.Words(1, 3)}",
-                        BirthDate = TimestampHelper.GetTimestamp(
-                            DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000))),
+                        BirthDate = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000))
+                            .GetUnixTimeMilliseconds(),
                         Description = $"描述{Lorem.Words(1, 3)}",
                         Address = $"地址{Lorem.Words(1, 3)}",
                         Email = $"邮件{Lorem.Words(1, 3)}@dotnet9.com",
                         PhoneNumber = RandomShared.Next(1000000, 999999999).ToString(),
                         Salary = RandomShared.Next(2000, 100000),
                         DepartmentId = i,
-                        EntryTime = TimestampHelper.GetTimestamp(
-                            DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)))
+                        EntryTime = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000))
+                            .GetUnixTimeMilliseconds()
                     }).ToList(),
                     Budget = RandomShared.Next(2000, 100000) + (decimal)RandomShared.NextDouble(),
                     Value = RandomShared.NextDouble(),
-                    CreateTime =
-                        TimestampHelper.GetTimestamp(
-                            DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)))
+                    CreateTime = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000))
+                        .GetUnixTimeMilliseconds()
                 }).ToList(),
                 AnnualBudget = RandomShared.Next(20000, 1000000) + (decimal)RandomShared.NextDouble(),
-                FoundationDate =
-                    TimestampHelper.GetTimestamp(
-                        DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)))
+                FoundationDate = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000))
+                    .GetUnixTimeMilliseconds()
             }).ToList()
         };
 
@@ -80,22 +79,18 @@ public class BenchmarkTest
                 FirstName = $"名{Lorem.Words(1, 3)}",
                 LastName = $"姓{Lorem.Words(1, 3)}",
                 NickName = $"昵称{Lorem.Words(1, 3)}",
-                BirthDate = TimestampHelper.GetTimestamp(
-                    DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000))),
+                BirthDate = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)).GetUnixTimeMilliseconds(),
                 Description = $"描述{Lorem.Words(1, 3)}",
                 Address = $"地址{Lorem.Words(1, 3)}",
                 Email = $"邮件{Lorem.Words(1, 3)}@dotnet9.com",
                 PhoneNumber = RandomShared.Next(1000000, 999999999).ToString(),
                 Salary = RandomShared.Next(2000, 100000),
                 DepartmentId = 3,
-                EntryTime = TimestampHelper.GetTimestamp(
-                    DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)))
+                EntryTime = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)).GetUnixTimeMilliseconds()
             }).ToList(),
             Budget = RandomShared.Next(2000, 100000) + (decimal)RandomShared.NextDouble(),
             Value = RandomShared.NextDouble(),
-            CreateTime =
-                TimestampHelper.GetTimestamp(
-                    DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)))
+            CreateTime = DateTime.Now.AddMilliseconds(-1 * RandomShared.Next(500000, 500000000)).GetUnixTimeMilliseconds()
         };
     }
 

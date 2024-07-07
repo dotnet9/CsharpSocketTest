@@ -24,6 +24,7 @@
 		<PackageReference Include="Lorem.Universal.Net" Version="4.0.80" />
 		<PackageReference Include="Semi.Avalonia" Version="11.1.0-rc2" />
 		<PackageReference Include="Semi.Avalonia.DataGrid" Version="11.1.0-rc1" />
+		<PackageReference Include="CodeWF.Tools" Version="0.2.1" />
 	</ItemGroup>
 
 

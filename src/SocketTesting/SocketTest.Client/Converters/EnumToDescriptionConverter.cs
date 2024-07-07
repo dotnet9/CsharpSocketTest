@@ -1,5 +1,5 @@
 ﻿using Avalonia.Data.Converters;
-using SocketTest.Common;
+using CodeWF.Tools.Extensions;
 using System;
 using System.Globalization;
 
@@ -11,7 +11,7 @@ public class EnumToDescriptionConverter : IValueConverter
     {
         if (value is not Enum enumValue) return value;
 
-        return enumValue.Description();
+        return enumValue.GetDescription();
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

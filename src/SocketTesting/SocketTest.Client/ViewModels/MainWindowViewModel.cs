@@ -24,6 +24,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using CodeWF.LogViewer.Avalonia.Log4Net;
+using CodeWF.Tools.Extensions;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
@@ -43,7 +44,7 @@ public class MainWindowViewModel : ViewModelBase
     private string? _searchKey;
 
     private Timer? _sendDataTimer;
-    private byte _timestampStartYear;
+    private int _timestampStartYear;
 
     public MainWindowViewModel()
     {
@@ -279,7 +280,7 @@ public class MainWindowViewModel : ViewModelBase
         var type = (TerminalType)Enum.Parse(typeof(TerminalType), response.Type.ToString());
         if (response.Type == (byte)TerminalType.Server)
         {
-            _ = Log($"正确连接{type.Description()}，程序正常运行");
+            _ = Log($"正确连接{type.GetDescription()}，程序正常运行");
 
             TcpHelper.SendCommand(new RequestUdpAddress());
             _ = Log("发送命令获取Udp组播地址");
@@ -288,7 +289,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         else
         {
-            _ = Log($"目标终端非服务端(type: {type.Description()})，请检查地址是否配置正确（重点检查端口），即将断开连接", LogType.Error);
+            _ = Log($"目标终端非服务端(type: {type.GetDescription()})，请检查地址是否配置正确（重点检查端口），即将断开连接", LogType.Error);
         }
     }
 
@@ -307,7 +308,7 @@ public class MainWindowViewModel : ViewModelBase
         _timestampStartYear = response.TimestampStartYear;
         var oldBaseInfo = BaseInfo;
         BaseInfo =
-            $"更新时间【{response.LastUpdateTime.ToDateTime(response.TimestampStartYear):yyyy:MM:dd HH:mm:ss fff}】：操作系统【{response.OS}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.DiskSize}GB】-带宽【{response.NetworkBandwidth}Mbps】";
+            $"更新时间【{response.LastUpdateTime.FromSpecialUnixTimeSecondsToDateTime(response.TimestampStartYear):yyyy:MM:dd HH:mm:ss fff}】：操作系统【{response.OS}】-内存【{response.MemorySize}GB】-处理器【{response.ProcessorCount}个】-硬盘【{response.DiskSize}GB】-带宽【{response.NetworkBandwidth}Mbps】";
 
         LogFactory.Instance.Log.Info(response.TaskId == default ? "收到服务端推送的基本信息" : "收到请求基本信息响应");
         LogFactory.Instance.Log.Info($"【旧】{oldBaseInfo}");

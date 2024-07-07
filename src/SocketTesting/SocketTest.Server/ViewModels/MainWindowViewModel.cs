@@ -20,6 +20,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using CodeWF.LogViewer.Avalonia.Log4Net;
+using CodeWF.Tools.Extensions;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Server.ViewModels;
@@ -175,7 +176,7 @@ public class MainWindowViewModel : ViewModelBase
         };
         TcpHelper.SendCommand(client, response);
 
-        _ = Log($"响应请求终端类型命令：当前终端为={currentTerminalType.Description()}");
+        _ = Log($"响应请求终端类型命令：当前终端为={currentTerminalType.GetDescription()}");
     }
 
     private void ReceiveSocketMessage(Socket client, RequestUdpAddress request)
