@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
-    <PackageReference Include="CodeWF.Tools" Version="0.2.1" />
+    <PackageReference Include="CodeWF.Tools" Version="1.0.0" />
     <PackageReference Include="Lorem.Universal.Net" Version="4.0.80" />
     <PackageReference Include="MessagePack" Version="3.0.54-alpha" />
     <PackageReference Include="protobuf-net" Version="3.2.30" />
