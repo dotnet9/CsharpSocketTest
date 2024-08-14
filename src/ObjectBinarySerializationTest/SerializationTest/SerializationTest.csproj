@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageReference Include="CodeWF.Tools" Version="1.2.0" />
     <PackageReference Include="Lorem.Universal.Net" Version="4.0.80" />
     <PackageReference Include="MessagePack" Version="3.0.54-alpha" />

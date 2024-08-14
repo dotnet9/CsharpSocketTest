@@ -26,6 +26,7 @@ using System.Timers;
 using CodeWF.LogViewer.Avalonia.Log4Net;
 using CodeWF.Tools.Extensions;
 using Notification = Avalonia.Controls.Notifications.Notification;
+using ObservableCollections;
 
 namespace SocketTest.Client.ViewModels;
 
@@ -69,7 +70,7 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     public Window? Owner { get; set; }
-    public ObservableCollection<ProcessItemModel> DisplayProcesses { get; } = new();
+    public ObservableList<ProcessItemModel> DisplayProcesses { get; } = new();
     public TcpHelper TcpHelper { get; set; } = new();
     public UdpHelper UdpHelper { get; set; } = new();
 
@@ -155,7 +156,7 @@ public class MainWindowViewModel : ViewModelBase
     private void ClearData()
     {
         _receivedProcesses.Clear();
-        Invoke(DisplayProcesses.Clear);
+        DisplayProcesses.Clear();
     }
 
     private void SendHeartbeat()
@@ -338,7 +339,7 @@ public class MainWindowViewModel : ViewModelBase
 
         _receivedProcesses.AddRange(processes);
         var filterData = FilterData(processes);
-        Invoke(() => DisplayProcesses.Add(filterData));
+        DisplayProcesses.AddRange(filterData);
         if (_receivedProcesses.Count == response.TotalSize)
             _processIdAndItems = _receivedProcesses.ToDictionary(process => process.PID);
 
