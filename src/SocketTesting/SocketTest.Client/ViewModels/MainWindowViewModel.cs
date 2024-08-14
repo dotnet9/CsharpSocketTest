@@ -2,7 +2,8 @@
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CodeWF.EventBus;
-using DynamicData;
+using CodeWF.LogViewer.Avalonia.Log4Net;
+using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
@@ -11,22 +12,18 @@ using SocketDto.EventBus;
 using SocketDto.Requests;
 using SocketDto.Response;
 using SocketDto.Udp;
+using SocketTest.Client.Extensions;
 using SocketTest.Client.Helpers;
 using SocketTest.Client.Models;
-using SocketTest.Common;
 using SocketTest.Mvvm;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using CodeWF.LogViewer.Avalonia.Log4Net;
-using CodeWF.Tools.Extensions;
 using Notification = Avalonia.Controls.Notifications.Notification;
-using ObservableCollections;
 
 namespace SocketTest.Client.ViewModels;
 
@@ -49,6 +46,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
+        DisplayProcesses = new();
+
         void ListenProperty()
         {
             this.WhenAnyValue(x => x.TcpHelper.IsRunning)
@@ -70,7 +69,8 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     public Window? Owner { get; set; }
-    public ObservableList<ProcessItemModel> DisplayProcesses { get; } = new();
+    public RangObservableCollection<ProcessItemModel> DisplayProcesses { get; }
+
     public TcpHelper TcpHelper { get; set; } = new();
     public UdpHelper UdpHelper { get; set; } = new();
 
@@ -156,7 +156,7 @@ public class MainWindowViewModel : ViewModelBase
     private void ClearData()
     {
         _receivedProcesses.Clear();
-        DisplayProcesses.Clear();
+        Invoke(DisplayProcesses.Clear);
     }
 
     private void SendHeartbeat()
@@ -339,7 +339,7 @@ public class MainWindowViewModel : ViewModelBase
 
         _receivedProcesses.AddRange(processes);
         var filterData = FilterData(processes);
-        DisplayProcesses.AddRange(filterData);
+        Invoke(()=>DisplayProcesses.AddRange(filterData));
         if (_receivedProcesses.Count == response.TotalSize)
             _processIdAndItems = _receivedProcesses.ToDictionary(process => process.PID);
 
