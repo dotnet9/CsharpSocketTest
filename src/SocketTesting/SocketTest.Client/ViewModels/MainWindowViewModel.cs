@@ -37,8 +37,6 @@ public class MainWindowViewModel : ViewModelBase
     private int[]? _processIdArray;
     private Dictionary<int, ProcessItemModel>? _processIdAndItems;
 
-    private string? _runTcpCommandContent = "连接服务";
-
     private string? _searchKey;
 
     private Timer? _sendDataTimer;
@@ -48,12 +46,6 @@ public class MainWindowViewModel : ViewModelBase
     {
         DisplayProcesses = new();
 
-        void ListenProperty()
-        {
-            this.WhenAnyValue(x => x.TcpHelper.IsRunning)
-                .Subscribe(newValue => RunTcpCommandContent = newValue ? "断开服务" : "连接服务");
-        }
-
         void RegisterCommand()
         {
             var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
@@ -61,7 +53,6 @@ public class MainWindowViewModel : ViewModelBase
             RefreshAllCommand = ReactiveCommand.Create(HandleRefreshAllCommand, isTcpRunning);
         }
 
-        ListenProperty();
         EventBus.Default.Subscribe(this);
         RegisterCommand();
 
@@ -73,13 +64,6 @@ public class MainWindowViewModel : ViewModelBase
 
     public TcpHelper TcpHelper { get; set; } = new();
     public UdpHelper UdpHelper { get; set; } = new();
-
-    public string? RunTcpCommandContent
-    {
-        get => _runTcpCommandContent;
-        set => this.RaiseAndSetIfChanged(ref _runTcpCommandContent, value);
-    }
-
 
     public string? SearchKey
     {

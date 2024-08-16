@@ -3,7 +3,7 @@
         xmlns:vm="using:SocketTest.Client.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:log="https://codewf.com"
+        xmlns:codewf="https://codewf.com"
         xmlns:converters="clr-namespace:SocketTest.Client.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SocketTest.Client.Views.MainWindow"
@@ -59,7 +59,7 @@
                      Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
             <Button
                 Command="{Binding HandleConnectTcpCommandAsync}"
-                Content="{Binding RunTcpCommandContent}" />
+                Content="{codewf:If Condition={Binding TcpHelper.IsRunning}, True=断开服务, False=连接服务}" />
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding RefreshAllCommand}" Content="刷新所有客户端" />
         </StackPanel>
@@ -191,7 +191,7 @@
             HorizontalAlignment="Stretch"
             ResizeDirection="Rows" />
         <HeaderedContentControl Header="日志" Grid.Row="3" Margin="3">
-            <log:LogView />
+            <codewf:LogView />
         </HeaderedContentControl>
 
         <StackPanel

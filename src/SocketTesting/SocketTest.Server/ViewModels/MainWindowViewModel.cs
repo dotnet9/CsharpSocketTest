@@ -32,12 +32,6 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        void ListenProperty()
-        {
-            this.WhenAnyValue(x => x.TcpHelper.IsRunning)
-                .Subscribe(newValue => RunCommandContent = newValue ? "停止服务" : "开启服务");
-        }
-
         void RegisterCommand()
         {
             var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
@@ -48,7 +42,6 @@ public class MainWindowViewModel : ViewModelBase
         TcpHelper = new TcpHelper();
         UdpHelper = new UdpHelper(TcpHelper);
 
-        ListenProperty();
         EventBus.Default.Subscribe(this);
         RegisterCommand();
 

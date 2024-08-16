@@ -3,7 +3,7 @@
         xmlns:vm="using:SocketTest.Server.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:log="https://codewf.com"
+        xmlns:codewf="https://codewf.com"
         mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="550" Width="650" Height="550"
         x:Class="SocketTest.Server.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -71,12 +71,12 @@
             Orientation="Horizontal">
             <Button
                 Command="{Binding HandleRunCommandCommandAsync}"
-                Content="{Binding RunCommandContent}" />
+                Content="{codewf:If Condition={Binding TcpHelper.IsRunning}, True=停止服务, False=开启服务}" />
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding UpdateCommand}" Content="更新" />
         </StackPanel>
         <HeaderedContentControl Header="日志" Grid.Row="3">
-            <log:LogView />
+			<codewf:LogView />
         </HeaderedContentControl>
         <StackPanel
             Grid.Row="4"
