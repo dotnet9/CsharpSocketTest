@@ -43,7 +43,7 @@ public class SocketCommand(NetHeadInfo netHead, byte[] buffer, Socket? client = 
     /// <returns></returns>
     public T Message<T>() where T : new()
     {
-        return MessagePackHelper.Deserialize<T>(Buffer);
+        return Buffer.Deserialize<T>();
     }
 
     /// <summary>

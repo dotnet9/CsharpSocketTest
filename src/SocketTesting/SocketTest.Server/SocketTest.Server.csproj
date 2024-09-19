@@ -1,52 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<PublishAot>true</PublishAot>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	</PropertyGroup>
+	<PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
+		<IsTrimmable>true</IsTrimmable>
+		<PublishTrimmed>true</PublishTrimmed>
+	</PropertyGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AvaloniaXaml Remove="Models\**" />
-    <Compile Remove="Models\**" />
-    <EmbeddedResource Remove="Models\**" />
-    <None Remove="Models\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<AvaloniaXaml Remove="Models\**" />
+		<Compile Remove="Models\**" />
+		<EmbeddedResource Remove="Models\**" />
+		<None Remove="Models\**" />
+	</ItemGroup>
 
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.2.0-beta1" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.2.0-beta1" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.0-beta1" />
+		<PackageReference Include="Avalonia" Version="11.2.0-beta2" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.2.0-beta2" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.0-beta2" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.0-beta1" />
-		<PackageReference Include="Avalonia.ReactiveUI" Version="11.2.0-beta1" />
-		<PackageReference Include="AvaloniaExtensions.Axaml" Version="0.0.2.5" />
-		<PackageReference Include="CodeWF.LogViewer.Avalonia.Log4Net" Version="1.0.3" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.0-beta2" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="11.2.0-beta2" />
+		<PackageReference Include="AvaloniaExtensions.Axaml" Version="0.0.2.7" />
+		<PackageReference Include="CodeWF.LogViewer.Avalonia" Version="1.0.5.2" />
 		<PackageReference Include="Lorem.Universal.Net" Version="4.0.80" />
 		<PackageReference Include="Semi.Avalonia" Version="11.2.0-beta1" />
-		<PackageReference Include="CodeWF.Tools" Version="1.2.0" />
+		<PackageReference Include="CodeWF.Tools" Version="1.2.5.2" />
 	</ItemGroup>
 
 
 	<ItemGroup>
-		<ProjectReference Include="..\SocketTest.Common\SocketTest.Common.csproj" />
 		<ProjectReference Include="..\SocketDto\SocketDto.csproj" />
 		<ProjectReference Include="..\SocketNetObject\SocketNetObject.csproj" />
-		<ProjectReference Include="..\SocketTest.Mvvm\SocketTest.Mvvm.csproj" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-	  <None Update="log4net.config">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 </Project>

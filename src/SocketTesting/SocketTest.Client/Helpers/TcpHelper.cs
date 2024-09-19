@@ -1,4 +1,6 @@
 ﻿using Avalonia.Threading;
+using CodeWF.EventBus;
+using CodeWF.LogViewer.Avalonia;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
@@ -6,19 +8,16 @@ using SocketDto;
 using SocketDto.EventBus;
 using SocketNetObject;
 using SocketNetObject.Models;
-using SocketTest.Mvvm;
 using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeWF.EventBus;
-using CodeWF.LogViewer.Avalonia.Log4Net;
 
 namespace SocketTest.Client.Helpers;
 
-public class TcpHelper : ViewModelBase, ISocketBase
+public class TcpHelper : ReactiveObject, ISocketBase
 {
     private Socket? _client;
     public long SystemId { get; private set; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
@@ -127,14 +126,14 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     ListenForServer();
                     CheckResponse();
 
-                    LogFactory.Instance.Log.Info("连接Tcp服务成功");
+                    Logger.Info("连接Tcp服务成功");
                     await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true, Ip, Port));
                     break;
                 }
                 catch (Exception ex)
                 {
                     IsRunning = false;
-                    LogFactory.Instance.Log.Warn($"连接TCP服务异常，3秒后将重新连接：{ex.Message}");
+                    Logger.Warn($"连接TCP服务异常，3秒后将重新连接：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
         }, _connectServer.Token);
@@ -146,11 +145,11 @@ public class TcpHelper : ViewModelBase, ISocketBase
         {
             _connectServer?.Cancel();
             _client?.Close(0);
-            LogFactory.Instance.Log.Info("停止Tcp服务");
+            Logger.Info("停止Tcp服务");
         }
         catch (Exception ex)
         {
-            LogFactory.Instance.Log.Warn($"停止TCP服务异常：{ex.Message}");
+            Logger.Warn($"停止TCP服务异常：{ex.Message}");
         }
 
         IsRunning = false;
@@ -160,18 +159,18 @@ public class TcpHelper : ViewModelBase, ISocketBase
     {
         if (!IsRunning)
         {
-            LogFactory.Instance.Log.Error("Tcp服务未连接，无法发送命令");
+            Logger.Error("Tcp服务未连接，无法发送命令");
             return;
         }
 
-        var buffer = MessagePackHelper.Serialize(command, SystemId);
+        var buffer = command.Serialize(SystemId);
         _client!.Send(buffer);
         if (command is Heartbeat)
         {
             SendHeartbeatTime = DateTime.Now;
         }
         else
-            LogFactory.Instance.Log.Info($"发送命令{command.GetType()}");
+            Logger.Info($"发送命令{command.GetType()}");
     }
 
     private static int _taskId;
@@ -201,12 +200,12 @@ public class TcpHelper : ViewModelBase, ISocketBase
                 }
                 catch (SocketException ex)
                 {
-                    LogFactory.Instance.Log.Error($"接收数据异常：{ex.Message}");
+                    Logger.Error($"接收数据异常：{ex.Message}");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    LogFactory.Instance.Log.Error($"接收数据异常：{ex.Message}");
+                    Logger.Error($"接收数据异常：{ex.Message}");
                 }
 
             return Task.CompletedTask;

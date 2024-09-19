@@ -1,21 +1,20 @@
-﻿using CodeWF.NetWeaver;
+﻿using CodeWF.EventBus;
+using CodeWF.LogViewer.Avalonia;
+using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
 using SocketDto.EventBus;
 using SocketNetObject.Models;
-using SocketTest.Mvvm;
 using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeWF.EventBus;
-using CodeWF.LogViewer.Avalonia.Log4Net;
 
 namespace SocketTest.Client.Helpers;
 
-public class UdpHelper : ViewModelBase, ISocketBase
+public class UdpHelper : ReactiveObject, ISocketBase
 {
     private readonly BlockingCollection<SocketCommand> _receivedBuffers = new(new ConcurrentQueue<SocketCommand>());
     private UdpClient? _client;
@@ -111,7 +110,7 @@ public class UdpHelper : ViewModelBase, ISocketBase
                 catch (Exception ex)
                 {
                     IsRunning = false;
-                    LogFactory.Instance.Log.Warn($"运行Udp异常，3秒后将重新运行：{ex.Message}");
+                    Logger.Warn($"运行Udp异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
         }, _connectServer.Token);
@@ -124,11 +123,11 @@ public class UdpHelper : ViewModelBase, ISocketBase
             _connectServer?.Cancel();
             _client?.Close();
             _client = null;
-            LogFactory.Instance.Log.Info("停止Udp");
+            Logger.Info("停止Udp");
         }
         catch (Exception ex)
         {
-            LogFactory.Instance.Log.Warn($"停止Udp异常：{ex.Message}");
+            Logger.Warn($"停止Udp异常：{ex.Message}");
         }
 
         IsRunning = false;
@@ -164,20 +163,20 @@ public class UdpHelper : ViewModelBase, ISocketBase
                     }
                     else
                     {
-                        LogFactory.Instance.Log.Warn($"收到错误UDP包：{headInfo}");
+                        Logger.Warn($"收到错误UDP包：{headInfo}");
                     }
 
                     ReceiveTime = DateTime.Now;
                 }
                 catch (SocketException ex)
                 {
-                    LogFactory.Instance.Log.Error(ex.SocketErrorCode == SocketError.Interrupted
+                    Logger.Error(ex.SocketErrorCode == SocketError.Interrupted
                         ? "Udp中断，停止接收数据！"
                         : $"接收Udp数据异常：{ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    LogFactory.Instance.Log.Error($"接收Udp数据异常：{ex.Message}");
+                    Logger.Error($"接收Udp数据异常：{ex.Message}");
                 }
         });
     }

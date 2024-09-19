@@ -8,11 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="CodeWF.EventBus" Version="3.4.4.2" />
+    <PackageReference Include="CodeWF.NetWeaver" Version="1.2.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SocketNetObject\SocketNetObject.csproj" />
-    <ProjectReference Include="..\SocketTest.Common\SocketTest.Common.csproj" />
-  </ItemGroup>
-
 </Project>

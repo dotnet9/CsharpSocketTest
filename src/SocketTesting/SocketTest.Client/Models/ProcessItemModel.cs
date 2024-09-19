@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections;
-using CodeWF.Tools.Extensions;
+﻿using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto.Enums;
 using SocketDto.Response;
-using SocketTest.Common;
-using SocketTest.Mvvm;
+using System;
 
 namespace SocketTest.Client.Models;
 
 /// <summary>
 ///     操作系统进程信息
 /// </summary>
-public class ProcessItemModel : ViewModelBase
+public class ProcessItemModel : ReactiveObject
 {
     private string? _commandLine;
 

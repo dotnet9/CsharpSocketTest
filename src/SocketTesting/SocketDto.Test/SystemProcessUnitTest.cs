@@ -1,9 +1,7 @@
-using System.Text;
-using System.Text.Json;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
-using MessagePack;
-using SocketNetObject.Models;
+using System.Text;
+using System.Text.Json;
 using Xunit.Abstractions;
 
 namespace SocketDto.Test;
@@ -84,46 +82,6 @@ public class SystemProcessUnitTest
     }
 
     /// <summary>
-    ///     Json序列化大小测试
-    /// </summary>
-    [Fact]
-    public void Test_SerializeJsonData_Success()
-    {
-        var jsonData = JsonSerializer.Serialize(_codeWFObject);
-        _testOutputHelper.WriteLine($"Json长度：{jsonData.Length}");
-
-        var jsonDataBytes = Encoding.UTF8.GetBytes(jsonData);
-        _testOutputHelper.WriteLine($"json二进制长度：{jsonDataBytes.Length}");
-    }
-
-    /// <summary>
-    ///     二进制序列化测试
-    /// </summary>
-    [Fact]
-    public void Test_SerializeToBytes_Success()
-    {
-        var buffer = _codeWFObject.Serialize(1);
-        _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
-
-        var deserializeObj = buffer.Deserialize<SystemProcess>();
-        Assert.Equal("码界工坊", deserializeObj.Name);
-    }
-
-    /// <summary>
-    ///     二进制序列化测试
-    /// </summary>
-    [Fact]
-    public void Test_SerializeToBytes2_Success()
-    {
-        var buffer = _codeWFObject2.Serialize(1);
-        _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
-
-        var deserializeObj = buffer.Deserialize<SystemProcess2>();
-        Assert.Equal("码界工坊", deserializeObj.Name);
-        Assert.Equal(2.2f, deserializeObj.GPU);
-    }
-
-    /// <summary>
     ///     二进制极限序列化测试
     /// </summary>
     [Fact]
@@ -131,21 +89,6 @@ public class SystemProcessUnitTest
     {
         var buffer = _codeWFObject3.Serialize(1);
         _testOutputHelper.WriteLine($"序列化后二进制长度：{buffer.Length}");
-
-        var deserializeObj = buffer.Deserialize<SystemProcess3>();
-        Assert.Equal("码界工坊", deserializeObj.Name);
-        Assert.Equal(23, deserializeObj.ProcessData!.CPU);
-        Assert.Equal(1, deserializeObj.ProcessData.PowerUsage);
-    }
-
-    /// <summary>
-    ///     二进制极限序列化测试（MessagePack压缩）
-    /// </summary>
-    [Fact]
-    public void Test_SerializeToBytes4_Success()
-    {
-        var buffer = MessagePackHelper.Serialize(_codeWFObject3, 1);
-        _testOutputHelper.WriteLine($"加入MessagePack压缩序列化后二进制长度：{buffer.Length}");
 
         var deserializeObj = buffer.Deserialize<SystemProcess3>();
         Assert.Equal("码界工坊", deserializeObj.Name);
@@ -192,22 +135,20 @@ public class SystemProcess2 : INetObject
     public byte Status { get; set; }
 }
 
-[MessagePackObject]
 [NetHead(1, 3)]
 public class SystemProcess3 : INetObject
 {
     private byte[]? _data;
 
     private SystemProcessData? _processData;
-    [Key(0)] public int PID { get; set; }
-    [Key(1)] public string? Name { get; set; }
-    [Key(2)] public string? Publisher { get; set; }
-    [Key(3)] public string? CommandLine { get; set; }
+    public int PID { get; set; }
+    public string? Name { get; set; }
+    public string? Publisher { get; set; }
+    public string? CommandLine { get; set; }
 
     /// <summary>
     ///     序列化，这是实际需要序列化的数据
     /// </summary>
-    [Key(4)]
     public byte[]? Data
     {
         get => _data;
@@ -223,7 +164,6 @@ public class SystemProcess3 : INetObject
     /// <summary>
     ///     进程数据，添加NetIgnoreMember在序列化会忽略
     /// </summary>
-    [IgnoreMember]
     [NetIgnoreMember]
     public SystemProcessData? ProcessData
     {

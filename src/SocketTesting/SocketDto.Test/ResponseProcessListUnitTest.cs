@@ -1,3 +1,4 @@
+using CodeWF.NetWeaver;
 using SocketDto.Enums;
 using SocketDto.Response;
 
@@ -38,8 +39,8 @@ public class ResponseProcessListUnitTest
         };
         netObject.Processes.Add(processItem);
 
-        var buffer = MessagePackHelper.Serialize(netObject, 32);
-        var desObject = MessagePackHelper.Deserialize<ResponseProcessList>(buffer);
+        var buffer = netObject.Serialize(32);
+        var desObject = buffer.Deserialize<ResponseProcessList>();
 
         Assert.Equal(netObject.TotalSize, desObject.TotalSize);
         Assert.NotNull(desObject.Processes);

@@ -1,18 +1,17 @@
-﻿using CodeWF.LogViewer.Avalonia.Log4Net;
-using CodeWF.NetWeaver;
+﻿using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
 using SocketNetObject.Models;
-using SocketTest.Mvvm;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeWF.LogViewer.Avalonia;
 
 namespace SocketTest.Server.Helpers;
 
-public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
+public class UdpHelper(TcpHelper tcpHelper) : ReactiveObject, ISocketBase
 {
     private UdpClient? _client;
     private IPEndPoint? _udpIpEndPoint;
@@ -114,13 +113,13 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
                     _client.JoinMulticastGroup(ipAddress);
                     IsRunning = true;
 
-                    LogFactory.Instance.Log.Info("Udp启动成功");
+                    Logger.Info("Udp启动成功");
                     break;
                 }
                 catch (Exception ex)
                 {
                     IsRunning = false;
-                    LogFactory.Instance.Log.Warn($"运行Udp异常，3秒后将重新运行：{ex.Message}");
+                    Logger.Warn($"运行Udp异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
         }, _connectServer.Token);
@@ -133,11 +132,11 @@ public class UdpHelper(TcpHelper tcpHelper) : ViewModelBase, ISocketBase
             _connectServer?.Cancel();
             _client?.Close();
             _client = null;
-            LogFactory.Instance.Log.Info("停止Udp");
+            Logger.Info("停止Udp");
         }
         catch (Exception ex)
         {
-            LogFactory.Instance.Log.Warn($"停止Udp异常：{ex.Message}");
+            Logger.Warn($"停止Udp异常：{ex.Message}");
         }
 
         IsRunning = false;

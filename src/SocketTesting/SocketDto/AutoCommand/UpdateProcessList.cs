@@ -6,12 +6,10 @@ namespace SocketDto.AutoCommand;
 ///     更新进程信息
 /// </summary>
 [NetHead(11, 1)]
-[MessagePackObject]
 public class UpdateProcessList : INetObject
 {
     /// <summary>
     ///     进程列表
     /// </summary>
-    [Key(0)]
     public List<ProcessItem>? Processes { get; set; }
 }

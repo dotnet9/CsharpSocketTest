@@ -1,6 +1,5 @@
 ﻿using Avalonia.Threading;
 using CodeWF.EventBus;
-using CodeWF.LogViewer.Avalonia.Log4Net;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
@@ -8,7 +7,6 @@ using SocketDto;
 using SocketDto.EventBus;
 using SocketNetObject;
 using SocketNetObject.Models;
-using SocketTest.Mvvm;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,10 +15,11 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeWF.LogViewer.Avalonia;
 
 namespace SocketTest.Server.Helpers;
 
-public class TcpHelper : ViewModelBase, ISocketBase
+public class TcpHelper : ReactiveObject, ISocketBase
 {
     private readonly ConcurrentDictionary<string, Socket> _clients = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SocketCommand>> _requests = new();
@@ -142,14 +141,14 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     ListenForClients();
                     ProcessingRequests();
 
-                    LogFactory.Instance.Log.Info($"Tcp服务启动成功：{ipEndPoint}，等待客户端连接");
+                    Logger.Info($"Tcp服务启动成功：{ipEndPoint}，等待客户端连接");
                     await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true));
                     break;
                 }
                 catch (Exception ex)
                 {
                     IsRunning = false;
-                    LogFactory.Instance.Log.Warn($"运行TCP服务异常，3秒后将重新运行：{ex.Message}");
+                    Logger.Warn($"运行TCP服务异常，3秒后将重新运行：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
         }, _connectServer.Token);
@@ -162,11 +161,11 @@ public class TcpHelper : ViewModelBase, ISocketBase
             _connectServer?.Cancel();
             _server?.Close(0);
             _server = null;
-            LogFactory.Instance.Log.Info("停止Tcp服务");
+            Logger.Info("停止Tcp服务");
         }
         catch (Exception ex)
         {
-            LogFactory.Instance.Log.Warn($"停止TCP服务异常：{ex.Message}");
+            Logger.Warn($"停止TCP服务异常：{ex.Message}");
         }
 
         IsRunning = false;
@@ -176,24 +175,24 @@ public class TcpHelper : ViewModelBase, ISocketBase
     {
         if (_clients.IsEmpty)
         {
-            LogFactory.Instance.Log.Error("没有客户端上线，无发送目的地址，无法发送命令");
+            Logger.Error("没有客户端上线，无发送目的地址，无法发送命令");
             return;
         }
 
-        var buffer = MessagePackHelper.Serialize(command, SystemId);
+        var buffer = command.Serialize(SystemId);
         foreach (var client in _clients) client.Value.Send(buffer);
 
-        LogFactory.Instance.Log.Info($"发送命令{command.GetType()}");
+        Logger.Info($"发送命令{command.GetType()}");
     }
 
     public void SendCommand(Socket client, INetObject command)
     {
         var sw = Stopwatch.StartNew();
-        var buffer = MessagePackHelper.Serialize(command, SystemId);
+        var buffer = command.Serialize(SystemId);
         client.Send(buffer);
 
         if (command is not Heartbeat)
-            LogFactory.Instance.Log.Info($"发送命令{command.GetType()}，{buffer.Length}字节,{sw.ElapsedMilliseconds}ms");
+            Logger.Info($"发送命令{command.GetType()}，{buffer.Length}字节,{sw.ElapsedMilliseconds}ms");
     }
 
     private static int _taskId;
@@ -216,7 +215,7 @@ public class TcpHelper : ViewModelBase, ISocketBase
     {
         _clients.TryRemove(key, out _);
         _requests.TryRemove(key, out _);
-        LogFactory.Instance.Log.Warn($"已清除客户端信息{key}");
+        Logger.Warn($"已清除客户端信息{key}");
     }
 
     private void ListenForClients()
@@ -231,13 +230,13 @@ public class TcpHelper : ViewModelBase, ISocketBase
                     var socketClientKey = $"{socketClient.RemoteEndPoint}";
                     _clients[socketClientKey] = socketClient;
 
-                    LogFactory.Instance.Log.Info($"客户端({socketClientKey})连接上线");
+                    Logger.Info($"客户端({socketClientKey})连接上线");
 
                     HandleClient(socketClient);
                 }
                 catch (Exception ex)
                 {
-                    LogFactory.Instance.Log.Error($"处理客户端连接上线异常：{ex.Message}");
+                    Logger.Error($"处理客户端连接上线异常：{ex.Message}");
                 }
         });
     }
@@ -263,13 +262,13 @@ public class TcpHelper : ViewModelBase, ISocketBase
                 }
                 catch (SocketException ex)
                 {
-                    LogFactory.Instance.Log.Error($"远程主机异常，将移除该客户端：{ex.Message}");
+                    Logger.Error($"远程主机异常，将移除该客户端：{ex.Message}");
                     RemoveClient(tcpClient);
                     break;
                 }
                 catch (Exception ex)
                 {
-                    LogFactory.Instance.Log.Error($"接收数据异常：{ex.Message}");
+                    Logger.Error($"接收数据异常：{ex.Message}");
                 }
 
             return Task.CompletedTask;

@@ -1,4 +1,4 @@
-﻿namespace SocketTest.Common;
+﻿namespace SocketTest.Server.Mock;
 
 public class MockConst
 {
