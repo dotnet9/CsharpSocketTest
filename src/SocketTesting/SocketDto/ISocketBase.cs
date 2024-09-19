@@ -1,6 +1,4 @@
-﻿using CodeWF.NetWeaver.Base;
-
-namespace SocketNetObject.Models;
+﻿namespace SocketDto;
 
 /// <summary>
 ///     套接字接口

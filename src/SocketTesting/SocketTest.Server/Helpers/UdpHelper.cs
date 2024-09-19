@@ -1,13 +1,13 @@
 ﻿using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
-using SocketNetObject.Models;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.LogViewer.Avalonia;
+using SocketDto;
 
 namespace SocketTest.Server.Helpers;
 

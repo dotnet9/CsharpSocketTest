@@ -46,7 +46,7 @@ public class CustomSerializeHelper : ISerializeHelper
         var objectName = type.Name;
         if (ObjectPropertyInfos.TryGetValue(objectName, out var propertyInfos)) return propertyInfos;
 
-        propertyInfos = type.GetProperties().ToList();
+        propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).ToList();
         ObjectPropertyInfos[objectName] = propertyInfos;
         return propertyInfos;
     }

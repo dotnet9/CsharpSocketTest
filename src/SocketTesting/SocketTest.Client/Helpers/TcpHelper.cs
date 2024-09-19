@@ -6,8 +6,6 @@ using CodeWF.NetWeaver.Base;
 using ReactiveUI;
 using SocketDto;
 using SocketDto.EventBus;
-using SocketNetObject;
-using SocketNetObject.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Net;
