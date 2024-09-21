@@ -163,6 +163,9 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
         var buffer = command.Serialize(SystemId);
         _client!.Send(buffer);
+        var index = 0;
+        buffer.ReadHead(ref index, out var head);
+        Logger.Info($"Send(client={_client.RemoteEndPoint},len={buffer.Length})：{head}");
         if (command is Heartbeat)
         {
             SendHeartbeatTime = DateTime.Now;
@@ -189,8 +192,10 @@ public class TcpHelper : ReactiveObject, ISocketBase
             while (IsRunning)
                 try
                 {
+                    Logger.Info("Listen server");
                     while (_client!.ReadPacket(out var buffer, out var headInfo))
                     {
+                        Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
                         ReceiveTime = DateTime.Now;
                         SystemId = headInfo!.SystemId;
                         _responses.Add(new SocketCommand(headInfo, buffer, _client));
@@ -223,6 +228,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
             {
                 while (_responses.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
+                    Logger.Info($"Send event {message}");
                     await EventBus.Default.PublishAsync(message);
                 }
             }

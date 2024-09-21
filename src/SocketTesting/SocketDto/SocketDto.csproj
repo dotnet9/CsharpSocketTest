@@ -8,6 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="CodeWF.EventBus" Version="3.4.4.2" />
-    <PackageReference Include="CodeWF.NetWeaver" Version="1.2.1" />
+    <PackageReference Include="CodeWF.NetWeaver" Version="1.3.0" />
   </ItemGroup>
 </Project>

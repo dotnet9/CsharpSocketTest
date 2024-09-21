@@ -55,4 +55,9 @@ public class SocketCommand(NetHeadInfo netHead, byte[] buffer, Socket? client = 
     {
         return Buffer.Deserialize<T>();
     }
+
+    public override string ToString()
+    {
+        return HeadInfo.ToString();
+    }
 }

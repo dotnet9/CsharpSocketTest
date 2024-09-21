@@ -14,6 +14,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.LogViewer.Avalonia;
+using Tmds.DBus.Protocol;
 
 namespace SocketTest.Server.Helpers;
 
@@ -178,7 +179,13 @@ public class TcpHelper : ReactiveObject, ISocketBase
         }
 
         var buffer = command.Serialize(SystemId);
-        foreach (var client in _clients) client.Value.Send(buffer);
+        foreach (var client in _clients)
+        {
+            client.Value.Send(buffer);
+            var index = 0;
+            buffer.ReadHead(ref index, out var head);
+            Logger.Info($"Send(client={client.Value.RemoteEndPoint},len={buffer.Length})：{head}");
+        }
 
         Logger.Info($"发送命令{command.GetType()}");
     }
@@ -188,6 +195,9 @@ public class TcpHelper : ReactiveObject, ISocketBase
         var sw = Stopwatch.StartNew();
         var buffer = command.Serialize(SystemId);
         client.Send(buffer);
+        var index = 0;
+        buffer.ReadHead(ref index, out var head);
+        Logger.Info($"Send(client={client.RemoteEndPoint},len={buffer.Length})：{head}");
 
         if (command is not Heartbeat)
             Logger.Info($"发送命令{command.GetType()}，{buffer.Length}字节,{sw.ElapsedMilliseconds}ms");
@@ -247,8 +257,10 @@ public class TcpHelper : ReactiveObject, ISocketBase
                 try
                 {
                     var tcpClientKey = tcpClient.RemoteEndPoint!.ToString()!;
+                    Logger.Info($"监听客户端");
                     while (tcpClient.ReadPacket(out var buffer, out var headInfo))
                     {
+                        Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
                         if (!_requests.TryGetValue(tcpClientKey, out var value))
                         {
                             value = new ConcurrentQueue<SocketCommand>();
@@ -295,6 +307,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
                     while (request.Value.TryDequeue(out var command))
                     {
+                        Logger.Info($"Send event {command}");
                         await EventBus.Default.PublishAsync(command);
                     }
                 }

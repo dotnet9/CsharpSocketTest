@@ -124,6 +124,7 @@ public class MainWindowViewModel : ReactiveObject
     [EventHandler]
     private void ReceiveSocketMessage(SocketCommand message)
     {
+        Logger.Info($"Dill command: {message}");
         if (message.IsMessage<RequestTargetType>())
         {
             ReceiveSocketMessage(message.Client!, message.Message<RequestTargetType>());
