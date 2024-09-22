@@ -34,7 +34,7 @@
 		<PackageReference Include="Semi.Avalonia" Version="11.2.0-beta1" />
 		<PackageReference Include="Semi.Avalonia.DataGrid" Version="11.1.0.4" />
 		<PackageReference Include="CodeWF.Tools" Version="1.2.5.2" />
-		<PackageReference Include="CodeWF.LogViewer.Avalonia" Version="1.0.5.2" />
+		<PackageReference Include="CodeWF.LogViewer.Avalonia" Version="1.0.5.3" />
 	</ItemGroup>
 
 
