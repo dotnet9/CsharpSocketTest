@@ -11,7 +11,7 @@
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageReference Include="CodeWF.Tools" Version="1.2.5.9" />
     <PackageReference Include="Lorem.Universal.Net" Version="4.0.80" />
-    <PackageReference Include="MessagePack" Version="3.0.308" />
+    <PackageReference Include="MessagePack" Version="3.1.0" />
     <PackageReference Include="protobuf-net" Version="3.2.45" />
   </ItemGroup>
 
