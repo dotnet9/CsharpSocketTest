@@ -55,7 +55,7 @@
                      Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
 
             <TextBlock Margin="10,0,5,0" Text="端口：" />
-            <TextBox Width="50"
+            <TextBox Width="60"
                      Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
             <Button
                 Command="{Binding HandleConnectTcpCommandAsync}"
