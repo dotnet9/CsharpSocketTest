@@ -100,6 +100,7 @@ public class MainWindowViewModel : ReactiveObject
         {
             TcpHelper.Stop();
             UdpHelper.Stop();
+            UdpHelper.NewDataResponse -= ReceiveUdpCommand;
         }
     }
 
@@ -250,13 +251,17 @@ public class MainWindowViewModel : ReactiveObject
         {
             ReceivedSocketMessage(message.Message<Heartbeat>());
         }
-        else if (message.IsMessage<UpdateRealtimeProcessList>())
+    }
+
+    private void ReceiveUdpCommand(SocketCommand command)
+    {
+        if (command.IsMessage<UpdateRealtimeProcessList>())
         {
-            ReceivedSocketMessage(message.MessageByNative<UpdateRealtimeProcessList>());
+            ReceivedSocketMessage(command.MessageByNative<UpdateRealtimeProcessList>());
         }
-        else if (message.IsMessage<UpdateGeneralProcessList>())
+        else if (command.IsMessage<UpdateGeneralProcessList>())
         {
-            ReceivedSocketMessage(message.MessageByNative<UpdateGeneralProcessList>());
+            ReceivedSocketMessage(command.MessageByNative<UpdateGeneralProcessList>());
         }
     }
 
@@ -285,6 +290,7 @@ public class MainWindowViewModel : ReactiveObject
         UdpHelper.Ip = response.Ip;
         UdpHelper.Port = response.Port;
         UdpHelper.Start();
+        UdpHelper.NewDataResponse += ReceiveUdpCommand;
         _ = Log("尝试订阅Udp组播");
     }
 

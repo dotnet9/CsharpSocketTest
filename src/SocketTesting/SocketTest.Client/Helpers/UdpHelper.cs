@@ -77,6 +77,11 @@ public class UdpHelper : ReactiveObject, ISocketBase
         set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
     }
 
+    /// <summary>
+    /// 新数据通知
+    /// </summary>
+    public Action<SocketCommand>? NewDataResponse;
+
     #endregion
 
     #region 公开接口
@@ -194,7 +199,7 @@ public class UdpHelper : ReactiveObject, ISocketBase
             {
                 while (_receivedBuffers.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
                 {
-                    await EventBus.Default.PublishAsync(message);
+                    NewDataResponse?.Invoke(message);
                 }
             }
         });
