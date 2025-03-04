@@ -17,6 +17,8 @@
         <converters:ProcessStatusToForegroundConverter x:Key="ProcessStatusToForegroundConverter" />
         <converters:AlarmStatusToForegroundConverter x:Key="AlarmStatusToForegroundConverter" />
         <converters:UsageToFormatConverter x:Key="UsageToFormatConverter" />
+        <x:Double x:Key="DataGridColumnHeaderMinHeight">21</x:Double>
+        <x:Double x:Key="DataGridCellMinHeight">21</x:Double>
     </Window.Resources>
     <Window.Styles>
         <Style Selector="TextBlock">
@@ -65,7 +67,8 @@
         </StackPanel>
         <HeaderedContentControl Header="实时进程信息" Grid.Row="1">
             <DataGrid CanUserReorderColumns="True" CanUserResizeColumns="True" CanUserSortColumns="True"
-                      HeadersVisibility="Column" IsReadOnly="True"
+                      GridLinesVisibility="All" ScrollViewer.AllowAutoHide="False" FontSize="12"
+                      HeadersVisibility="Column" IsReadOnly="True" BorderThickness="1" BorderBrush="#33000000"
                       ItemsSource="{Binding DisplayProcesses, Mode=OneWay}">
                 <DataGrid.Columns>
                     <DataGridTextColumn
