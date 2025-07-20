@@ -1,6 +1,7 @@
 <linker>
-	<assembly fullname="CodeWF.NetWeaver" preserve="All" />
+	<assembly fullname="SocketTest.Client" preserve="All" />
 	<assembly fullname="CodeWF.LogViewer.Avalonia" preserve="All" />
 	<assembly fullname="SocketDto" preserve="All" />
 	<assembly fullname="CodeWF.EventBus" preserve="All" />
+	<assembly fullname="CodeWF.NetWeaver" preserve="All" />
 </linker>

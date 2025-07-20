@@ -5,23 +5,23 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectBinarySerializationTest", "ObjectBinarySerializationTest", "{49C052ED-5F1C-4834-8310-F0D425A354F7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerializationTest", "ObjectBinarySerializationTest\SerializationTest\SerializationTest.csproj", "{849FB784-B220-4F6F-ADAE-15448873BFB1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerializationTest", "src\ObjectBinarySerializationTest\SerializationTest\SerializationTest.csproj", "{849FB784-B220-4F6F-ADAE-15448873BFB1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SocketTesting", "SocketTesting", "{CB845ECA-47B9-452D-A404-4DE8E835C2D9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketDto", "SocketTesting\SocketDto\SocketDto.csproj", "{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketDto", "src\SocketTesting\SocketDto\SocketDto.csproj", "{0CC6BAFC-F920-4AB1-ADB1-D44380AEC17D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketDto.Test", "SocketTesting\SocketDto.Test\SocketDto.Test.csproj", "{9CCC071C-CADC-4C50-814D-5779726CFC5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketDto.Test", "src\SocketTesting\SocketDto.Test\SocketDto.Test.csproj", "{9CCC071C-CADC-4C50-814D-5779726CFC5F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketTest.Client", "SocketTesting\SocketTest.Client\SocketTest.Client.csproj", "{04E8952A-83DF-4875-A7FC-AA4C57FE3085}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketTest.Client", "src\SocketTesting\SocketTest.Client\SocketTest.Client.csproj", "{04E8952A-83DF-4875-A7FC-AA4C57FE3085}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketTest.Server", "SocketTesting\SocketTest.Server\SocketTest.Server.csproj", "{349503F8-DFF0-4FBF-9680-5ADAD4EFF733}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocketTest.Server", "src\SocketTesting\SocketTest.Server\SocketTest.Server.csproj", "{349503F8-DFF0-4FBF-9680-5ADAD4EFF733}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{2467F89A-512D-4A94-A97E-2EACE1004449}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{FBD28AA3-F56E-4EC7-98BC-BC752D454878}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FBD28AA3-F56E-4EC7-98BC-BC752D454878}"
 	ProjectSection(SolutionItems) = preProject
-		..\README.md = ..\README.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
