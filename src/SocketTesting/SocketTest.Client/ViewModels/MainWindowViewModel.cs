@@ -48,8 +48,8 @@ public class MainWindowViewModel : ReactiveObject
         void RegisterCommand()
         {
             var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
-            RefreshCommand = ReactiveCommand.Create(HandleRefreshCommand, isTcpRunning);
-            RefreshAllCommand = ReactiveCommand.Create(HandleRefreshAllCommand, isTcpRunning);
+            RefreshCommand = ReactiveCommand.CreateFromTask(HandleRefreshCommandAsync, isTcpRunning);
+            RefreshAllCommand = ReactiveCommand.CreateFromTask(HandleRefreshAllCommandAsync, isTcpRunning);
         }
 
         EventBus.Default.Subscribe(this);
@@ -90,7 +90,7 @@ public class MainWindowViewModel : ReactiveObject
     /// </summary>
     public ReactiveCommand<Unit, Unit>? RefreshAllCommand { get; private set; }
 
-    public void HandleConnectTcpCommandAsync()
+    public async Task HandleConnectTcpCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
@@ -104,7 +104,7 @@ public class MainWindowViewModel : ReactiveObject
         }
     }
 
-    private void HandleRefreshCommand()
+    private async Task HandleRefreshCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
@@ -117,7 +117,7 @@ public class MainWindowViewModel : ReactiveObject
         _ = Log("发送请求服务基本信息命令");
     }
 
-    private void HandleRefreshAllCommand()
+    private async Task HandleRefreshAllCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
@@ -187,14 +187,14 @@ public class MainWindowViewModel : ReactiveObject
     #region 接收事件
 
     [EventHandler]
-    private void ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
+    private async Task ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
     {
         TcpHelper.SendCommand(new RequestTargetType());
         _ = Log("发送命令查询目标终端类型是否是服务端");
     }
 
     [EventHandler]
-    private void ReceiveUdpStatusMessage(ChangeUDPStatusCommand message)
+    private async Task ReceiveUdpStatusMessage(ChangeUDPStatusCommand message)
     {
         _ = Log("Udp组播订阅成功！");
     }
@@ -206,7 +206,7 @@ public class MainWindowViewModel : ReactiveObject
         {
             while (!TcpHelper.IsRunning) await Task.Delay(TimeSpan.FromMilliseconds(10));
 
-            HandleRefreshCommand();
+            await HandleRefreshCommandAsync();
         });
     }
 
@@ -216,12 +216,12 @@ public class MainWindowViewModel : ReactiveObject
     /// <param name="message"></param>
     /// <exception cref="Exception"></exception>
     [EventHandler]
-    private void ReceivedSocketMessage(SocketCommand message)
+    private async Task ReceivedSocketMessage(SocketCommand message)
     {
         Logger.Info($"Dill command: {message}");
         if (message.IsMessage<ResponseTargetType>())
         {
-            ReceivedSocketMessage(message.Message<ResponseTargetType>());
+            await ReceivedSocketMessageAsync(message.Message<ResponseTargetType>());
         }
         else if (message.IsMessage<ResponseUdpAddress>())
         {
@@ -245,7 +245,7 @@ public class MainWindowViewModel : ReactiveObject
         }
         else if (message.IsMessage<ChangeProcessList>())
         {
-            HandleRefreshCommand();
+            await HandleRefreshCommandAsync();
         }
         else if (message.IsMessage<Heartbeat>())
         {
@@ -265,7 +265,7 @@ public class MainWindowViewModel : ReactiveObject
         }
     }
 
-    private void ReceivedSocketMessage(ResponseTargetType response)
+    private async Task ReceivedSocketMessageAsync(ResponseTargetType response)
     {
         var type = (TerminalType)Enum.Parse(typeof(TerminalType), response.Type.ToString());
         if (response.Type == (byte)TerminalType.Server)
@@ -275,7 +275,7 @@ public class MainWindowViewModel : ReactiveObject
             TcpHelper.SendCommand(new RequestUdpAddress());
             _ = Log("发送命令获取Udp组播地址");
 
-            HandleRefreshCommand();
+            await HandleRefreshCommandAsync();
         }
         else
         {

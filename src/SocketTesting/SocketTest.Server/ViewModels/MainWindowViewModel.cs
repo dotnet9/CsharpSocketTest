@@ -32,8 +32,8 @@ public class MainWindowViewModel : ReactiveObject
         void RegisterCommand()
         {
             var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
-            RefreshCommand = ReactiveCommand.Create(HandleRefreshCommandAsync, isTcpRunning);
-            UpdateCommand = ReactiveCommand.Create(HandleUpdateCommandAsync, isTcpRunning);
+            RefreshCommand = ReactiveCommand.CreateFromTask(HandleRefreshCommandAsync, isTcpRunning);
+            UpdateCommand = ReactiveCommand.CreateFromTask(HandleUpdateCommandAsync, isTcpRunning);
         }
 
         TcpHelper = new TcpHelper();
@@ -83,7 +83,7 @@ public class MainWindowViewModel : ReactiveObject
         await Task.CompletedTask;
     }
 
-    private void HandleRefreshCommandAsync()
+    private async Task HandleRefreshCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
@@ -94,7 +94,7 @@ public class MainWindowViewModel : ReactiveObject
         UpdateAllData(true);
     }
 
-    private void HandleUpdateCommandAsync()
+    private async Task HandleUpdateCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
@@ -108,7 +108,7 @@ public class MainWindowViewModel : ReactiveObject
     #region 处理Socket信息
 
     [EventHandler]
-    private void ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
+    private async Task ReceiveTcpStatusMessageAsync(ChangeTCPStatusCommand message)
     {
         _ = Log(message.IsConnect ? "TCP服务已运行" : "TCP服务已停止");
         if (message.IsConnect)
@@ -122,7 +122,7 @@ public class MainWindowViewModel : ReactiveObject
     }
 
     [EventHandler]
-    private void ReceiveSocketMessage(SocketCommand message)
+    private async Task ReceiveSocketMessageAsync(SocketCommand message)
     {
         Logger.Info($"Dill command: {message}");
         if (message.IsMessage<RequestTargetType>())
@@ -210,7 +210,7 @@ public class MainWindowViewModel : ReactiveObject
         _ = Log($"响应进程ID列表命令：{response.IDList?.Length}");
     }
 
-    private async void ReceiveSocketMessage(Socket client, RequestProcessList request)
+    private async Task ReceiveSocketMessage(Socket client, RequestProcessList request)
     {
         _ = Log("收到请求进程详细信息列表命令");
         await Task.Run(async () =>
