@@ -2,6 +2,8 @@
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CodeWF.EventBus;
+using CodeWF.Log.Core;
+using CodeWF.NetWrapper.Helpers;
 using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;
@@ -12,7 +14,6 @@ using SocketDto.Requests;
 using SocketDto.Response;
 using SocketDto.Udp;
 using SocketTest.Client.Extensions;
-using SocketTest.Client.Helpers;
 using SocketTest.Client.Models;
 using System;
 using System.Collections.Generic;
@@ -21,8 +22,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using CodeWF.LogViewer.Avalonia;
+using CodeWF.NetWrapper.Commands;
 using Notification = Avalonia.Controls.Notifications.Notification;
+using CodeWF.NetWrapper.Models;
 
 namespace SocketTest.Client.ViewModels;
 
@@ -30,8 +32,9 @@ public class MainWindowViewModel : ReactiveObject
 {
     public WindowNotificationManager? NotificationManager { get; set; }
     private readonly List<ProcessItemModel> _receivedProcesses = new();
+    private TcpSocketClient _tcpClient { get; set; } = new();
+    private UdpSocketClient _udpClient { get; set; } = new();
 
-    private string? _baseInfo;
 
     private int[]? _processIdArray;
     private Dictionary<int, ProcessItemModel>? _processIdAndItems;
@@ -47,7 +50,8 @@ public class MainWindowViewModel : ReactiveObject
 
         void RegisterCommand()
         {
-            var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
+            var isTcpRunning = this.WhenAnyValue(x => x._tcpClient.IsRunning);
+            isTcpRunning.Subscribe(running => IsRunning = running);
             RefreshCommand = ReactiveCommand.CreateFromTask(HandleRefreshCommandAsync, isTcpRunning);
             RefreshAllCommand = ReactiveCommand.CreateFromTask(HandleRefreshAllCommandAsync, isTcpRunning);
         }
@@ -58,25 +62,34 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info("连接服务端后获取数据");
     }
 
+    #region 属性
     public Window? Owner { get; set; }
     public RangObservableCollection<ProcessItemModel> DisplayProcesses { get; }
 
-    public TcpHelper TcpHelper { get; set; } = new();
-    public UdpHelper UdpHelper { get; set; } = new();
-
-    public string? SearchKey
+    public string? IP
     {
-        get => _searchKey;
-        set => this.RaiseAndSetIfChanged(ref _searchKey, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "127.0.0.1";
 
+    public int Port
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 5000;
+
+    public bool IsRunning
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
     /// <summary>
     ///     基本信息
     /// </summary>
     public string? BaseInfo
     {
-        get => _baseInfo;
-        set => this.RaiseAndSetIfChanged(ref _baseInfo, value);
+        get ;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
 
@@ -90,51 +103,54 @@ public class MainWindowViewModel : ReactiveObject
     /// </summary>
     public ReactiveCommand<Unit, Unit>? RefreshAllCommand { get; private set; }
 
+#endregion
+
+
     public async Task HandleConnectTcpCommandAsync()
     {
-        if (!TcpHelper.IsRunning)
+        if (!_tcpClient.IsRunning)
         {
-            TcpHelper.Start();
+            await _tcpClient.ConnectAsync("TCP服务端", IP, Port);
         }
         else
         {
-            TcpHelper.Stop();
-            UdpHelper.Stop();
-            UdpHelper.NewDataResponse -= ReceiveUdpCommand;
+            _tcpClient.Stop();
+            _udpClient.Stop();
+            _udpClient.NewDataResponse -= ReceiveUdpCommand;
         }
     }
 
     private async Task HandleRefreshCommandAsync()
     {
-        if (!TcpHelper.IsRunning)
+        if (!_tcpClient.IsRunning)
         {
             _ = Log("未连接Tcp服务，无法发送命令", LogType.Error);
             return;
         }
 
         ClearData();
-        TcpHelper.SendCommand(new RequestServiceInfo { TaskId = TcpHelper.GetNewTaskId() });
+        await _tcpClient.SendCommandAsync(new RequestServiceInfo { TaskId = NetHelper.GetTaskId() });
         _ = Log("发送请求服务基本信息命令");
     }
 
     private async Task HandleRefreshAllCommandAsync()
     {
-        if (!TcpHelper.IsRunning)
+        if (!_tcpClient.IsRunning)
         {
             Logger.Error("未连接Tcp服务，无法发送命令");
             return;
         }
 
-        TcpHelper.SendCommand(new ChangeProcessList());
+        await _tcpClient.SendCommandAsync(new ChangeProcessList());
         Logger.Info("发送刷新所有客户端命令");
     }
 
     private IEnumerable<ProcessItemModel> FilterData(IEnumerable<ProcessItemModel> processes)
     {
-        return string.IsNullOrWhiteSpace(SearchKey)
+        return string.IsNullOrWhiteSpace(_searchKey)
             ? processes
             : processes.Where(process =>
-                !string.IsNullOrWhiteSpace(process.Name) && process.Name.Contains(SearchKey));
+                !string.IsNullOrWhiteSpace(process.Name) && process.Name.Contains(_searchKey));
     }
 
     private void ClearData()
@@ -153,9 +169,9 @@ public class MainWindowViewModel : ReactiveObject
 
     private void MockSendData(object? sender, ElapsedEventArgs e)
     {
-        if (!TcpHelper.IsRunning) return;
+        if (!_tcpClient.IsRunning) return;
 
-        TcpHelper.SendCommand(new Heartbeat());
+        _tcpClient.SendCommandAsync(new Heartbeat());
     }
 
     private void Try(string actionName, Action action, Action<Exception>? exceptionAction = null)
@@ -187,9 +203,9 @@ public class MainWindowViewModel : ReactiveObject
     #region 接收事件
 
     [EventHandler]
-    private async Task ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
+    private async Task ReceiveTcpStatusMessageAsync(ChangeTCPStatusCommand message)
     {
-        TcpHelper.SendCommand(new RequestTargetType());
+        await _tcpClient.SendCommandAsync(new RequestTargetType());
         _ = Log("发送命令查询目标终端类型是否是服务端");
     }
 
@@ -204,7 +220,7 @@ public class MainWindowViewModel : ReactiveObject
         // 开启线程接收数据
         Task.Run(async () =>
         {
-            while (!TcpHelper.IsRunning) await Task.Delay(TimeSpan.FromMilliseconds(10));
+            while (!_tcpClient.IsRunning) await Task.Delay(TimeSpan.FromMilliseconds(10));
 
             await HandleRefreshCommandAsync();
         });
@@ -219,49 +235,49 @@ public class MainWindowViewModel : ReactiveObject
     private async Task ReceivedSocketMessage(SocketCommand message)
     {
         Logger.Info($"Dill command: {message}");
-        if (message.IsMessage<ResponseTargetType>())
+        if (message.IsCommand<ResponseTargetType>())
         {
-            await ReceivedSocketMessageAsync(message.Message<ResponseTargetType>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseTargetType>());
         }
-        else if (message.IsMessage<ResponseUdpAddress>())
+        else if (message.IsCommand<ResponseUdpAddress>())
         {
-            ReceivedSocketMessage(message.Message<ResponseUdpAddress>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseUdpAddress>());
         }
-        else if (message.IsMessage<ResponseServiceInfo>())
+        else if (message.IsCommand<ResponseServiceInfo>())
         {
-            ReceivedSocketMessage(message.Message<ResponseServiceInfo>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseServiceInfo>());
         }
-        else if (message.IsMessage<ResponseProcessIDList>())
+        else if (message.IsCommand<ResponseProcessIDList>())
         {
-            ReceivedSocketMessage(message.Message<ResponseProcessIDList>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseProcessIDList>());
         }
-        else if (message.IsMessage<ResponseProcessList>())
+        else if (message.IsCommand<ResponseProcessList>())
         {
-            ReceivedSocketMessage(message.Message<ResponseProcessList>());
+            ReceivedSocketMessage(message.GetCommand<ResponseProcessList>());
         }
-        else if (message.IsMessage<UpdateProcessList>())
+        else if (message.IsCommand<UpdateProcessList>())
         {
-            ReceivedSocketMessage(message.Message<UpdateProcessList>());
+            ReceivedSocketMessage(message.GetCommand<UpdateProcessList>());
         }
-        else if (message.IsMessage<ChangeProcessList>())
+        else if (message.IsCommand<ChangeProcessList>())
         {
             await HandleRefreshCommandAsync();
         }
-        else if (message.IsMessage<Heartbeat>())
+        else if (message.IsCommand<Heartbeat>())
         {
-            ReceivedSocketMessage(message.Message<Heartbeat>());
+            ReceivedSocketMessage(message.GetCommand<Heartbeat>());
         }
     }
 
     private void ReceiveUdpCommand(SocketCommand command)
     {
-        if (command.IsMessage<UpdateRealtimeProcessList>())
+        if (command.IsCommand<UpdateRealtimeProcessList>())
         {
-            ReceivedSocketMessage(command.MessageByNative<UpdateRealtimeProcessList>());
+            ReceivedSocketMessage(command.GetCommand<UpdateRealtimeProcessList>());
         }
-        else if (command.IsMessage<UpdateGeneralProcessList>())
+        else if (command.IsCommand<UpdateGeneralProcessList>())
         {
-            ReceivedSocketMessage(command.MessageByNative<UpdateGeneralProcessList>());
+            ReceivedSocketMessage(command.GetCommand<UpdateGeneralProcessList>());
         }
     }
 
@@ -272,7 +288,7 @@ public class MainWindowViewModel : ReactiveObject
         {
             _ = Log($"正确连接{type.GetDescription()}，程序正常运行");
 
-            TcpHelper.SendCommand(new RequestUdpAddress());
+            await _tcpClient.SendCommandAsync(new RequestUdpAddress());
             _ = Log("发送命令获取Udp组播地址");
 
             await HandleRefreshCommandAsync();
@@ -283,18 +299,16 @@ public class MainWindowViewModel : ReactiveObject
         }
     }
 
-    private void ReceivedSocketMessage(ResponseUdpAddress response)
+    private async Task ReceivedSocketMessageAsync(ResponseUdpAddress response)
     {
         _ = Log($"收到Udp组播地址=》{response.Ip}:{response.Port}");
 
-        UdpHelper.Ip = response.Ip;
-        UdpHelper.Port = response.Port;
-        UdpHelper.Start();
-        UdpHelper.NewDataResponse += ReceiveUdpCommand;
+        await _udpClient.ConnectAsync("UDP组播", response.Ip,response.Port, _tcpClient.LocalEndPoint);
+        _udpClient.NewDataResponse += ReceiveUdpCommand;
         _ = Log("尝试订阅Udp组播");
     }
 
-    private void ReceivedSocketMessage(ResponseServiceInfo response)
+    private async Task ReceivedSocketMessageAsync(ResponseServiceInfo response)
     {
         _timestampStartYear = response.TimestampStartYear;
         var oldBaseInfo = BaseInfo;
@@ -306,18 +320,18 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info($"【新】{BaseInfo}");
         _ = Log(BaseInfo);
 
-        TcpHelper.SendCommand(new RequestProcessIDList() { TaskId = TcpHelper.GetNewTaskId() });
+        await _tcpClient.SendCommandAsync(new RequestProcessIDList() { TaskId = NetHelper.GetTaskId() });
         _ = Log("发送请求进程ID列表命令");
 
         ClearData();
     }
 
-    private void ReceivedSocketMessage(ResponseProcessIDList response)
+    private async Task ReceivedSocketMessageAsync(ResponseProcessIDList response)
     {
         _processIdArray = response.IDList!;
         _ = Log($"收到进程ID列表，共{_processIdArray.Length}个进程");
 
-        TcpHelper.SendCommand(new RequestProcessList { TaskId = TcpHelper.GetNewTaskId() });
+        await _tcpClient.SendCommandAsync(new RequestProcessList { TaskId = NetHelper.GetTaskId() });
         _ = Log("发送请求进程详细信息列表命令");
     }
 

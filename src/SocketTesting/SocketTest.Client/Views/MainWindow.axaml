@@ -54,14 +54,14 @@
         <StackPanel Orientation="Horizontal">
             <TextBlock Margin="0,0,5,0" Text="服务端IP：" />
             <TextBox Width="150"
-                     Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
+                     Text="{Binding IP}" />
 
             <TextBlock Margin="10,0,5,0" Text="端口：" />
             <TextBox Width="60"
-                     Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
+                     Text="{Binding Port}" />
             <Button
                 Command="{Binding HandleConnectTcpCommandAsync}"
-                Content="{codewf:If Condition={Binding TcpHelper.IsRunning}, True=断开服务, False=连接服务}" />
+                Content="{codewf:If Condition={Binding IsRunning}, True=断开服务, False=连接服务}" />
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding RefreshAllCommand}" Content="刷新所有客户端" />
         </StackPanel>
@@ -202,34 +202,6 @@
             VerticalAlignment="Center"
             Orientation="Horizontal">
             <TextBlock Text="{Binding BaseInfo}" />
-        </StackPanel>
-        <StackPanel
-            Grid.Row="5"
-            Margin="0,8"
-            VerticalAlignment="Center">
-            <TextBlock Margin="0,5,0,5">
-                <Run Text="TCP：" />
-
-                <Run Text="心跳  发送 " />
-                <Run Foreground="Green"
-                     Text="{Binding TcpHelper.SendHeartbeatTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
-                <Run Text=" 响应 " />
-                <Run Foreground="Green"
-                     Text="{Binding TcpHelper.ResponseHeartbeatTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
-                <Run Text=" 数据包 发送 " />
-                <Run Foreground="Green" Text="{Binding TcpHelper.SendTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
-                <Run Text=" 接收 " />
-                <Run Foreground="Green" Text="{Binding TcpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
-
-            </TextBlock>
-            <TextBlock>
-                <Run Text="UDP组播：" />
-                <Run Text="{Binding UdpHelper.Ip,Mode=OneWay}" />
-                <Run Text=":" />
-                <Run Text="{Binding UdpHelper.Port,Mode=OneWay}" />
-                <Run Text=" 时间 " />
-                <Run Foreground="Green" Text="{Binding UdpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
-            </TextBlock>
         </StackPanel>
     </Grid>
 </Window>
