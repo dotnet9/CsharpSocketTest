@@ -41,25 +41,28 @@
         <HeaderedContentControl Grid.Row="0" Header="Tcp服务配置">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,5,0" Text="IP：" />
-                <TextBox Width="150" Text="{Binding TCPIP}" />
+                <TextBox Width="150" Text="{Binding TcpHelper.Ip, Mode=TwoWay}" />
 
                 <TextBlock Margin="10,0,5,0" Text="端口：" />
-                <TextBox Width="60" Text="{Binding TCPPort}" />
+                <TextBox Width="60" Text="{Binding TcpHelper.Port, Mode=TwoWay}" />
                 <TextBlock Margin="10,0,5,0" Text="模拟总数：" />
                 <TextBox Width="80"
-                         Text="{Binding MockCount}" />
+                         Text="{Binding TcpHelper.MockCount, Mode=TwoWay}" />
                 <TextBlock Margin="10,0,5,0" Text="单包数据：" />
                 <TextBox Width="60"
-                         Text="{Binding MockPageSize}" />
+                         Text="{Binding TcpHelper.MockPageSize, Mode=TwoWay}" />
             </StackPanel>
         </HeaderedContentControl>
         <HeaderedContentControl Grid.Row="1" Header="Udp组播配置">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,5,0" Text="IP：" />
-                <TextBox Width="150" Text="{Binding UDPIP, Mode=TwoWay}" />
+                <TextBox Width="150" Text="{Binding UdpHelper.Ip, Mode=TwoWay}" />
 
                 <TextBlock Margin="10,0,5,0" Text="端口：" />
-                <TextBox Width="60" Text="{Binding UDPPort, Mode=TwoWay}" />
+                <TextBox Width="60" Text="{Binding UdpHelper.Port, Mode=TwoWay}" />
+                <TextBlock Margin="10,0,5,0" Text="Udp单包上限(byte)：" />
+                <TextBox Width="60"
+                         Text="{Binding UdpHelper.PacketMaxSize, Mode=TwoWay}" />
             </StackPanel>
         </HeaderedContentControl>
         <StackPanel
@@ -68,12 +71,33 @@
             Orientation="Horizontal">
             <Button
                 Command="{Binding HandleRunCommandCommandAsync}"
-                Content="{codewf:If Condition={Binding IsRunning}, True=停止服务, False=开启服务}" />
+                Content="{codewf:If Condition={Binding TcpHelper.IsRunning}, True=停止服务, False=开启服务}" />
             <Button Command="{Binding RefreshCommand}" Content="刷新" />
             <Button Command="{Binding UpdateCommand}" Content="更新" />
         </StackPanel>
         <HeaderedContentControl Header="日志" Grid.Row="3">
 			<codewf:LogView />
         </HeaderedContentControl>
+        <StackPanel
+            Grid.Row="4"
+            Margin="0,8"
+            VerticalAlignment="Center">
+            <TextBlock Margin="0,5,0,5">
+                <Run Text="TCP服务：" />
+                <Run Text="    心跳时间：" />
+                <Run Foreground="Green" Text="{Binding TcpHelper.HeartbeatTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+                <Run Text="    客户端：" />
+                <Run Foreground="Green" Text="3" />
+                <Run Text="    发送时间：" />
+                <Run Foreground="Green" Text="{Binding TcpHelper.SendTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+                <Run Text="    接收时间：" />
+                <Run Foreground="Green" Text="{Binding TcpHelper.ReceiveTime, StringFormat=yyyy-MM-dd HH:mm:ss fff}" />
+
+            </TextBlock>
+            <TextBlock>
+                <Run Text="UDP组播：" />
+                <Run Foreground="Green" Text="2023-12-16 11:27" />
+            </TextBlock>
+        </StackPanel>
     </Grid>
 </Window>
