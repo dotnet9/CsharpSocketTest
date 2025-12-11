@@ -1,4 +1,5 @@
-﻿using CodeWF.NetWeaver;
+﻿using CodeWF.Log.Core;
+using CodeWF.NetWeaver;
 using CodeWF.Tools.Extensions;
 using LoremNET;
 using SocketDto.Enums;
@@ -9,7 +10,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using CodeWF.LogViewer.Avalonia;
 using ProcessItem = SocketDto.Response.ProcessItem;
 
 namespace SocketTest.Server.Mock;

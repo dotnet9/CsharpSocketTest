@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CodeWF.EventBus;
-using CodeWF.LogViewer.Avalonia;
+using CodeWF.Log.Core;
 using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;

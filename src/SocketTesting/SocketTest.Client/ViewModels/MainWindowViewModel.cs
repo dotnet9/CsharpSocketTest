@@ -2,6 +2,7 @@
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CodeWF.EventBus;
+using CodeWF.Log.Core;
 using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;
@@ -21,7 +22,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using CodeWF.LogViewer.Avalonia;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;

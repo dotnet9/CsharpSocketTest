@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CodeWF.LogViewer.Avalonia;
 using Tmds.DBus.Protocol;
+using CodeWF.Log.Core;
 
 namespace SocketTest.Server.Helpers;
 

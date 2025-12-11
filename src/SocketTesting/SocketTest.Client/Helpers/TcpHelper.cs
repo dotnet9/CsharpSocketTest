@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using CodeWF.EventBus;
+using CodeWF.Log.Core;
 using CodeWF.LogViewer.Avalonia;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
@@ -187,7 +188,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
     private void ListenForServer()
     {
-        Task.Run(() =>
+        Task.Run(async() =>
         {
             while (IsRunning)
                 try

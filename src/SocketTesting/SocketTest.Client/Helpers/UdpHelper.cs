@@ -1,4 +1,5 @@
 ﻿using CodeWF.EventBus;
+using CodeWF.Log.Core;
 using CodeWF.LogViewer.Avalonia;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
