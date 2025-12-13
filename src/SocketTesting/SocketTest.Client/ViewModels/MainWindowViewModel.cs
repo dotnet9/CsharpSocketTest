@@ -3,6 +3,8 @@ using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using CodeWF.EventBus;
 using CodeWF.Log.Core;
+using CodeWF.NetWrapper.Commands;
+using CodeWF.NetWrapper.Helpers;
 using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;
@@ -22,7 +24,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using CodeWF.NetWrapper.Commands;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
@@ -64,8 +65,8 @@ public class MainWindowViewModel : ReactiveObject
     public Window? Owner { get; set; }
     public RangObservableCollection<ProcessItemModel> DisplayProcesses { get; }
 
-    public TcpHelper TcpHelper { get; set; } = new();
-    public UdpHelper UdpHelper { get; set; } = new();
+    public Helpers.TcpSocketClient TcpHelper { get; set; } = new();
+    public UdpSocketClient UdpHelper { get; set; } = new();
 
     /// <summary>
     ///     Tcp服务IP
@@ -93,7 +94,7 @@ public class MainWindowViewModel : ReactiveObject
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
-    } 
+    }
 
     /// <summary>
     ///     UDP组播端口
@@ -149,7 +150,7 @@ public class MainWindowViewModel : ReactiveObject
         {
             TcpHelper.Stop();
             UdpHelper.Stop();
-            UdpHelper.NewDataResponse -= ReceiveUdpCommand;
+            UdpHelper.Received -= ReceiveUdpCommand;
             IsRunning = false;
         }
     }
@@ -163,7 +164,7 @@ public class MainWindowViewModel : ReactiveObject
         }
 
         ClearData();
-        TcpHelper.SendCommand(new RequestServiceInfo { TaskId = TcpHelper.GetNewTaskId() });
+        TcpHelper.SendCommand(new RequestServiceInfo { TaskId = Helpers.TcpSocketClient.GetNewTaskId() });
         _ = Log("发送请求服务基本信息命令");
     }
 
@@ -275,7 +276,7 @@ public class MainWindowViewModel : ReactiveObject
         }
         else if (message.IsCommand<ResponseUdpAddress>())
         {
-            ReceivedSocketMessage(message.GetCommand<ResponseUdpAddress>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseUdpAddress>());
         }
         else if (message.IsCommand<ResponseServiceInfo>())
         {
@@ -303,7 +304,7 @@ public class MainWindowViewModel : ReactiveObject
         }
     }
 
-    private void ReceiveUdpCommand(SocketCommand command)
+    private void ReceiveUdpCommand(object? sender, SocketCommand command)
     {
         if (command.IsCommand<UpdateRealtimeProcessList>())
         {
@@ -333,14 +334,15 @@ public class MainWindowViewModel : ReactiveObject
         }
     }
 
-    private void ReceivedSocketMessage(ResponseUdpAddress response)
+    private async Task ReceivedSocketMessageAsync(ResponseUdpAddress response)
     {
         UdpIp = response.Ip;
         UdpPort = response.Port;
         _ = Log($"收到Udp组播地址=》{UdpIp}:{UdpPort}");
 
-        UdpHelper.Start(UdpIp, UdpPort);
-        UdpHelper.NewDataResponse += ReceiveUdpCommand;
+        await UdpHelper.ConnectAsync("UDP组播", UdpIp, UdpPort, TcpHelper.LocalEndPoint,
+            TcpHelper.SystemId);
+        UdpHelper.Received += ReceiveUdpCommand;
         _ = Log("尝试订阅Udp组播");
     }
 
@@ -356,7 +358,7 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info($"【新】{BaseInfo}");
         _ = Log(BaseInfo);
 
-        TcpHelper.SendCommand(new RequestProcessIDList() { TaskId = TcpHelper.GetNewTaskId() });
+        TcpHelper.SendCommand(new RequestProcessIDList() { TaskId = Helpers.TcpSocketClient.GetNewTaskId() });
         _ = Log("发送请求进程ID列表命令");
 
         ClearData();
@@ -367,7 +369,7 @@ public class MainWindowViewModel : ReactiveObject
         _processIdArray = response.IDList!;
         _ = Log($"收到进程ID列表，共{_processIdArray.Length}个进程");
 
-        TcpHelper.SendCommand(new RequestProcessList { TaskId = TcpHelper.GetNewTaskId() });
+        TcpHelper.SendCommand(new RequestProcessList { TaskId = Helpers.TcpSocketClient.GetNewTaskId() });
         _ = Log("发送请求进程详细信息列表命令");
     }
 

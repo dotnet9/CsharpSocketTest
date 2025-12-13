@@ -15,10 +15,9 @@ using CodeWF.NetWrapper.Commands;
 
 namespace SocketTest.Client.Helpers;
 
-public class TcpHelper : ReactiveObject
+public class TcpSocketClient : ReactiveObject
 {
     private Socket? _client;
-    public long SystemId { get; private set; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
 
     public readonly BlockingCollection<SocketCommand> _responses = new(new ConcurrentQueue<SocketCommand>());
 
@@ -30,6 +29,11 @@ public class TcpHelper : ReactiveObject
     public string? ServerIP { get; private set; }
 
     /// <summary>
+    ///     服务端标识，TCP数据接收时保存，用于UDP数据包识别
+    /// </summary>
+    public long SystemId { get; private set; }
+
+    /// <summary>
     ///     获取或设置服务器端口号
     /// </summary>
     public int ServerPort { get; private set; }
@@ -39,6 +43,11 @@ public class TcpHelper : ReactiveObject
     ///     是否正在运行Tcp服务
     /// </summary>
     public bool IsRunning { get; set; }
+
+    /// <summary>
+    /// 本地端点连接信息
+    /// </summary>
+    public string? LocalEndPoint { get; set; }
 
     #endregion
 
@@ -65,6 +74,7 @@ public class TcpHelper : ReactiveObject
                     _ = Task.Run(ListenForServerAsync);
                     CheckResponse();
 
+                    LocalEndPoint = _client.LocalEndPoint?.ToString();
                     Logger.Info("连接Tcp服务成功");
                     await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true, ServerIP, ServerPort));
                     break;
@@ -72,6 +82,7 @@ public class TcpHelper : ReactiveObject
                 catch (Exception ex)
                 {
                     IsRunning = false;
+                    LocalEndPoint = null;
                     Logger.Warn($"连接TCP服务异常，3秒后将重新连接：{ex.Message}");
                     await Task.Delay(TimeSpan.FromSeconds(3));
                 }
