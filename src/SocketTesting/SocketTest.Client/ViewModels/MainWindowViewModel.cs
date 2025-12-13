@@ -22,6 +22,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using CodeWF.NetWrapper.Commands;
 using Notification = Avalonia.Controls.Notifications.Notification;
 
 namespace SocketTest.Client.ViewModels;
@@ -268,49 +269,49 @@ public class MainWindowViewModel : ReactiveObject
     private async Task ReceivedSocketMessage(SocketCommand message)
     {
         Logger.Info($"Dill command: {message}");
-        if (message.IsMessage<ResponseTargetType>())
+        if (message.IsCommand<ResponseTargetType>())
         {
-            await ReceivedSocketMessageAsync(message.Message<ResponseTargetType>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseTargetType>());
         }
-        else if (message.IsMessage<ResponseUdpAddress>())
+        else if (message.IsCommand<ResponseUdpAddress>())
         {
-            ReceivedSocketMessage(message.Message<ResponseUdpAddress>());
+            ReceivedSocketMessage(message.GetCommand<ResponseUdpAddress>());
         }
-        else if (message.IsMessage<ResponseServiceInfo>())
+        else if (message.IsCommand<ResponseServiceInfo>())
         {
-            ReceivedSocketMessage(message.Message<ResponseServiceInfo>());
+            ReceivedSocketMessage(message.GetCommand<ResponseServiceInfo>());
         }
-        else if (message.IsMessage<ResponseProcessIDList>())
+        else if (message.IsCommand<ResponseProcessIDList>())
         {
-            ReceivedSocketMessage(message.Message<ResponseProcessIDList>());
+            ReceivedSocketMessage(message.GetCommand<ResponseProcessIDList>());
         }
-        else if (message.IsMessage<ResponseProcessList>())
+        else if (message.IsCommand<ResponseProcessList>())
         {
-            ReceivedSocketMessage(message.Message<ResponseProcessList>());
+            ReceivedSocketMessage(message.GetCommand<ResponseProcessList>());
         }
-        else if (message.IsMessage<UpdateProcessList>())
+        else if (message.IsCommand<UpdateProcessList>())
         {
-            ReceivedSocketMessage(message.Message<UpdateProcessList>());
+            ReceivedSocketMessage(message.GetCommand<UpdateProcessList>());
         }
-        else if (message.IsMessage<ChangeProcessList>())
+        else if (message.IsCommand<ChangeProcessList>())
         {
             await HandleRefreshCommandAsync();
         }
-        else if (message.IsMessage<Heartbeat>())
+        else if (message.IsCommand<Heartbeat>())
         {
-            ReceivedSocketMessage(message.Message<Heartbeat>());
+            ReceivedSocketMessage(message.GetCommand<Heartbeat>());
         }
     }
 
     private void ReceiveUdpCommand(SocketCommand command)
     {
-        if (command.IsMessage<UpdateRealtimeProcessList>())
+        if (command.IsCommand<UpdateRealtimeProcessList>())
         {
-            ReceivedSocketMessage(command.MessageByNative<UpdateRealtimeProcessList>());
+            ReceivedSocketMessage(command.GetCommand<UpdateRealtimeProcessList>());
         }
-        else if (command.IsMessage<UpdateGeneralProcessList>())
+        else if (command.IsCommand<UpdateGeneralProcessList>())
         {
-            ReceivedSocketMessage(command.MessageByNative<UpdateGeneralProcessList>());
+            ReceivedSocketMessage(command.GetCommand<UpdateGeneralProcessList>());
         }
     }
 

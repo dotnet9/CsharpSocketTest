@@ -54,7 +54,7 @@ public static class MockUtil
 
     public static async Task<ResponseServiceInfo?> GetBaseInfoAsync()
     {
-        return await Task.FromResult(_mockResponseBase);
+        return _mockResponseBase;
     }
 
     public static async Task<int[]?> GetProcessIdListAsync()
@@ -75,7 +75,6 @@ public static class MockUtil
             TimestampStartYear = TimestampStartYear,
             LastUpdateTime = DateTime.Now.GetSpecialUnixTimeSeconds(TimestampStartYear)
         };
-        await Task.CompletedTask;
     }
 
     private static async Task MockProcessIdListAsync()

@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeWF.NetWrapper.Commands;
 
 namespace SocketTest.Client.Helpers;
 
