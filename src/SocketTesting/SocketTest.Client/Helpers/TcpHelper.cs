@@ -122,7 +122,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
                     await Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
 
-                    ListenForServer();
+                    _ = Task.Run(ListenForServerAsync);
                     CheckResponse();
 
                     Logger.Info("连接Tcp服务成功");
@@ -186,34 +186,34 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
     #region 连接TCP、接收数据
 
-    private void ListenForServer()
+    private async Task ListenForServerAsync()
     {
-        Task.Run(async() =>
+        while (IsRunning)
         {
-            while (IsRunning)
-                try
+            try
+            {
+                Logger.Info("Listen server");
+                var (success, buffer, headInfo) = await _client!.ReadPacketAsync();
+                if (!success)
                 {
-                    Logger.Info("Listen server");
-                    while (_client!.ReadPacket(out var buffer, out var headInfo))
-                    {
-                        Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
-                        ReceiveTime = DateTime.Now;
-                        SystemId = headInfo!.SystemId;
-                        _responses.Add(new SocketCommand(headInfo, buffer, _client));
-                    }
-                }
-                catch (SocketException ex)
-                {
-                    Logger.Error($"接收数据异常：{ex.Message}");
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"接收数据异常：{ex.Message}");
+                    continue;
                 }
 
-            return Task.CompletedTask;
-        });
+                Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
+                ReceiveTime = DateTime.Now;
+                SystemId = headInfo!.SystemId;
+                _responses.Add(new SocketCommand(headInfo, buffer, _client));
+            }
+            catch (SocketException ex)
+            {
+                Logger.Error($"接收数据异常：{ex.Message}");
+                break;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"接收数据异常：{ex.Message}");
+            }
+        }
     }
 
     private void CheckResponse()

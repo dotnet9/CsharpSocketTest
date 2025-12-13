@@ -241,7 +241,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
                     Logger.Info($"客户端({socketClientKey})连接上线");
 
-                    HandleClient(socketClient);
+                    _ = Task.Run(async () => await HandleClientAsync(socketClient));
                 }
                 catch (Exception ex)
                 {
@@ -250,40 +250,41 @@ public class TcpHelper : ReactiveObject, ISocketBase
         });
     }
 
-    private void HandleClient(Socket tcpClient)
+    private async Task HandleClientAsync(Socket tcpClient)
     {
-        Task.Run(() =>
+        var tcpClientKey = tcpClient.RemoteEndPoint!.ToString()!;
+        while (IsRunning)
         {
-            while (IsRunning)
-                try
+            try
+            {
+                Logger.Info($"监听客户端");
+                var (success, buffer, headInfo) = await tcpClient.ReadPacketAsync();
+                if (!success)
                 {
-                    var tcpClientKey = tcpClient.RemoteEndPoint!.ToString()!;
-                    Logger.Info($"监听客户端");
-                    while (tcpClient.ReadPacket(out var buffer, out var headInfo))
-                    {
-                        Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
-                        if (!_requests.TryGetValue(tcpClientKey, out var value))
-                        {
-                            value = new ConcurrentQueue<SocketCommand>();
-                            _requests[tcpClientKey] = value;
-                        }
-
-                        value.Enqueue(new SocketCommand(headInfo!, buffer, tcpClient));
-                    }
-                }
-                catch (SocketException ex)
-                {
-                    Logger.Error($"远程主机异常，将移除该客户端：{ex.Message}");
-                    RemoveClient(tcpClient);
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"接收数据异常：{ex.Message}");
+                    continue;
                 }
 
-            return Task.CompletedTask;
-        });
+
+                Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
+                if (!_requests.TryGetValue(tcpClientKey, out var value))
+                {
+                    value = new ConcurrentQueue<SocketCommand>();
+                    _requests[tcpClientKey] = value;
+                }
+
+                value.Enqueue(new SocketCommand(headInfo!, buffer, tcpClient));
+            }
+            catch (SocketException ex)
+            {
+                Logger.Error($"远程主机异常，将移除该客户端：{ex.Message}");
+                RemoveClient(tcpClient);
+                break;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"接收数据异常：{ex.Message}");
+            }
+        }
     }
 
     #endregion
