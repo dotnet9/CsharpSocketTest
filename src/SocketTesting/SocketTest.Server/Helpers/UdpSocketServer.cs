@@ -8,10 +8,21 @@ using System.Threading.Tasks;
 
 namespace SocketTest.Server.Helpers;
 
-public class UdpHelper(TcpHelper tcpHelper)
+/// <summary>
+/// UDP Socket 服务端类，用于创建UDP组播服务器并发送数据
+/// </summary>
+public class UdpSocketServer
 {
+    /// <summary>
+    /// UDP客户端对象
+    /// </summary>
     private UdpClient? _client;
+
+    /// <summary>
+    /// UDP IP端点
+    /// </summary>
     private IPEndPoint? _udpIpEndPoint;
+
 
     #region 公开属性
 
@@ -19,7 +30,6 @@ public class UdpHelper(TcpHelper tcpHelper)
     /// 服务标识，用以区分多个服务
     /// </summary>
     public string? ServerMark { get; private set; }
-
     /// <summary>
     /// 获取或设置服务器IP地址
     /// </summary>
@@ -34,7 +44,6 @@ public class UdpHelper(TcpHelper tcpHelper)
     /// 获取或设置系统ID
     /// </summary>
     public long SystemId { get; private set; }
-
     /// <summary>
     /// 获取或设置回环IP地址
     /// </summary>
@@ -55,6 +64,7 @@ public class UdpHelper(TcpHelper tcpHelper)
 
     #region 公开接口方法
 
+
     /// <summary>
     /// 启动UDP组播服务器
     /// </summary>
@@ -64,8 +74,7 @@ public class UdpHelper(TcpHelper tcpHelper)
     /// <param name="serverPort">服务器端口号</param>
     /// <param name="localIP">本地IP地址</param>
     /// <returns>启动结果和错误信息</returns>
-    public (bool IsSuccess, string? ErrorMessage) Start(string serverMark, long systemId, string serverIP,
-        int serverPort, string localIP = "0.0.0.0")
+    public (bool IsSuccess, string? ErrorMessage) Start(string serverMark, long systemId, string serverIP, int serverPort, string localIP = "0.0.0.0")
     {
         ServerMark = serverMark;
         ServerIP = serverIP;
@@ -87,8 +96,7 @@ public class UdpHelper(TcpHelper tcpHelper)
             _client.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 1);
 
             // * 设置发送使用的网卡接口
-            _client.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface,
-                localNic.GetAddressBytes());
+            _client.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, localNic.GetAddressBytes());
 
             // 开启回环
             _client.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, true);
@@ -103,10 +111,8 @@ public class UdpHelper(TcpHelper tcpHelper)
         catch (Exception ex)
         {
             IsRunning = false;
-            Logger.Error($"{ServerIP} 组播启动失败，组播地址：{ServerIP}:{ServerPort}", ex,
-                $"{ServerIP} 组播启动失败，组播地址：{ServerIP}:{ServerPort}，详细信息请查看日志文件");
-            return (IsSuccess: false,
-                ErrorMessage: $"{ServerIP} 组播启动失败，组播地址：{ServerIP}:{ServerPort}，异常信息：{ex.Message}");
+            Logger.Error($"{ServerIP} 组播启动失败，组播地址：{ServerIP}:{ServerPort}", ex, $"{ServerIP} 组播启动失败，组播地址：{ServerIP}:{ServerPort}，详细信息请查看日志文件");
+            return (IsSuccess: false, ErrorMessage: $"{ServerIP} 组播启动失败，组播地址：{ServerIP}:{ServerPort}，异常信息：{ex.Message}");
         }
     }
 

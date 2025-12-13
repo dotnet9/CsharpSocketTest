@@ -38,7 +38,7 @@ public class MainWindowViewModel : ReactiveObject
         }
 
         TcpHelper = new TcpHelper();
-        UdpHelper = new UdpHelper(TcpHelper);
+        UdpHelper = new UdpSocketServer();
 
         EventBus.Default.Subscribe(this);
         RegisterCommand();
@@ -52,7 +52,7 @@ public class MainWindowViewModel : ReactiveObject
     #region 属性
 
     public TcpHelper TcpHelper { get; set; }
-    public UdpHelper UdpHelper { get; set; }
+    public UdpSocketServer UdpHelper { get; set; }
 
     /// <summary>
     ///     Tcp服务IP
