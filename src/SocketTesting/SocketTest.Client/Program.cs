@@ -1,5 +1,6 @@
 ﻿using System;
 using Avalonia;
+using CodeWF.Log.Core;
 using ReactiveUI.Avalonia;
 
 namespace SocketTest.Client;
@@ -12,6 +13,7 @@ internal sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        Logger.TimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
