@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using CodeWF.EventBus;
+using CodeWF.Log.Core;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
@@ -13,13 +14,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeWF.LogViewer.Avalonia;
-using Tmds.DBus.Protocol;
-using CodeWF.Log.Core;
 
 namespace SocketTest.Server.Helpers;
 
-public class TcpHelper : ReactiveObject, ISocketBase
+public class TcpHelper : ReactiveObject
 {
     private readonly ConcurrentDictionary<string, Socket> _clients = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SocketCommand>> _requests = new();
@@ -29,92 +27,23 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
     #region 公开属性
 
-    private string? _ip = "127.0.0.1";
+    /// <summary>
+    /// 获取或设置服务器IP地址
+    /// </summary>
+    public string? ServerIP { get; private set; }
 
     /// <summary>
-    ///     Tcp服务IP
+    /// 获取或设置服务器端口号
     /// </summary>
-    public string? Ip
-    {
-        get => _ip;
-        set => this.RaiseAndSetIfChanged(ref _ip, value);
-    }
-
-    private int _port = 5000;
-
-    /// <summary>
-    ///     Tcp服务端口
-    /// </summary>
-    public int Port
-    {
-        get => _port;
-        set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isRunning;
+    public int ServerPort { get; private set; }
 
     /// <summary>
     ///     是否正在运行Tcp服务
     /// </summary>
     public bool IsRunning
     {
-        get => _isRunning;
-        set => this.RaiseAndSetIfChanged(ref _isRunning, value);
-    }
-
-    private DateTime _sendTime;
-
-    /// <summary>
-    ///     命令发送时间
-    /// </summary>
-    public DateTime SendTime
-    {
-        get => _sendTime;
-        set => this.RaiseAndSetIfChanged(ref _sendTime, value);
-    }
-
-    private DateTime _receiveTime;
-
-    /// <summary>
-    ///     响应接收时间
-    /// </summary>
-    public DateTime ReceiveTime
-    {
-        get => _receiveTime;
-        set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
-    }
-
-    private DateTime _heartbeatTime;
-
-    /// <summary>
-    ///     心跳时间
-    /// </summary>
-    public DateTime HeartbeatTime
-    {
-        get => _heartbeatTime;
-        set => this.RaiseAndSetIfChanged(ref _heartbeatTime, value);
-    }
-
-    private int _mockCount = 200000;
-
-    /// <summary>
-    ///     模拟数据总量
-    /// </summary>
-    public int MockCount
-    {
-        get => _mockCount;
-        set => this.RaiseAndSetIfChanged(ref _mockCount, value);
-    }
-
-    private int _mockPageSize = 5000;
-
-    /// <summary>
-    ///     模拟分包数据量
-    /// </summary>
-    public int MockPageSize
-    {
-        get => _mockPageSize;
-        set => this.RaiseAndSetIfChanged(ref _mockPageSize, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     #endregion
@@ -123,10 +52,13 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
     private CancellationTokenSource? _connectServer;
 
-    public void Start()
+    public void Start(string ip, int port)
     {
+        ServerIP = ip;
+        ServerPort = port;
+
         _connectServer = new CancellationTokenSource();
-        var ipEndPoint = new IPEndPoint(IPAddress.Parse(Ip!), Port);
+        var ipEndPoint = new IPEndPoint(IPAddress.Parse(ServerIP), ServerPort);
         Task.Run(async () =>
         {
             while (!_connectServer.IsCancellationRequested)

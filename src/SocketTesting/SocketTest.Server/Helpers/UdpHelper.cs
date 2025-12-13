@@ -1,4 +1,5 @@
-﻿using CodeWF.NetWeaver;
+﻿using CodeWF.Log.Core;
+using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
 using System;
@@ -6,92 +7,36 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeWF.LogViewer.Avalonia;
-using SocketDto;
-using CodeWF.Log.Core;
 
 namespace SocketTest.Server.Helpers;
 
-public class UdpHelper(TcpHelper tcpHelper) : ReactiveObject, ISocketBase
+public class UdpHelper(TcpHelper tcpHelper) : ReactiveObject
 {
     private UdpClient? _client;
     private IPEndPoint? _udpIpEndPoint;
 
     #region 公开属性
 
-    private string? _ip = "224.0.0.0";
+    /// <summary>
+    /// 获取或设置服务器IP地址
+    /// </summary>
+    public string? ServerIP { get; private set; }
 
     /// <summary>
-    ///     UDP组播IP
+    /// 获取或设置服务器端口号
     /// </summary>
-    public string? Ip
-    {
-        get => _ip;
-        set => this.RaiseAndSetIfChanged(ref _ip, value);
-    }
-
-    private int _port = 9540;
-
-    /// <summary>
-    ///     UDP组播端口
-    /// </summary>
-    public int Port
-    {
-        get => _port;
-        set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isRunning;
+    public int ServerPort { get; private set; }
 
     /// <summary>
     ///     是否正在运行udp组播订阅
     /// </summary>
     public bool IsRunning
     {
-        get => _isRunning;
+        get;
         set
         {
-            if (value != _isRunning) this.RaiseAndSetIfChanged(ref _isRunning, value);
+            if (value != field) this.RaiseAndSetIfChanged(ref field, value);
         }
-    }
-
-    private DateTime _sendTime;
-
-    /// <summary>
-    ///     命令发送时间
-    /// </summary>
-    public DateTime SendTime
-    {
-        get => _sendTime;
-        set
-        {
-            if (value != _sendTime) this.RaiseAndSetIfChanged(ref _sendTime, value);
-        }
-    }
-
-    private DateTime _receiveTime;
-
-    /// <summary>
-    ///     响应接收时间
-    /// </summary>
-    public DateTime ReceiveTime
-    {
-        get => _receiveTime;
-        set
-        {
-            if (value != _receiveTime) this.RaiseAndSetIfChanged(ref _receiveTime, value);
-        }
-    }
-
-    private int _packetMaxSize = 65507;
-
-    /// <summary>
-    ///     Udp单包大小上限
-    /// </summary>
-    public int PacketMaxSize
-    {
-        get => _packetMaxSize;
-        set => this.RaiseAndSetIfChanged(ref _packetMaxSize, value);
     }
 
     #endregion
@@ -100,16 +45,18 @@ public class UdpHelper(TcpHelper tcpHelper) : ReactiveObject, ISocketBase
 
     private CancellationTokenSource? _connectServer;
 
-    public void Start()
+    public void Start(string ip, int port)
     {
+        ServerIP = ip;
+        ServerPort = port;
         _connectServer = new CancellationTokenSource();
         Task.Run(async () =>
         {
             while (!_connectServer.IsCancellationRequested)
                 try
                 {
-                    var ipAddress = IPAddress.Parse(Ip);
-                    _udpIpEndPoint = new IPEndPoint(ipAddress, Port);
+                    var ipAddress = IPAddress.Parse(ServerIP);
+                    _udpIpEndPoint = new IPEndPoint(ipAddress, ServerPort);
                     _client = new UdpClient();
                     _client.JoinMulticastGroup(ipAddress);
                     IsRunning = true;

@@ -58,11 +58,56 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info("连接服务端后获取数据");
     }
 
+    #region 属性
+
     public Window? Owner { get; set; }
     public RangObservableCollection<ProcessItemModel> DisplayProcesses { get; }
 
     public TcpHelper TcpHelper { get; set; } = new();
     public UdpHelper UdpHelper { get; set; } = new();
+
+    /// <summary>
+    ///     Tcp服务IP
+    /// </summary>
+    public string? TcpIp
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "127.0.0.1";
+
+    /// <summary>
+    ///     Tcp服务端口
+    /// </summary>
+    public int TcpPort
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 5000;
+
+
+    /// <summary>
+    ///     UDP组播IP
+    /// </summary>
+    public string? UdpIp
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } 
+
+    /// <summary>
+    ///     UDP组播端口
+    /// </summary>
+    public int UdpPort
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public bool IsRunning
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
 
     public string? SearchKey
     {
@@ -90,17 +135,21 @@ public class MainWindowViewModel : ReactiveObject
     /// </summary>
     public ReactiveCommand<Unit, Unit>? RefreshAllCommand { get; private set; }
 
+    #endregion 属性
+
     public async Task HandleConnectTcpCommandAsync()
     {
         if (!TcpHelper.IsRunning)
         {
-            TcpHelper.Start();
+            TcpHelper.Start(TcpIp, TcpPort);
+            IsRunning = true;
         }
         else
         {
             TcpHelper.Stop();
             UdpHelper.Stop();
             UdpHelper.NewDataResponse -= ReceiveUdpCommand;
+            IsRunning = false;
         }
     }
 
@@ -285,11 +334,11 @@ public class MainWindowViewModel : ReactiveObject
 
     private void ReceivedSocketMessage(ResponseUdpAddress response)
     {
-        _ = Log($"收到Udp组播地址=》{response.Ip}:{response.Port}");
+        UdpIp = response.Ip;
+        UdpPort = response.Port;
+        _ = Log($"收到Udp组播地址=》{UdpIp}:{UdpPort}");
 
-        UdpHelper.Ip = response.Ip;
-        UdpHelper.Port = response.Port;
-        UdpHelper.Start();
+        UdpHelper.Start(UdpIp, UdpPort);
         UdpHelper.NewDataResponse += ReceiveUdpCommand;
         _ = Log("尝试订阅Udp组播");
     }
@@ -329,7 +378,7 @@ public class MainWindowViewModel : ReactiveObject
 
         _receivedProcesses.AddRange(processes);
         var filterData = FilterData(processes);
-        Invoke(()=>DisplayProcesses.AddRange(filterData));
+        Invoke(() => DisplayProcesses.AddRange(filterData));
         if (_receivedProcesses.Count == response.TotalSize)
             _processIdAndItems = _receivedProcesses.ToDictionary(process => process.PID);
 

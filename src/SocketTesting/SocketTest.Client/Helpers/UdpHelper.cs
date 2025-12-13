@@ -1,10 +1,8 @@
 ﻿using CodeWF.EventBus;
 using CodeWF.Log.Core;
-using CodeWF.LogViewer.Avalonia;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
-using SocketDto;
 using SocketDto.EventBus;
 using System;
 using System.Collections.Concurrent;
@@ -15,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SocketTest.Client.Helpers;
 
-public class UdpHelper : ReactiveObject, ISocketBase
+public class UdpHelper : ReactiveObject
 {
     private readonly BlockingCollection<SocketCommand> _receivedBuffers = new(new ConcurrentQueue<SocketCommand>());
     private UdpClient? _client;
@@ -23,60 +21,25 @@ public class UdpHelper : ReactiveObject, ISocketBase
 
     #region 公开属性
 
-    private string? _ip;
+    /// <summary>
+    /// 获取或设置服务器IP地址
+    /// </summary>
+    public string? ServerIP { get; private set; }
 
     /// <summary>
-    ///     UDP组播IP
+    /// 获取或设置服务器端口号
     /// </summary>
-    public string? Ip
-    {
-        get => _ip;
-        set => this.RaiseAndSetIfChanged(ref _ip, value);
-    }
-
-    private int _port;
-
-    /// <summary>
-    ///     UDP组播端口
-    /// </summary>
-    public int Port
-    {
-        get => _port;
-        set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isRunning;
+    public int ServerPort { get; private set; }
 
     /// <summary>
     ///     是否正在运行udp组播订阅
     /// </summary>
     public bool IsRunning
     {
-        get => _isRunning;
-        set => this.RaiseAndSetIfChanged(ref _isRunning, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private DateTime _sendTime;
-
-    /// <summary>
-    ///     命令发送时间
-    /// </summary>
-    public DateTime SendTime
-    {
-        get => _sendTime;
-        set => this.RaiseAndSetIfChanged(ref _sendTime, value);
-    }
-
-    private DateTime _receiveTime;
-
-    /// <summary>
-    ///     响应接收时间
-    /// </summary>
-    public DateTime ReceiveTime
-    {
-        get => _receiveTime;
-        set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
-    }
 
     /// <summary>
     /// 新数据通知
@@ -89,8 +52,10 @@ public class UdpHelper : ReactiveObject, ISocketBase
 
     private CancellationTokenSource? _connectServer;
 
-    public void Start()
+    public void Start(string ip, int port)
     {
+        ServerIP = ip;
+        ServerPort = port;
         _connectServer = new CancellationTokenSource();
         Task.Run(async () =>
         {
@@ -102,10 +67,10 @@ public class UdpHelper : ReactiveObject, ISocketBase
                     _client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
 
                     // 任意IP+广播端口，0是任意端口
-                    _client.Client.Bind(new IPEndPoint(IPAddress.Any, Port));
+                    _client.Client.Bind(new IPEndPoint(IPAddress.Any, ServerPort));
 
                     // 加入组播
-                    _client.JoinMulticastGroup(IPAddress.Parse(Ip!));
+                    _client.JoinMulticastGroup(IPAddress.Parse(ServerIP));
                     IsRunning = true;
 
                     ReceiveData();
@@ -171,8 +136,6 @@ public class UdpHelper : ReactiveObject, ISocketBase
                     {
                         Logger.Warn($"收到错误UDP包：{headInfo}");
                     }
-
-                    ReceiveTime = DateTime.Now;
                 }
                 catch (SocketException ex)
                 {

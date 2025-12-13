@@ -1,11 +1,9 @@
 ﻿using Avalonia.Threading;
 using CodeWF.EventBus;
 using CodeWF.Log.Core;
-using CodeWF.LogViewer.Avalonia;
 using CodeWF.NetWeaver;
 using CodeWF.NetWeaver.Base;
 using ReactiveUI;
-using SocketDto;
 using SocketDto.EventBus;
 using System;
 using System.Collections.Concurrent;
@@ -16,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace SocketTest.Client.Helpers;
 
-public class TcpHelper : ReactiveObject, ISocketBase
+public class TcpHelper : ReactiveObject
 {
     private Socket? _client;
     public long SystemId { get; private set; } // 服务端标识，TCP数据接收时保存，用于UDP数据包识别
@@ -25,82 +23,21 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
     #region 公开属性
 
-    private string? _ip = "127.0.0.1";
+    /// <summary>
+    ///     获取或设置服务器IP地址
+    /// </summary>
+    public string? ServerIP { get; private set; }
 
     /// <summary>
-    ///     Tcp服务IP
+    ///     获取或设置服务器端口号
     /// </summary>
-    public string? Ip
-    {
-        get => _ip;
-        set => this.RaiseAndSetIfChanged(ref _ip, value);
-    }
+    public int ServerPort { get; private set; }
 
-    private int _port = 5000;
-
-    /// <summary>
-    ///     Tcp服务端口
-    /// </summary>
-    public int Port
-    {
-        get => _port;
-        set => this.RaiseAndSetIfChanged(ref _port, value);
-    }
-
-    private bool _isRunning;
 
     /// <summary>
     ///     是否正在运行Tcp服务
     /// </summary>
-    public bool IsRunning
-    {
-        get => _isRunning;
-        set => this.RaiseAndSetIfChanged(ref _isRunning, value);
-    }
-
-    private DateTime _sendTime;
-
-    /// <summary>
-    ///     命令发送时间
-    /// </summary>
-    public DateTime SendTime
-    {
-        get => _sendTime;
-        set => this.RaiseAndSetIfChanged(ref _sendTime, value);
-    }
-
-    private DateTime _receiveTime;
-
-    /// <summary>
-    ///     响应接收时间
-    /// </summary>
-    public DateTime ReceiveTime
-    {
-        get => _receiveTime;
-        set => this.RaiseAndSetIfChanged(ref _receiveTime, value);
-    }
-
-    private DateTime _sendHeartbeatTime;
-
-    /// <summary>
-    ///     心跳发送时间
-    /// </summary>
-    public DateTime SendHeartbeatTime
-    {
-        get => _sendHeartbeatTime;
-        set => this.RaiseAndSetIfChanged(ref _sendHeartbeatTime, value);
-    }
-
-    private DateTime _responseHeartbeatTime;
-
-    /// <summary>
-    ///     心跳响应时间
-    /// </summary>
-    public DateTime ResponseHeartbeatTime
-    {
-        get => _responseHeartbeatTime;
-        set => this.RaiseAndSetIfChanged(ref _responseHeartbeatTime, value);
-    }
+    public bool IsRunning { get; set; }
 
     #endregion
 
@@ -108,10 +45,12 @@ public class TcpHelper : ReactiveObject, ISocketBase
 
     private CancellationTokenSource? _connectServer;
 
-    public void Start()
+    public void Start(string ip, int port)
     {
+        ServerIP = ip;
+        ServerPort = port;
         _connectServer = new CancellationTokenSource();
-        var ipEndPoint = new IPEndPoint(IPAddress.Parse(Ip), Port);
+        var ipEndPoint = new IPEndPoint(IPAddress.Parse(ServerIP), ServerPort);
         Task.Run(async () =>
         {
             while (!_connectServer.IsCancellationRequested)
@@ -126,7 +65,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
                     CheckResponse();
 
                     Logger.Info("连接Tcp服务成功");
-                    await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true, Ip, Port));
+                    await EventBus.Default.PublishAsync(new ChangeTCPStatusCommand(true, ServerIP, ServerPort));
                     break;
                 }
                 catch (Exception ex)
@@ -167,12 +106,7 @@ public class TcpHelper : ReactiveObject, ISocketBase
         var index = 0;
         buffer.ReadHead(ref index, out var head);
         Logger.Info($"Send(client={_client.RemoteEndPoint},len={buffer.Length})：{head}");
-        if (command is Heartbeat)
-        {
-            SendHeartbeatTime = DateTime.Now;
-        }
-        else
-            Logger.Info($"发送命令{command.GetType()}");
+        Logger.Info($"发送命令{command.GetType()}");
     }
 
     private static int _taskId;
@@ -200,7 +134,6 @@ public class TcpHelper : ReactiveObject, ISocketBase
                 }
 
                 Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
-                ReceiveTime = DateTime.Now;
                 SystemId = headInfo!.SystemId;
                 _responses.Add(new SocketCommand(headInfo, buffer, _client));
             }

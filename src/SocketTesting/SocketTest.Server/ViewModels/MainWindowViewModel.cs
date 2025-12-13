@@ -2,6 +2,7 @@
 using Avalonia.Threading;
 using CodeWF.EventBus;
 using CodeWF.Log.Core;
+using CodeWF.NetWeaver;
 using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;
@@ -48,13 +49,88 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info("连接服务端后获取数据");
     }
 
+    #region 属性
+
     public TcpHelper TcpHelper { get; set; }
     public UdpHelper UdpHelper { get; set; }
+
+    /// <summary>
+    ///     Tcp服务IP
+    /// </summary>
+    public string? TcpIp
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "127.0.0.1";
+
+    /// <summary>
+    ///     Tcp服务端口
+    /// </summary>
+    public int TcpPort
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 5000;
+
+    /// <summary>
+    ///     UDP组播IP
+    /// </summary>
+    public string? UdpIp
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "224.0.0.0";
+
+    /// <summary>
+    ///     UDP组播端口
+    /// </summary>
+    public int UdpPort
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 9540;
 
     public string? RunCommandContent
     {
         get => _runCommandContent;
         set => this.RaiseAndSetIfChanged(ref _runCommandContent, value);
+    }
+
+
+    /// <summary>
+    ///     模拟数据总量
+    /// </summary>
+    public int MockCount
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 200000;
+
+    /// <summary>
+    ///     模拟分包数据量
+    /// </summary>
+    public int MockPageSize
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = 5000;
+
+    /// <summary>
+    ///     心跳时间
+    /// </summary>
+    public DateTime HeartbeatTime
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    /// <summary>
+    ///     是否正在运行Tcp服务
+    /// </summary>
+    public bool IsRunning
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -71,17 +147,21 @@ public class MainWindowViewModel : ReactiveObject
     {
         if (!TcpHelper.IsRunning)
         {
-            TcpHelper.Start();
-            UdpHelper.Start();
+            TcpHelper.Start(TcpIp, TcpPort);
+            UdpHelper.Start(UdpIp, UdpPort);
+            IsRunning = true;
         }
         else
         {
             TcpHelper.Stop();
             UdpHelper.Stop();
+            IsRunning = false;
         }
 
         await Task.CompletedTask;
     }
+
+    #endregion 属性
 
     private async Task HandleRefreshCommandAsync()
     {
@@ -115,7 +195,7 @@ public class MainWindowViewModel : ReactiveObject
         {
             Task.Run(async () =>
             {
-                await MockUtil.MockAsync(TcpHelper.MockCount);
+                await MockUtil.MockAsync(MockCount);
                 _ = Log("数据模拟完成，客户端可以正常请求数据了");
             });
         }
@@ -177,8 +257,8 @@ public class MainWindowViewModel : ReactiveObject
         var response = new ResponseUdpAddress()
         {
             TaskId = request.TaskId,
-            Ip = UdpHelper.Ip,
-            Port = UdpHelper.Port,
+            Ip = UdpIp,
+            Port = UdpPort,
         };
         TcpHelper.SendCommand(client, response);
 
@@ -215,18 +295,18 @@ public class MainWindowViewModel : ReactiveObject
         _ = Log("收到请求进程详细信息列表命令");
         await Task.Run(async () =>
         {
-            var pageCount = MockUtil.GetPageCount(TcpHelper.MockCount, TcpHelper.MockPageSize);
+            var pageCount = MockUtil.GetPageCount(MockCount, MockPageSize);
             var sendCount = 0;
             for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
             {
                 var response = new ResponseProcessList
                 {
                     TaskId = request.TaskId,
-                    TotalSize = TcpHelper.MockCount,
-                    PageSize = TcpHelper.MockPageSize,
+                    TotalSize = MockCount,
+                    PageSize = MockPageSize,
                     PageCount = pageCount,
                     PageIndex = pageIndex,
-                    Processes = await MockUtil.MockProcessesAsync(TcpHelper.MockPageSize, pageIndex)
+                    Processes = await MockUtil.MockProcessesAsync(MockPageSize, pageIndex)
                 };
                 sendCount += response.Processes.Count;
                 TcpHelper.SendCommand(client, response);
@@ -247,7 +327,7 @@ public class MainWindowViewModel : ReactiveObject
     private void ReceiveSocketMessage(Socket client, Heartbeat heartbeat)
     {
         TcpHelper.SendCommand(client, new Heartbeat());
-        TcpHelper.HeartbeatTime = DateTime.Now;
+        HeartbeatTime = DateTime.Now;
     }
 
     #endregion
@@ -283,7 +363,7 @@ public class MainWindowViewModel : ReactiveObject
 
         TcpHelper.SendCommand(new UpdateProcessList
         {
-            Processes = await MockUtil.MockProcessesAsync(TcpHelper.MockCount, TcpHelper.MockPageSize)
+            Processes = await MockUtil.MockProcessesAsync(MockCount, MockPageSize)
         });
         Logger.Info("====TCP推送更新通知====");
 
@@ -336,7 +416,7 @@ public class MainWindowViewModel : ReactiveObject
 
         var sw = Stopwatch.StartNew();
 
-        MockUtil.MockUpdateRealtimeProcessPageCount(TcpHelper.MockCount, UdpHelper.PacketMaxSize, out var pageSize,
+        MockUtil.MockUpdateRealtimeProcessPageCount(MockCount, SerializeHelper.MaxUdpPacketSize, out var pageSize,
             out var pageCount);
 
         for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
@@ -344,7 +424,7 @@ public class MainWindowViewModel : ReactiveObject
             if (!UdpHelper.IsRunning) break;
 
             var response = MockUtil.MockUpdateRealtimeProcessList(pageSize, pageIndex);
-            response.TotalSize = TcpHelper.MockCount;
+            response.TotalSize = MockCount;
             response.PageSize = pageSize;
             response.PageCount = pageCount;
             response.PageIndex = pageIndex;
@@ -353,7 +433,7 @@ public class MainWindowViewModel : ReactiveObject
         }
 
         Logger.Info(
-            $"推送实时数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
+            $"推送实时数据{MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
     private void MockSendGeneralDataAsync(object? sender, ElapsedEventArgs e)
@@ -362,7 +442,7 @@ public class MainWindowViewModel : ReactiveObject
 
         var sw = Stopwatch.StartNew();
 
-        MockUtil.MockUpdateGeneralProcessPageCount(TcpHelper.MockCount, UdpHelper.PacketMaxSize, out var pageSize,
+        MockUtil.MockUpdateGeneralProcessPageCount(MockCount, SerializeHelper.MaxUdpPacketSize, out var pageSize,
             out var pageCount);
 
         for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
@@ -370,7 +450,7 @@ public class MainWindowViewModel : ReactiveObject
             if (!UdpHelper.IsRunning) break;
 
             var response = MockUtil.MockUpdateGeneralProcessList(pageSize, pageIndex);
-            response.TotalSize = TcpHelper.MockCount;
+            response.TotalSize = MockCount;
             response.PageSize = pageSize;
             response.PageCount = pageCount;
             response.PageIndex = pageIndex;
@@ -379,7 +459,7 @@ public class MainWindowViewModel : ReactiveObject
         }
 
         Logger.Info(
-            $"推送一般数据{TcpHelper.MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
+            $"推送一般数据{MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
     #endregion
