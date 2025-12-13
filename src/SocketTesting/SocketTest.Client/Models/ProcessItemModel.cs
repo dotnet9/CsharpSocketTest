@@ -11,36 +11,6 @@ namespace SocketTest.Client.Models;
 /// </summary>
 public class ProcessItemModel : ReactiveObject
 {
-    private string? _commandLine;
-
-    private short _cpu;
-
-    private short _disk;
-
-    private short _gpu;
-
-    private GpuEngine _gpuEngine;
-
-    private DateTime _lastUpdateTime;
-
-    private short _memory;
-
-    private string? _name;
-
-    private short _network;
-
-    private PowerUsage _powerUsage;
-
-    private PowerUsage _powerUsageTrend;
-
-    private string? _publisher;
-
-    private ProcessStatus _status;
-
-    private ProcessType _type;
-
-    private DateTime _updateTime;
-
     public ProcessItemModel()
     {
     }
@@ -60,8 +30,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public string? Name
     {
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -69,8 +39,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public ProcessType Type
     {
-        get => _type;
-        set => this.RaiseAndSetIfChanged(ref _type, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -78,8 +48,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public ProcessStatus Status
     {
-        get => _status;
-        set => this.RaiseAndSetIfChanged(ref _status, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     private AlarmStatus _alarmStatus;
@@ -98,8 +68,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public string? Publisher
     {
-        get => _publisher;
-        set => this.RaiseAndSetIfChanged(ref _publisher, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -107,8 +77,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public string? CommandLine
     {
-        get => _commandLine;
-        set => this.RaiseAndSetIfChanged(ref _commandLine, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -116,8 +86,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public short Cpu
     {
-        get => _cpu;
-        set => this.RaiseAndSetIfChanged(ref _cpu, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -125,8 +95,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public short Memory
     {
-        get => _memory;
-        set => this.RaiseAndSetIfChanged(ref _memory, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -134,8 +104,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public short Disk
     {
-        get => _disk;
-        set => this.RaiseAndSetIfChanged(ref _disk, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -143,8 +113,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public short Network
     {
-        get => _network;
-        set => this.RaiseAndSetIfChanged(ref _network, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -152,8 +122,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public short Gpu
     {
-        get => _gpu;
-        set => this.RaiseAndSetIfChanged(ref _gpu, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -161,8 +131,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public GpuEngine GpuEngine
     {
-        get => _gpuEngine;
-        set => this.RaiseAndSetIfChanged(ref _gpuEngine, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -170,8 +140,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public PowerUsage PowerUsage
     {
-        get => _powerUsage;
-        set => this.RaiseAndSetIfChanged(ref _powerUsage, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -179,8 +149,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public PowerUsage PowerUsageTrend
     {
-        get => _powerUsageTrend;
-        set => this.RaiseAndSetIfChanged(ref _powerUsageTrend, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -188,8 +158,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public DateTime LastUpdateTime
     {
-        get => _lastUpdateTime;
-        set => this.RaiseAndSetIfChanged(ref _lastUpdateTime, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -197,8 +167,8 @@ public class ProcessItemModel : ReactiveObject
     /// </summary>
     public DateTime UpdateTime
     {
-        get => _updateTime;
-        set => this.RaiseAndSetIfChanged(ref _updateTime, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public void Update(ProcessItem process, int timestampStartYear)
