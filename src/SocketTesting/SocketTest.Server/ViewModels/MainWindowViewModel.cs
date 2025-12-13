@@ -148,7 +148,7 @@ public class MainWindowViewModel : ReactiveObject
         if (!TcpHelper.IsRunning)
         {
             TcpHelper.Start(TcpIp, TcpPort);
-            UdpHelper.Start(UdpIp, UdpPort);
+            UdpHelper.Start("UDP服务端", 2, UdpIp, UdpPort);
             IsRunning = true;
         }
         else
@@ -410,7 +410,7 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info($"更新模拟实时数据{sw.ElapsedMilliseconds}ms");
     }
 
-    private void MockSendRealtimeDataAsync(object? sender, ElapsedEventArgs e)
+    private async void MockSendRealtimeDataAsync(object? sender, ElapsedEventArgs e)
     {
         if (!UdpHelper.IsRunning || !MockUtil.IsInitOver) return;
 
@@ -429,14 +429,14 @@ public class MainWindowViewModel : ReactiveObject
             response.PageCount = pageCount;
             response.PageIndex = pageIndex;
 
-            UdpHelper.SendCommand(response);
+            await UdpHelper.SendCommandAsync(response, DateTimeOffset.UtcNow);
         }
 
         Logger.Info(
             $"推送实时数据{MockCount}条，单包{pageSize}条分{pageCount}包，{sw.ElapsedMilliseconds}ms");
     }
 
-    private void MockSendGeneralDataAsync(object? sender, ElapsedEventArgs e)
+    private async void MockSendGeneralDataAsync(object? sender, ElapsedEventArgs e)
     {
         if (!UdpHelper.IsRunning || !MockUtil.IsInitOver) return;
 
@@ -455,7 +455,7 @@ public class MainWindowViewModel : ReactiveObject
             response.PageCount = pageCount;
             response.PageIndex = pageIndex;
 
-            UdpHelper.SendCommand(response);
+            await UdpHelper.SendCommandAsync(response, DateTimeOffset.UtcNow);
         }
 
         Logger.Info(
