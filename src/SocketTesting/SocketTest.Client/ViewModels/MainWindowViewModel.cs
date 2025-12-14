@@ -5,6 +5,7 @@ using CodeWF.EventBus;
 using CodeWF.Log.Core;
 using CodeWF.NetWrapper.Commands;
 using CodeWF.NetWrapper.Helpers;
+using CodeWF.NetWrapper.Models;
 using CodeWF.Tools.Extensions;
 using ReactiveUI;
 using SocketDto;
