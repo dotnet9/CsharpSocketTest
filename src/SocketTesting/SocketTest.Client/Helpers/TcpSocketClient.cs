@@ -76,7 +76,7 @@ public class TcpSocketClient : ReactiveObject
             await Dispatcher.UIThread.InvokeAsync(() => IsRunning = true);
 
             _ = Task.Run(ListenForServerAsync);
-            CheckResponse();
+            _ = Task.Run(CheckResponseAsync);
 
             LocalEndPoint = _client.LocalEndPoint?.ToString();
             Logger.Info("连接Tcp服务成功");
@@ -126,53 +126,45 @@ public class TcpSocketClient : ReactiveObject
 
     #region 连接TCP、接收数据
 
+    /// <summary>
+    ///     监听服务器发送的数据
+    /// </summary>
     private async Task ListenForServerAsync()
     {
         while (IsRunning)
-        {
             try
             {
-                Logger.Info("Listen server");
                 var (success, buffer, headInfo) = await _client!.ReadPacketAsync();
-                if (!success)
-                {
-                    continue;
-                }
+                if (!success) break;
 
-                Logger.Info($"Receive(len={buffer.Length}): {headInfo}");
                 SystemId = headInfo!.SystemId;
                 _responses.Add(new SocketCommand(headInfo, buffer, _client));
             }
             catch (SocketException ex)
             {
-                Logger.Error($"接收数据异常：{ex.Message}");
+                Logger.Error($"{ServerMark} 处理接收数据异常", ex, $"{ServerMark} 处理接收数据异常，详细信息请查看日志文件");
                 break;
             }
             catch (Exception ex)
             {
-                Logger.Error($"接收数据异常：{ex.Message}");
+                if (IsRunning) Logger.Error($"{ServerMark} 处理接收数据异常", ex, $"{ServerMark} 处理接收数据异常，详细信息请查看日志文件");
+
+                break;
             }
-        }
     }
 
-    private void CheckResponse()
+    /// <summary>
+    ///     检查响应命令队列
+    /// </summary>
+    private async Task CheckResponseAsync()
     {
-        Task.Run(async () =>
-        {
-            while (!IsRunning)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(10));
-            }
+        while (!IsRunning) await Task.Delay(TimeSpan.FromMilliseconds(10));
 
-            while (IsRunning)
-            {
-                while (_responses.TryTake(out var message, TimeSpan.FromMilliseconds(10)))
-                {
-                    Logger.Info($"Send event {message}");
-                    await EventBus.Default.PublishAsync(message);
-                }
-            }
-        });
+        while (IsRunning)
+        {
+            while (_responses.TryTake(out var command, TimeSpan.FromMilliseconds(10)))
+                await EventBus.Default.PublishAsync(command);
+        }
     }
 
     #endregion
