@@ -10,7 +10,6 @@ using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
 using SocketDto.Enums;
-using SocketDto.EventBus;
 using SocketDto.Requests;
 using SocketDto.Response;
 using SocketTest.Server.Mock;

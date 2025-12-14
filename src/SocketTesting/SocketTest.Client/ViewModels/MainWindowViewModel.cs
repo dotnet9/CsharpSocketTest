@@ -10,7 +10,6 @@ using ReactiveUI;
 using SocketDto;
 using SocketDto.AutoCommand;
 using SocketDto.Enums;
-using SocketDto.EventBus;
 using SocketDto.Requests;
 using SocketDto.Response;
 using SocketDto.Udp;
@@ -19,7 +18,6 @@ using SocketTest.Client.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -233,13 +231,7 @@ public class MainWindowViewModel : ReactiveObject
 
     #region 接收事件
 
-
-    [EventHandler]
-    private async Task ReceiveUdpStatusMessage(ChangeUDPStatusCommand message)
-    {
-        _ = Log("Udp组播订阅成功！");
-    }
-
+    
     private void ReceiveTcpData()
     {
         // 开启线程接收数据
