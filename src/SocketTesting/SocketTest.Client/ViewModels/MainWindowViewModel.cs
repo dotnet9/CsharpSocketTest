@@ -15,11 +15,11 @@ using SocketDto.Requests;
 using SocketDto.Response;
 using SocketDto.Udp;
 using SocketTest.Client.Extensions;
-using SocketTest.Client.Helpers;
 using SocketTest.Client.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -33,12 +33,8 @@ public class MainWindowViewModel : ReactiveObject
     public WindowNotificationManager? NotificationManager { get; set; }
     private readonly List<ProcessItemModel> _receivedProcesses = new();
 
-    private string? _baseInfo;
-
     private int[]? _processIdArray;
     private Dictionary<int, ProcessItemModel>? _processIdAndItems;
-
-    private string? _searchKey;
 
     private Timer? _sendDataTimer;
     private int _timestampStartYear;
@@ -49,9 +45,8 @@ public class MainWindowViewModel : ReactiveObject
 
         void RegisterCommand()
         {
-            var isTcpRunning = this.WhenAnyValue(x => x.TcpHelper.IsRunning);
-            RefreshCommand = ReactiveCommand.CreateFromTask(HandleRefreshCommandAsync, isTcpRunning);
-            RefreshAllCommand = ReactiveCommand.CreateFromTask(HandleRefreshAllCommandAsync, isTcpRunning);
+            RefreshCommand = ReactiveCommand.CreateFromTask(HandleRefreshCommandAsync);
+            RefreshAllCommand = ReactiveCommand.CreateFromTask(HandleRefreshAllCommandAsync);
         }
 
         EventBus.Default.Subscribe(this);
@@ -65,7 +60,7 @@ public class MainWindowViewModel : ReactiveObject
     public Window? Owner { get; set; }
     public RangObservableCollection<ProcessItemModel> DisplayProcesses { get; }
 
-    public Helpers.TcpSocketClient TcpHelper { get; set; } = new();
+    public TcpSocketClient TcpHelper { get; set; } = new();
     public UdpSocketClient UdpHelper { get; set; } = new();
 
     /// <summary>
@@ -113,8 +108,8 @@ public class MainWindowViewModel : ReactiveObject
 
     public string? SearchKey
     {
-        get => _searchKey;
-        set => this.RaiseAndSetIfChanged(ref _searchKey, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     /// <summary>
@@ -122,8 +117,8 @@ public class MainWindowViewModel : ReactiveObject
     /// </summary>
     public string? BaseInfo
     {
-        get => _baseInfo;
-        set => this.RaiseAndSetIfChanged(ref _baseInfo, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
 
@@ -144,6 +139,7 @@ public class MainWindowViewModel : ReactiveObject
         if (!TcpHelper.IsRunning)
         {
             await TcpHelper.ConnectAsync("TCP服务端", TcpIp, TcpPort);
+            await RequestTargetTypeAsync();
             IsRunning = true;
         }
         else
@@ -237,12 +233,6 @@ public class MainWindowViewModel : ReactiveObject
 
     #region 接收事件
 
-    [EventHandler]
-    private async Task ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
-    {
-        await TcpHelper.SendCommandAsync(new RequestTargetType());
-        _ = Log("发送命令查询目标终端类型是否是服务端");
-    }
 
     [EventHandler]
     private async Task ReceiveUdpStatusMessage(ChangeUDPStatusCommand message)
@@ -507,6 +497,12 @@ public class MainWindowViewModel : ReactiveObject
     }
 
     #endregion
+
+    private async Task RequestTargetTypeAsync()
+    {
+        await TcpHelper.SendCommandAsync(new RequestTargetType() { TaskId = NetHelper.GetTaskId() });
+        _ = Log("发送命令查询目标终端类型是否是服务端");
+    }
 
     private async Task Log(string msg, LogType type = LogType.Info, bool showNotification = true)
     {
