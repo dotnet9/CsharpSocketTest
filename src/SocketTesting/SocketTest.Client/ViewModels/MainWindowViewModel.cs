@@ -143,7 +143,7 @@ public class MainWindowViewModel : ReactiveObject
     {
         if (!TcpHelper.IsRunning)
         {
-            TcpHelper.Start(TcpIp, TcpPort);
+            await TcpHelper.ConnectAsync("TCP服务端", TcpIp, TcpPort);
             IsRunning = true;
         }
         else
@@ -164,7 +164,7 @@ public class MainWindowViewModel : ReactiveObject
         }
 
         ClearData();
-        TcpHelper.SendCommand(new RequestServiceInfo { TaskId = Helpers.TcpSocketClient.GetNewTaskId() });
+        await TcpHelper.SendCommandAsync(new RequestServiceInfo { TaskId = NetHelper.GetTaskId() });
         _ = Log("发送请求服务基本信息命令");
     }
 
@@ -176,7 +176,7 @@ public class MainWindowViewModel : ReactiveObject
             return;
         }
 
-        TcpHelper.SendCommand(new ChangeProcessList());
+        await TcpHelper.SendCommandAsync(new ChangeProcessList());
         Logger.Info("发送刷新所有客户端命令");
     }
 
@@ -202,11 +202,11 @@ public class MainWindowViewModel : ReactiveObject
         _sendDataTimer.Start();
     }
 
-    private void MockSendData(object? sender, ElapsedEventArgs e)
+    private async void MockSendData(object? sender, ElapsedEventArgs e)
     {
         if (!TcpHelper.IsRunning) return;
 
-        TcpHelper.SendCommand(new Heartbeat());
+        await TcpHelper.SendCommandAsync(new Heartbeat());
     }
 
     private void Try(string actionName, Action action, Action<Exception>? exceptionAction = null)
@@ -240,7 +240,7 @@ public class MainWindowViewModel : ReactiveObject
     [EventHandler]
     private async Task ReceiveTcpStatusMessage(ChangeTCPStatusCommand message)
     {
-        TcpHelper.SendCommand(new RequestTargetType());
+        await TcpHelper.SendCommandAsync(new RequestTargetType());
         _ = Log("发送命令查询目标终端类型是否是服务端");
     }
 
@@ -280,11 +280,11 @@ public class MainWindowViewModel : ReactiveObject
         }
         else if (message.IsCommand<ResponseServiceInfo>())
         {
-            ReceivedSocketMessage(message.GetCommand<ResponseServiceInfo>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseServiceInfo>());
         }
         else if (message.IsCommand<ResponseProcessIDList>())
         {
-            ReceivedSocketMessage(message.GetCommand<ResponseProcessIDList>());
+            await ReceivedSocketMessageAsync(message.GetCommand<ResponseProcessIDList>());
         }
         else if (message.IsCommand<ResponseProcessList>())
         {
@@ -323,7 +323,7 @@ public class MainWindowViewModel : ReactiveObject
         {
             _ = Log($"正确连接{type.GetDescription()}，程序正常运行");
 
-            TcpHelper.SendCommand(new RequestUdpAddress());
+            await TcpHelper.SendCommandAsync(new RequestUdpAddress());
             _ = Log("发送命令获取Udp组播地址");
 
             await HandleRefreshCommandAsync();
@@ -346,7 +346,7 @@ public class MainWindowViewModel : ReactiveObject
         _ = Log("尝试订阅Udp组播");
     }
 
-    private void ReceivedSocketMessage(ResponseServiceInfo response)
+    private async Task ReceivedSocketMessageAsync(ResponseServiceInfo response)
     {
         _timestampStartYear = response.TimestampStartYear;
         var oldBaseInfo = BaseInfo;
@@ -358,18 +358,18 @@ public class MainWindowViewModel : ReactiveObject
         Logger.Info($"【新】{BaseInfo}");
         _ = Log(BaseInfo);
 
-        TcpHelper.SendCommand(new RequestProcessIDList() { TaskId = Helpers.TcpSocketClient.GetNewTaskId() });
+        await TcpHelper.SendCommandAsync(new RequestProcessIDList() { TaskId = NetHelper.GetTaskId() });
         _ = Log("发送请求进程ID列表命令");
 
         ClearData();
     }
 
-    private void ReceivedSocketMessage(ResponseProcessIDList response)
+    private async Task ReceivedSocketMessageAsync(ResponseProcessIDList response)
     {
         _processIdArray = response.IDList!;
         _ = Log($"收到进程ID列表，共{_processIdArray.Length}个进程");
 
-        TcpHelper.SendCommand(new RequestProcessList { TaskId = Helpers.TcpSocketClient.GetNewTaskId() });
+        await TcpHelper.SendCommandAsync(new RequestProcessList { TaskId = NetHelper.GetTaskId() });
         _ = Log("发送请求进程详细信息列表命令");
     }
 
