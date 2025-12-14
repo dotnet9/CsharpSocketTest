@@ -138,11 +138,13 @@ public class MainWindowViewModel : ReactiveObject
         if (!TcpHelper.IsRunning)
         {
             await TcpHelper.ConnectAsync("TCP服务端", TcpIp, TcpPort);
+            SendHeartbeat();
             await RequestTargetTypeAsync();
             IsRunning = true;
         }
         else
         {
+            StopSendHeartbeat();
             TcpHelper.Stop();
             UdpHelper.Stop();
             UdpHelper.Received -= ReceiveUdpCommand;
@@ -192,9 +194,21 @@ public class MainWindowViewModel : ReactiveObject
     private void SendHeartbeat()
     {
         _sendDataTimer = new Timer();
-        _sendDataTimer.Interval = 200;
+        _sendDataTimer.Interval = 1000;
         _sendDataTimer.Elapsed += MockSendData;
         _sendDataTimer.Start();
+        _ = Log("开始发送心跳包");
+    }
+
+    private void StopSendHeartbeat()
+    {
+        if (_sendDataTimer != null)
+        {
+            _sendDataTimer.Stop();
+            _sendDataTimer.Elapsed -= MockSendData;
+            _sendDataTimer.Dispose();
+            _ = Log("停止发送心跳包");
+        }
     }
 
     private async void MockSendData(object? sender, ElapsedEventArgs e)
@@ -232,7 +246,6 @@ public class MainWindowViewModel : ReactiveObject
 
     #region 接收事件
 
-    
     private void ReceiveTcpData()
     {
         // 开启线程接收数据
@@ -252,7 +265,6 @@ public class MainWindowViewModel : ReactiveObject
     [EventHandler]
     private async Task ReceivedSocketMessage(SocketCommand message)
     {
-        Logger.Info($"Dill command: {message}");
         if (message.IsCommand<ResponseTargetType>())
         {
             await ReceivedSocketMessageAsync(message.GetCommand<ResponseTargetType>());

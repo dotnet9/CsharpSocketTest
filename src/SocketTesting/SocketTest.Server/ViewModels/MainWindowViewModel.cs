@@ -200,7 +200,6 @@ public class MainWindowViewModel : ReactiveObject
     [EventHandler]
     private async Task ReceiveSocketMessageAsync(SocketCommand message)
     {
-        Logger.Info($"Dill command: {message}");
         if (message.IsCommand<RequestTargetType>())
         {
             await ReceiveSocketCommandAsync(message.Client!, message.GetCommand<RequestTargetType>());

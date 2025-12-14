@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="550" Width="650" Height="550"
         x:Class="SocketTest.Server.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/logo.ico"
         Title="Socket服务端(承载TCP服务和UDP组播)">
     <Window.Styles>
         <Style Selector="TextBlock">
